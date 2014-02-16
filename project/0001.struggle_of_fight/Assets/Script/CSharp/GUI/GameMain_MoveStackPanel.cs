@@ -75,11 +75,6 @@ public class GameMain_MoveStackPanel : MonoBehaviour
 		if (mouseUp)
 		{
 			bool buttonUped = false;
-			if (mBarButtonRect.Contains (mousePt2))
-			{
-				if(null != OnButtonUp && OnButtonUp(mMoveStackBar, new ButtonEventArgs(mousePt2, mMouseDownButton == mMoveStackBar)))
-					buttonUped = true;
-			}
 			if (mBGImageRect.Contains (mousePt2))
 			{
 				if(null != OnButtonUp && OnButtonUp(mMoveStackBG, new ButtonEventArgs(mousePt2, mMouseDownButton == mMoveStackBG)))
@@ -112,14 +107,6 @@ public class GameMain_MoveStackPanel : MonoBehaviour
 		if (mouseDown)
 		{
 			bool isMouseMove = mLastMousePos3D != mousePt3;
-			if (mBarButtonRect.Contains (mousePt2))
-			{
-				mMouseDownButton = mMoveStackBar;
-				if(isMouseMove && (null != OnButtonDrag))
-					OnButtonDrag(mMoveStackBar, new ButtonEventArgs(mousePt2));
-				if((null != OnButtonDown) && OnButtonDown(mMoveStackBar, new ButtonEventArgs(mousePt2)))
-					return;
-			}
 			if (mBGImageRect.Contains (mousePt2))
 			{
 				mMouseDownButton = mMoveStackBar;
@@ -165,27 +152,41 @@ public class GameMain_MoveStackPanel : MonoBehaviour
 
 	void OnGUI()
 	{
-		if (GUI.Button (mBGImageRect, "", mMoveStackBG.GetStyle (mMoveStackBG.name)))
+		GUI.Button (mBGImageRect, "", mMoveStackBG.GetStyle (mMoveStackBG.name));
+		GUI.Button (mBarButtonRect, "", mMoveStackBar.GetStyle (mMoveStackBar.name));
+		bool btnClicked = false;
+		if(GUI.Button (mAttackBtnRect, "", mAttackButton.GetStyle(mAttackButton.name)))
 		{
-			if(null != OnButtonClicked)
+			if(!btnClicked && (null != OnButtonClicked))
 			{
 				Vector3 mousePt = Input.mousePosition;
-				OnButtonClicked(mMoveStackBG, new ButtonEventArgs(new Vector2(mousePt.x, mousePt.y)));
+				btnClicked = OnButtonClicked(mAttackButton, new ButtonEventArgs(new Vector2(mousePt.x, mousePt.y)));
 			}
 		}
-		if (GUI.Button (mBarButtonRect, "", mMoveStackBar.GetStyle (mMoveStackBar.name)))
+		if (GUI.Button (mJumpBtnRect, "", mJumpButton.GetStyle (mJumpButton.name)))
 		{
-			if(null != OnButtonClicked)
+			if(!btnClicked && (null != OnButtonClicked))
 			{
 				Vector3 mousePt = Input.mousePosition;
-				OnButtonClicked(mMoveStackBar, new ButtonEventArgs(new Vector2(mousePt.x, mousePt.y)));
+				btnClicked = OnButtonClicked(mJumpButton, new ButtonEventArgs(new Vector2(mousePt.x, mousePt.y)));
 			}
 		}
-
-		GUI.Button (mAttackBtnRect, "", mAttackButton.GetStyle(mAttackButton.name));
-		GUI.Button (mJumpBtnRect, "", mJumpButton.GetStyle(mJumpButton.name));
-		GUI.Button (mSkill1BtnRect, "", mSkill1Button.GetStyle(mSkill1Button.name));
-		GUI.Button (mSkill2BtnRect, "", mSkill2Button.GetStyle(mSkill2Button.name));
+		if (GUI.Button (mSkill1BtnRect, "", mSkill1Button.GetStyle(mSkill1Button.name)))
+		{
+			if(!btnClicked && (null != OnButtonClicked))
+			{
+				Vector3 mousePt = Input.mousePosition;
+				btnClicked = OnButtonClicked(mSkill1Button, new ButtonEventArgs(new Vector2(mousePt.x, mousePt.y)));
+			}
+		}
+		if (GUI.Button (mSkill2BtnRect, "", mSkill2Button.GetStyle(mSkill2Button.name)))
+		{
+			if(!btnClicked && (null != OnButtonClicked))
+			{
+				Vector3 mousePt = Input.mousePosition;
+				btnClicked = OnButtonClicked(mSkill2Button, new ButtonEventArgs(new Vector2(mousePt.x, mousePt.y)));
+			}
+		}
 	}
 	
 	void OnMouseDown()
