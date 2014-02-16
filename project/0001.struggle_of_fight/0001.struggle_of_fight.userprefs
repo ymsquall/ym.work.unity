@@ -1,13 +1,17 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Temp\Compiled-Normal-Diffuse.shader">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Script\CSharp\GUI\GameMain_MoveStackPanel.cs">
     <Files>
-      <File FileName="Temp\Compiled-Normal-Diffuse.shader" Line="1" Column="1" />
-      <File FileName="Temp\Compiled-Normal-Diffuse.shader" Line="1" Column="19" />
+      <File FileName="Assets\Script\CSharp\GUI\GameMain_MoveStackPanel.cs" Line="22" Column="28" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="Y:\Work\ym.work.unity\project\0001.struggle_of_fight\Assets\Script\CSharp\GUI\GameMain_MoveStackBG.cs" line="7" />
+      <Breakpoint file="Y:\Work\ym.work.unity\project\0001.struggle_of_fight\Assets\Script\CSharp\GUI\GameMain_MoveStackBar.cs" line="7" />
+      <Breakpoint file="Y:\Work\ym.work.unity\project\0001.struggle_of_fight\Assets\Script\CSharp\GUI\GameMain_MoveStackBG.cs" line="14" />
+      <Breakpoint file="Y:\Work\ym.work.unity\project\0001.struggle_of_fight\Assets\Script\CSharp\GUI\GameMain_MoveStackBar.cs" line="13" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>
