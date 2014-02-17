@@ -1,6 +1,9 @@
 project/*/Library/
 project/*/Temp/
 project/*/obj/
+project/*/Assets/UnityVS/
+project/*/Assets/UnityVS.meta
+project/*/UnityVS.*
 *.suo
 2D Mario Clone/
 3D Mario Unity Project - Starter/
