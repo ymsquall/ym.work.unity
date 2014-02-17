@@ -37,6 +37,8 @@ public class GameMain_MoveStackPanel : MonoBehaviour
 
 	void Start()
 	{
+        mLastMousePos3D = Input.mousePosition;
+
 		var btnStyle = mMoveStackBG.customStyles [0] as GUIStyle;
 		mBGImageRect = new Rect (0, Screen.height - btnStyle.normal.background.height,
 		                         btnStyle.normal.background.width, btnStyle.normal.background.height);
@@ -206,5 +208,5 @@ public class GameMain_MoveStackPanel : MonoBehaviour
 	private Rect mSkill1BtnRect;
 	private Rect mSkill2BtnRect;
 	private Object mMouseDownButton = null;
-	private static Vector3 mLastMousePos3D = Input.mousePosition;
+	private static Vector3 mLastMousePos3D;
 }
