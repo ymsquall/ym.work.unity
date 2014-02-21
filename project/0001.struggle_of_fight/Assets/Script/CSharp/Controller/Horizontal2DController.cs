@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-[AddComponentMenu("ExternControl/Horizontal2D")]
+[AddComponentMenu("Extern/Horizontal2DController")]
 public class Horizontal2DController : MonoBehaviour
 {
     public AnimationClip mAnim02_Jumpup;
@@ -10,7 +10,7 @@ public class Horizontal2DController : MonoBehaviour
     public AnimationClip mAnim05_Attack02;
     public AnimationClip mAnim06_Attack03;
     public AnimationClip mAnim07_AirAttack;
-    public AnimationClip mAnim08_Run;
+    public AnimationClip mAnim08_Running;
     public AnimationClip mAnim09_BeAttack;
     public AnimationClip mAnim10_Death;
     public AnimationClip mAnim11_Take;
@@ -30,6 +30,11 @@ public class Horizontal2DController : MonoBehaviour
     public float mJumpRepeatTime = 0.05f;
     public float mJumpTimeout = 0.15f;
     public float mGroundedTimeout = 0.25f;
+
+    public float mJumpAnimSpeed = 1.15f;
+    public float mRunAnimSpeed = 1.0f;
+    public float mInLandAnimSpeed = 1.0f;
+    public bool mCanJump = true;
 
     // How high do we jump when pressing jump and letting go immediately
     public CollisionFlags mCollisionFlags;
@@ -70,7 +75,12 @@ public class Horizontal2DController : MonoBehaviour
         set { mJumping = value; }
         get { return mJumping; }
     }
-    public void UpdateSmoothedMovementDirection()
+    public float LockCameraTimer
+    {
+        get { return mLockCameraTimer; }
+    }
+
+    void UpdateSmoothedMovementDirection()
     {
         var cameraTransform = Camera.main.transform;
 
@@ -81,7 +91,7 @@ public class Horizontal2DController : MonoBehaviour
         forward = forward.normalized;
         // Right vector relative to the camera
         // Always orthogonal to the forward vector
-        var right = new Vector3(0, 0, -forward.x);
+        var right = cameraTransform.TransformDirection(Vector3.right);
         var h = Input.GetAxisRaw("Horizontal");
         var wasMoving = mIsMoving;
         mIsMoving = Mathf.Abs(h) > 0.1;
@@ -99,7 +109,13 @@ public class Horizontal2DController : MonoBehaviour
             // moveDirection is always normalized, and we only update it if there is user input.
             if (targetDirection != Vector3.zero)
             {
-                mMoveDirection = Vector3.RotateTowards(mMoveDirection, targetDirection, mRotateSpeed * Mathf.Deg2Rad * Time.deltaTime, 1000);
+                Vector3 oldDir = mMoveDirection;
+                //mMoveDirection = Vector3.RotateTowards(mMoveDirection, targetDirection, mRotateSpeed * Mathf.Deg2Rad * Time.deltaTime, 1000);
+                mMoveDirection = targetDirection;
+                if (mMoveDirection.z != 0.0f)
+                {
+                    mMoveDirection.z = 0.0f;
+                }
                 mMoveDirection = mMoveDirection.normalized;
             }
             // Smooth the speed based on the current target direction
@@ -155,10 +171,56 @@ public class Horizontal2DController : MonoBehaviour
     }
     void ApplyJumping()
     {
-
+        // Prevent jumping too fast after each other
+        if (mLastJumpTime + mJumpRepeatTime > Time.time)
+            return;
+        if (Grounded)
+        {
+            // Jump
+            // - Only when pressing the button down
+            // - With a timeout so you can press the button slightly before landing		
+            if (mCanJump && Time.time < mLastJumpButtonTime + mJumpTimeout)
+            {
+                mVerticalSpeed = CalculateJumpVerticalSpeed(mJumpHeight);
+                SendMessage("DidJump", SendMessageOptions.DontRequireReceiver);
+            }
+        }
+    }
+    void AnimationSector(CharacterController controller)
+    {
+        // ANIMATION sector
+        if (mPlayingAnim)
+        {
+            if (mState == CharacterState.Jumpup)
+            {
+                mPlayingAnim[mAnim12_JumpAir.name].speed = mJumpAnimSpeed;
+                mPlayingAnim[mAnim12_JumpAir.name].wrapMode = WrapMode.ClampForever;
+                mPlayingAnim.CrossFade(mAnim12_JumpAir.name);
+            }
+            else
+            {
+                if (controller.velocity.sqrMagnitude < 0.1)
+                {
+                    mPlayingAnim[mAnim14_Idel.name].speed = 10.0f;
+                    mPlayingAnim.CrossFade(mAnim14_Idel.name);
+                }
+                else
+                {
+                    if (mState == CharacterState.Running)
+                    {
+                        mPlayingAnim[mAnim08_Running.name].speed = Mathf.Clamp(controller.velocity.magnitude, 0.0f, mRunAnimSpeed);
+                        mPlayingAnim.CrossFade(mAnim08_Running.name);
+                    }
+                }
+            }
+        }
     }
     void Update()
     {
+        if (Input.GetButtonDown("Jump"))
+        {
+            mLastJumpButtonTime = Time.time;
+        }
         UpdateSmoothedMovementDirection();
         // Apply gravity
         // - extra power jump modifies gravity
@@ -169,13 +231,33 @@ public class Horizontal2DController : MonoBehaviour
         // Calculate actual motion
         var movement = mMoveDirection * mMoveSpeed + new Vector3(0, mVerticalSpeed, 0) + mInAirVelocity;
         movement *= Time.deltaTime;
-	    // Move the controller
-	    var controller = GetComponent<CharacterController>();
+        // Move the controller
+        var controller = GetComponent<CharacterController>();
         mCollisionFlags = controller.Move(movement);
-
+        // ANIMATION sector
+        AnimationSector(controller);
+        // Set rotation to the move direction
         if (Grounded)
         {
-
+            transform.rotation = Quaternion.LookRotation(mMoveDirection);
+            // We are in jump mode but just became grounded
+            //mLastGroundedTime = Time.time;
+            mInAirVelocity = Vector3.zero;
+            if (mJumping)
+            {
+                mJumping = false;
+                SendMessage("DidLand", SendMessageOptions.DontRequireReceiver);
+            }
+        }
+        else
+        {
+            var xMove = movement;
+            xMove.y = 0;
+            xMove.z = 0;
+            if (xMove.sqrMagnitude > 0.001f)
+            {
+                transform.rotation = Quaternion.LookRotation(xMove);
+            }
         }
     }
 
@@ -197,4 +279,6 @@ public class Horizontal2DController : MonoBehaviour
     private bool mJumping = false;
     private bool mIsMoving = false;
     private float mLockCameraTimer = 0.0f;
+    float mLastJumpButtonTime = 0.0f;
+    float mLastJumpTime = 0.0f;
 }
