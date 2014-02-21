@@ -1,0 +1,222 @@
+fileFormatVersion: 2
+guid: a59bd91bebd5d3544b6858fe43e85d74
+ModelImporter:
+  serializedVersion: 16
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: Bip01
+    100004: Bip01 Footsteps
+    100006: Bip01 Head
+    100008: Bip01 HeadNub
+    100010: Bip01 L Calf
+    100012: Bip01 L Clavicle
+    100014: Bip01 L Finger0
+    100016: Bip01 L Finger01
+    100018: Bip01 L Finger0Nub
+    100020: Bip01 L Finger1
+    100022: Bip01 L Finger11
+    100024: Bip01 L Finger1Nub
+    100026: Bip01 L Foot
+    100028: Bip01 L Forearm
+    100030: Bip01 L ForeTwist
+    100032: Bip01 L ForeTwist1
+    100034: Bip01 L Hand
+    100036: Bip01 L Thigh
+    100038: Bip01 L Toe0
+    100040: Bip01 L Toe0Nub
+    100042: Bip01 L UpperArm
+    100044: Bip01 LCalfTwist
+    100046: Bip01 LCalfTwist1
+    100048: Bip01 LCalfTwist2
+    100050: Bip01 LThighTwist
+    100052: Bip01 LThighTwist1
+    100054: Bip01 LUpArmTwist
+    100056: Bip01 LUpArmTwist1
+    100058: Bip01 Neck
+    100060: Bip01 Pelvis
+    100062: Bip01 Prop1
+    100064: Bip01 R Calf
+    100066: Bip01 R Clavicle
+    100068: Bip01 R Finger0
+    100070: Bip01 R Finger01
+    100072: Bip01 R Finger0Nub
+    100074: Bip01 R Finger1
+    100076: Bip01 R Finger11
+    100078: Bip01 R Finger1Nub
+    100080: Bip01 R Foot
+    100082: Bip01 R Forearm
+    100084: Bip01 R ForeTwist
+    100086: Bip01 R ForeTwist1
+    100088: Bip01 R Hand
+    100090: Bip01 R Thigh
+    100092: Bip01 R Toe0
+    100094: Bip01 R Toe0Nub
+    100096: Bip01 R UpperArm
+    100098: Bip01 RCalfTwist
+    100100: Bip01 RCalfTwist1
+    100102: Bip01 RCalfTwist2
+    100104: Bip01 RThighTwist
+    100106: Bip01 RThighTwist1
+    100108: Bip01 RUpArmTwist
+    100110: Bip01 RUpArmTwist1
+    100112: Bip01 Spine
+    100114: Bip01 Spine1
+    100116: Camera01
+    100118: Camera01.Target
+    100120: DAO
+    100122: dao
+    100124: dao01
+    100126: dao02
+    100128: Direct01
+    100130: Direct01.Target
+    100132: jiao
+    100134: lian
+    100136: shangshen
+    100138: tui
+    100140: youshou
+    400000: //RootNode
+    400002: Bip01
+    400004: Bip01 Footsteps
+    400006: Bip01 Head
+    400008: Bip01 HeadNub
+    400010: Bip01 L Calf
+    400012: Bip01 L Clavicle
+    400014: Bip01 L Finger0
+    400016: Bip01 L Finger01
+    400018: Bip01 L Finger0Nub
+    400020: Bip01 L Finger1
+    400022: Bip01 L Finger11
+    400024: Bip01 L Finger1Nub
+    400026: Bip01 L Foot
+    400028: Bip01 L Forearm
+    400030: Bip01 L ForeTwist
+    400032: Bip01 L ForeTwist1
+    400034: Bip01 L Hand
+    400036: Bip01 L Thigh
+    400038: Bip01 L Toe0
+    400040: Bip01 L Toe0Nub
+    400042: Bip01 L UpperArm
+    400044: Bip01 LCalfTwist
+    400046: Bip01 LCalfTwist1
+    400048: Bip01 LCalfTwist2
+    400050: Bip01 LThighTwist
+    400052: Bip01 LThighTwist1
+    400054: Bip01 LUpArmTwist
+    400056: Bip01 LUpArmTwist1
+    400058: Bip01 Neck
+    400060: Bip01 Pelvis
+    400062: Bip01 Prop1
+    400064: Bip01 R Calf
+    400066: Bip01 R Clavicle
+    400068: Bip01 R Finger0
+    400070: Bip01 R Finger01
+    400072: Bip01 R Finger0Nub
+    400074: Bip01 R Finger1
+    400076: Bip01 R Finger11
+    400078: Bip01 R Finger1Nub
+    400080: Bip01 R Foot
+    400082: Bip01 R Forearm
+    400084: Bip01 R ForeTwist
+    400086: Bip01 R ForeTwist1
+    400088: Bip01 R Hand
+    400090: Bip01 R Thigh
+    400092: Bip01 R Toe0
+    400094: Bip01 R Toe0Nub
+    400096: Bip01 R UpperArm
+    400098: Bip01 RCalfTwist
+    400100: Bip01 RCalfTwist1
+    400102: Bip01 RCalfTwist2
+    400104: Bip01 RThighTwist
+    400106: Bip01 RThighTwist1
+    400108: Bip01 RUpArmTwist
+    400110: Bip01 RUpArmTwist1
+    400112: Bip01 Spine
+    400114: Bip01 Spine1
+    400116: Camera01
+    400118: Camera01.Target
+    400120: DAO
+    400122: dao
+    400124: dao01
+    400126: dao02
+    400128: Direct01
+    400130: Direct01.Target
+    400132: jiao
+    400134: lian
+    400136: shangshen
+    400138: tui
+    400140: youshou
+    2300000: dao
+    2300002: dao01
+    2300004: dao02
+    3300000: dao
+    3300002: dao01
+    3300004: dao02
+    4300000: lian
+    4300002: shangshen
+    4300004: tui
+    4300006: youshou
+    4300008: jiao
+    4300010: dao02
+    4300012: dao
+    4300014: dao01
+    7400000: Take 001
+    9500000: //RootNode
+    11100000: //RootNode
+    13700000: jiao
+    13700002: lian
+    13700004: shangshen
+    13700006: tui
+    13700008: youshou
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: .00999999978
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 1
+  additionalBone: 0
+  userData: 
