@@ -5,7 +5,7 @@ using System.Collections;
 public class Horizontal2DController : MonoBehaviour
 {
     public AnimationClip mAnim02_Jumpup;
-    public AnimationClip mAnim03_Take;
+    public AnimationClip mAnim03_Skill01;
     public AnimationClip mAnim04_Attack01;
     public AnimationClip mAnim05_Attack02;
     public AnimationClip mAnim06_Attack03;
@@ -13,7 +13,7 @@ public class Horizontal2DController : MonoBehaviour
     public AnimationClip mAnim08_Running;
     public AnimationClip mAnim09_BeAttack;
     public AnimationClip mAnim10_Death;
-    public AnimationClip mAnim11_Take;
+    public AnimationClip mAnim11_Clobber;
     public AnimationClip mAnim12_JumpAir;
     public AnimationClip mAnim13_JumpDown;
     public AnimationClip mAnim14_Idel;
@@ -36,13 +36,18 @@ public class Horizontal2DController : MonoBehaviour
     public float mInLandAnimSpeed = 1.0f;
     public bool mCanJump = true;
 
+    public float mAttackAnimSpeed = 0.2f;
+    public int mAttackComboMaxNum = 3;
+    public float mAttackComboTimeout = 1.0f;
+
+
     // How high do we jump when pressing jump and letting go immediately
     public CollisionFlags mCollisionFlags;
 
-    enum CharacterState : byte
+    public enum CharacterState : byte
     {
         Jumpup = 2,
-        Take03 = 3,
+        Skill01 = 3,
         Attack01 = 4,
         Attack02 = 5,
         Attack03 = 6,
@@ -50,10 +55,11 @@ public class Horizontal2DController : MonoBehaviour
         Running = 8,
         BeAttack = 9,
         Death = 10,
-        Take11 = 11,
+        Clobber = 11,
         JumpAir = 12,
         JumpDown = 13,
-        Idel = 14
+        Idel = 14,
+        Skill02 = 15
     }
     public static float CalculateJumpVerticalSpeed(float jumpHeight)
     {
@@ -79,6 +85,53 @@ public class Horizontal2DController : MonoBehaviour
     {
         get { return mLockCameraTimer; }
     }
+    public void DoAttack()
+    {
+        if (CharacterState.Idel == mState || CharacterState.Running == mState)
+        {
+            mMoveSpeed = 0.0f;
+            int nowNum = (int)CharacterState.Attack01;
+            mState = (CharacterState)(nowNum + mAttackComboNum++);
+            if (mAttackComboNum >= mAttackComboMaxNum)
+                mAttackComboNum = 0;
+            mAttackComboTimer = mAttackComboTimeout;
+        }
+    }
+    public void DoJump()
+    {
+        if (CharacterState.Idel == mState || CharacterState.Running == mState)
+        {
+            mState = CharacterState.Jumpup;
+            mJumping = true;
+            mLastJumpButtonTime = Time.time;
+        }
+    }
+    public void OnAnimationOvered(CharacterState state)
+    {
+        if (mState == state)
+        {
+            switch (state)
+            {
+                case CharacterState.Attack01:
+                case CharacterState.Attack02:
+                case CharacterState.Attack03:
+                case CharacterState.JumpDown:
+                    {
+                        if (Moving)
+                            mState = CharacterState.Running;
+                        else
+                            mState = CharacterState.Idel;
+                    }
+                    break;
+                case CharacterState.Jumpup:
+                    {
+                        mState = CharacterState.JumpAir;
+                    }
+                    break;
+            }
+        }
+    }
+
 
     void UpdateSmoothedMovementDirection()
     {
@@ -193,9 +246,39 @@ public class Horizontal2DController : MonoBehaviour
         {
             if (mState == CharacterState.Jumpup)
             {
+                mPlayingAnim[mAnim02_Jumpup.name].speed = mJumpAnimSpeed;
+                mPlayingAnim[mAnim02_Jumpup.name].wrapMode = WrapMode.ClampForever;
+                mPlayingAnim.CrossFade(mAnim02_Jumpup.name);
+            }
+            else if (mState == CharacterState.JumpAir)
+            {
                 mPlayingAnim[mAnim12_JumpAir.name].speed = mJumpAnimSpeed;
                 mPlayingAnim[mAnim12_JumpAir.name].wrapMode = WrapMode.ClampForever;
                 mPlayingAnim.CrossFade(mAnim12_JumpAir.name);
+            }
+            else if (mState == CharacterState.JumpDown)
+            {
+                mPlayingAnim[mAnim13_JumpDown.name].speed = mJumpAnimSpeed;
+                mPlayingAnim[mAnim13_JumpDown.name].wrapMode = WrapMode.ClampForever;
+                mPlayingAnim.CrossFade(mAnim13_JumpDown.name);
+            }
+            else if (mState == CharacterState.Attack01)
+            {
+                mPlayingAnim[mAnim04_Attack01.name].speed = mAttackAnimSpeed;
+                mPlayingAnim[mAnim04_Attack01.name].wrapMode = WrapMode.ClampForever;
+                mPlayingAnim.CrossFade(mAnim04_Attack01.name);
+            }
+            else if (mState == CharacterState.Attack02)
+            {
+                mPlayingAnim[mAnim05_Attack02.name].speed = mAttackAnimSpeed;
+                mPlayingAnim[mAnim05_Attack02.name].wrapMode = WrapMode.ClampForever;
+                mPlayingAnim.CrossFade(mAnim05_Attack02.name);
+            }
+            else if (mState == CharacterState.Attack03)
+            {
+                mPlayingAnim[mAnim06_Attack03.name].speed = mAttackAnimSpeed;
+                mPlayingAnim[mAnim06_Attack03.name].wrapMode = WrapMode.ClampForever;
+                mPlayingAnim.CrossFade(mAnim06_Attack03.name);
             }
             else
             {
@@ -218,10 +301,9 @@ public class Horizontal2DController : MonoBehaviour
     void Update()
     {
         if (Input.GetButtonDown("Jump"))
-        {
-            mLastJumpButtonTime = Time.time;
-        }
-        UpdateSmoothedMovementDirection();
+            DoJump();
+        if (mState == CharacterState.Running || mState == CharacterState.Idel)
+            UpdateSmoothedMovementDirection();
         // Apply gravity
         // - extra power jump modifies gravity
         // - controlledDescent mode modifies gravity
@@ -243,9 +325,10 @@ public class Horizontal2DController : MonoBehaviour
             // We are in jump mode but just became grounded
             //mLastGroundedTime = Time.time;
             mInAirVelocity = Vector3.zero;
-            if (mJumping)
+            if (mJumping && mState == CharacterState.JumpAir)
             {
                 mJumping = false;
+                mState = CharacterState.JumpDown;
                 SendMessage("DidLand", SendMessageOptions.DontRequireReceiver);
             }
         }
@@ -258,7 +341,17 @@ public class Horizontal2DController : MonoBehaviour
             {
                 transform.rotation = Quaternion.LookRotation(xMove);
             }
+            //if (mState == CharacterState.JumpAir)
+            //{
+            //    if (movement.y < 0.0f)
+            //    {
+            //        mState = CharacterState.JumpDown;
+            //    }
+            //}
         }
+        mAttackComboTimer -= Time.deltaTime;
+        if (mAttackComboTimer <= 0.0f)
+            mAttackComboNum = 0;
     }
 
     void FixedUpdate()
@@ -281,4 +374,7 @@ public class Horizontal2DController : MonoBehaviour
     private float mLockCameraTimer = 0.0f;
     float mLastJumpButtonTime = 0.0f;
     float mLastJumpTime = 0.0f;
+
+    int mAttackComboNum = 0;
+    float mAttackComboTimer = 0.0f;
 }
