@@ -17,6 +17,7 @@ public class Horizontal2DController : MonoBehaviour
     public AnimationClip mAnim12_JumpAir;
     public AnimationClip mAnim13_JumpDown;
     public AnimationClip mAnim14_Idel;
+    public GameObject mWeaponPhysicsObject = null;
 
     public float mCharacterGravity = 20.0f;
     public float mMoveSpeed = 0.0f;
@@ -45,9 +46,6 @@ public class Horizontal2DController : MonoBehaviour
     public float mAssaultSkillMoveSpeed = 15.0f;
 
     public float mHelfCutAnimSpeed = 0.3f;
-    
-    // How high do we jump when pressing jump and letting go immediately
-    public CollisionFlags mCollisionFlags;
 
     public enum CharacterState : byte
     {
@@ -66,6 +64,22 @@ public class Horizontal2DController : MonoBehaviour
         Idel = 14,
         Skill02 = 15
     }
+
+    void Awake()
+    {
+        mController = GetComponent<CharacterController>();
+        mMoveDirection = transform.TransformDirection(Vector3.right);
+        mPlayingAnim = GetComponent<Animation>();
+        mMeshPhysicsCollider = mWeaponPhysicsObject.GetComponent<MeshPhysicsCollider>();
+        if (!mPlayingAnim)
+            Debug.Log("The character you would like to control doesn't have animations. Moving her might look weird.");
+        if (!mAnim14_Idel)
+        {
+            mPlayingAnim = null;
+            Debug.Log("No idle animation found. Turning off animations.");
+        }
+    }
+
     public static float CalculateJumpVerticalSpeed(float jumpHeight)
     {
 	    // From the jump height and gravity we deduce the upwards speed 
@@ -75,7 +89,14 @@ public class Horizontal2DController : MonoBehaviour
     }
     public bool Grounded
     {
-        get { return (mCollisionFlags & CollisionFlags.CollidedBelow) != 0; }
+        get
+        {
+            if ((mCollisionFlags & CollisionFlags.CollidedBelow) != 0)
+            {
+                return mController.isGrounded;
+            }
+            return false;
+        }
     }
     public bool Moving
     {
@@ -94,15 +115,19 @@ public class Horizontal2DController : MonoBehaviour
     {
         get { return mPlayingAnim; }
     }
+    public int AttackComboNum
+    {
+        get { return mAttackComboNum; }
+    }
     public void DoAttack()
     {
         if (CharacterState.Idel == mState || CharacterState.Running == mState)
         {
             mMoveSpeed = 0.0f;
-            int nowNum = (int)CharacterState.Attack01;
-            mState = (CharacterState)(nowNum + mAttackComboNum++);
             if (mAttackComboNum >= mAttackComboMaxNum)
                 mAttackComboNum = 0;
+            int nowNum = (int)CharacterState.Attack01;
+            mState = (CharacterState)(nowNum + mAttackComboNum++);
             mAttackComboTimer = mAttackComboTimeout;
             if (mPlayingAnim.IsPlaying(mAnim04_Attack01.name))
                 mPlayingAnim.Stop(mAnim04_Attack01.name);
@@ -110,6 +135,7 @@ public class Horizontal2DController : MonoBehaviour
                 mPlayingAnim.Stop(mAnim05_Attack02.name);
             if (mPlayingAnim.IsPlaying(mAnim06_Attack03.name))
                 mPlayingAnim.Stop(mAnim06_Attack03.name);
+            mMeshPhysicsCollider.ActivePhysics(true);
         }
     }
     public void DoJump()
@@ -163,6 +189,14 @@ public class Horizontal2DController : MonoBehaviour
                     {
                         mState = CharacterState.JumpAir;
                     }
+                    break;
+            }
+            switch (state)
+            {
+                case CharacterState.Attack01:
+                case CharacterState.Attack02:
+                case CharacterState.Attack03:
+                    mMeshPhysicsCollider.ActivePhysics(false);
                     break;
             }
         }
@@ -238,19 +272,6 @@ public class Horizontal2DController : MonoBehaviour
                 mInAirVelocity += targetDirection.normalized * Time.deltaTime * mInAirControlAcceleration;
         }
     }
-
-    void Awake()
-    {
-        mMoveDirection = transform.TransformDirection(Vector3.right);
-        mPlayingAnim = GetComponent<Animation>();
-        if (!mPlayingAnim)
-            Debug.Log("The character you would like to control doesn't have animations. Moving her might look weird.");
-        if (!mAnim14_Idel)
-        {
-            mPlayingAnim = null;
-            Debug.Log("No idle animation found. Turning off animations.");
-        }
-    }
     void Start()
     {
     }
@@ -286,7 +307,7 @@ public class Horizontal2DController : MonoBehaviour
             }
         }
     }
-    void AnimationSector(CharacterController controller)
+    void AnimationSector()
     {
         // ANIMATION sector
         if (mPlayingAnim)
@@ -341,7 +362,7 @@ public class Horizontal2DController : MonoBehaviour
             }
             else
             {
-                if (controller.velocity.sqrMagnitude < 0.1)
+                if (mController.velocity.sqrMagnitude < 0.1)
                 {
                     mPlayingAnim[mAnim14_Idel.name].speed = 10.0f;
                     mPlayingAnim.CrossFade(mAnim14_Idel.name);
@@ -350,7 +371,7 @@ public class Horizontal2DController : MonoBehaviour
                 {
                     if (mState == CharacterState.Running)
                     {
-                        mPlayingAnim[mAnim08_Running.name].speed = Mathf.Clamp(controller.velocity.magnitude, 0.0f, mRunAnimSpeed);
+                        mPlayingAnim[mAnim08_Running.name].speed = Mathf.Clamp(mController.velocity.magnitude, 0.0f, mRunAnimSpeed);
                         mPlayingAnim.CrossFade(mAnim08_Running.name);
                     }
                 }
@@ -381,10 +402,9 @@ public class Horizontal2DController : MonoBehaviour
         var movement = mMoveDirection * (mMoveSpeed + mAssaultMoveSpeed) + new Vector3(0, mVerticalSpeed, 0) + mInAirVelocity;
         movement *= Time.deltaTime;
         // Move the controller
-        var controller = GetComponent<CharacterController>();
-        mCollisionFlags = controller.Move(movement);
+        mCollisionFlags = mController.Move(movement);
         // ANIMATION sector
-        AnimationSector(controller);
+        AnimationSector();
         // Set rotation to the move direction
         if (Grounded)
         {
@@ -408,13 +428,6 @@ public class Horizontal2DController : MonoBehaviour
             {
                 transform.rotation = Quaternion.LookRotation(xMove);
             }
-            //if (mState == CharacterState.JumpAir)
-            //{
-            //    if (movement.y < 0.0f)
-            //    {
-            //        mState = CharacterState.JumpDown;
-            //    }
-            //}
         }
         mAttackComboTimer -= Time.deltaTime;
         if (mAttackComboTimer <= 0.0f)
@@ -439,17 +452,28 @@ public class Horizontal2DController : MonoBehaviour
 
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
+    }
+    void OnTriggerEnter(Collider other)
+    {
+
+    }
+    void OnCollisionEnter(Collision collisionInfo)
+    {
 
     }
 
-    private Animation mPlayingAnim = null;
-    private CharacterState mState = CharacterState.Idel;
-    private Vector3 mMoveDirection = Vector3.zero;
-    private float mVerticalSpeed = 0.0f;
-    private Vector3 mInAirVelocity = Vector3.zero;
-    private bool mJumping = false;
-    private bool mIsMoving = false;
-    private float mLockCameraTimer = 0.0f;
+    // How high do we jump when pressing jump and letting go immediately
+    CharacterController mController = null;
+    CollisionFlags mCollisionFlags;
+    Animation mPlayingAnim = null;
+    MeshPhysicsCollider mMeshPhysicsCollider = null;
+    CharacterState mState = CharacterState.Idel;
+    Vector3 mMoveDirection = Vector3.zero;
+    float mVerticalSpeed = 0.0f;
+    Vector3 mInAirVelocity = Vector3.zero;
+    bool mJumping = false;
+    bool mIsMoving = false;
+    float mLockCameraTimer = 0.0f;
     float mLastJumpButtonTime = 0.0f;
     float mLastJumpTime = 0.0f;
 

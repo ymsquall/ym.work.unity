@@ -111,7 +111,7 @@ public class Horizontal2DCamera : MonoBehaviour
 	    var currentHeight = mCameraTransform.position.y;
 	    currentHeight = Mathf.SmoothDamp (currentHeight, mTargetHeight, ref mHeightVelocity, mHeightSmoothLag);
 	    // Convert the angle into a rotation, by which we then reposition the camera
-	    var currentRotation = Quaternion.Euler (0, currentAngle, 0);
+	    var currentRotation = Quaternion.Euler (0, 0, 0);
 	    // Set the position of the camera on the x-z plane to:
 	    // distance meters behind the target
         var cameraPosition = mCameraTransform.position;
