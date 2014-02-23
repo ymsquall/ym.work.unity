@@ -20,14 +20,17 @@ public class H2DGUIController : MonoBehaviour
         }
         else if (sender == mLinkedUI.mJumpButton)
         {
+            mController.DoJump();
             return true;
         }
         else if (sender == mLinkedUI.mSkill1Button)
         {
+            mController.DoAssaultSkill();
             return true;
         }
         else if (sender == mLinkedUI.mSkill2Button)
         {
+            mController.DoHelfCutSkill();
             return true;
         }
         return false;
@@ -37,18 +40,22 @@ public class H2DGUIController : MonoBehaviour
     {
         if (sender == mLinkedUI.mAttackButton)
         {
+            mController.DoAttack();
             return true;
         }
         else if (sender == mLinkedUI.mJumpButton)
         {
+            mController.DoJump();
             return true;
         }
         else if (sender == mLinkedUI.mSkill1Button)
         {
+            mController.DoAssaultSkill();
             return true;
         }
         else if (sender == mLinkedUI.mSkill2Button)
         {
+            mController.DoHelfCutSkill();
             return true;
         }
         return false;

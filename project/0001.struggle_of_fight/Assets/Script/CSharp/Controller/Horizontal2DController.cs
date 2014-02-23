@@ -40,7 +40,12 @@ public class Horizontal2DController : MonoBehaviour
     public int mAttackComboMaxNum = 3;
     public float mAttackComboTimeout = 1.0f;
 
+    public float mAssaultAnimSpeed = 1.0f;
+    public float mAssaultSkillMaxTime = 0.3f;
+    public float mAssaultSkillMoveSpeed = 15.0f;
 
+    public float mHelfCutAnimSpeed = 0.3f;
+    
     // How high do we jump when pressing jump and letting go immediately
     public CollisionFlags mCollisionFlags;
 
@@ -85,6 +90,10 @@ public class Horizontal2DController : MonoBehaviour
     {
         get { return mLockCameraTimer; }
     }
+    public Animation Animations
+    {
+        get { return mPlayingAnim; }
+    }
     public void DoAttack()
     {
         if (CharacterState.Idel == mState || CharacterState.Running == mState)
@@ -95,6 +104,12 @@ public class Horizontal2DController : MonoBehaviour
             if (mAttackComboNum >= mAttackComboMaxNum)
                 mAttackComboNum = 0;
             mAttackComboTimer = mAttackComboTimeout;
+            if (mPlayingAnim.IsPlaying(mAnim04_Attack01.name))
+                mPlayingAnim.Stop(mAnim04_Attack01.name);
+            if (mPlayingAnim.IsPlaying(mAnim05_Attack02.name))
+                mPlayingAnim.Stop(mAnim05_Attack02.name);
+            if (mPlayingAnim.IsPlaying(mAnim06_Attack03.name))
+                mPlayingAnim.Stop(mAnim06_Attack03.name);
         }
     }
     public void DoJump()
@@ -104,6 +119,27 @@ public class Horizontal2DController : MonoBehaviour
             mState = CharacterState.Jumpup;
             mJumping = true;
             mLastJumpButtonTime = Time.time;
+        }
+    }
+    public void DoAssaultSkill()
+    {
+        if (CharacterState.Idel == mState || CharacterState.Running == mState)
+        {
+            mMoveSpeed = 0.0f;
+            mState = CharacterState.Skill01;
+            mAssaultSkillTimer = mAssaultSkillMaxTime;
+            if (mPlayingAnim.IsPlaying(mAnim03_Skill01.name))
+                mPlayingAnim.Stop(mAnim03_Skill01.name);
+        }
+    }
+    public void DoHelfCutSkill()
+    {
+        if (CharacterState.Idel == mState || CharacterState.Running == mState)
+        {
+            mMoveSpeed = 0.0f;
+            mState = CharacterState.Skill02;
+            if (mPlayingAnim.IsPlaying(mAnim04_Attack01.name))
+                mPlayingAnim.Stop(mAnim04_Attack01.name);
         }
     }
     public void OnAnimationOvered(CharacterState state)
@@ -129,6 +165,17 @@ public class Horizontal2DController : MonoBehaviour
                     }
                     break;
             }
+        }
+        else if ((mState == CharacterState.Skill02) && (state == CharacterState.Attack01))
+        {
+            if (Moving)
+                mState = CharacterState.Running;
+            else
+                mState = CharacterState.Idel;
+        }
+        else
+        {
+            Debug.Log("unknow state in frame event");
         }
     }
 
@@ -280,6 +327,18 @@ public class Horizontal2DController : MonoBehaviour
                 mPlayingAnim[mAnim06_Attack03.name].wrapMode = WrapMode.ClampForever;
                 mPlayingAnim.CrossFade(mAnim06_Attack03.name);
             }
+            else if (mState == CharacterState.Skill01)
+            {
+                mPlayingAnim[mAnim03_Skill01.name].speed = mAssaultAnimSpeed;
+                mPlayingAnim[mAnim03_Skill01.name].wrapMode = WrapMode.ClampForever;
+                mPlayingAnim.CrossFade(mAnim03_Skill01.name);
+            }
+            else if (mState == CharacterState.Skill02)
+            {
+                mPlayingAnim[mAnim04_Attack01.name].speed = mHelfCutAnimSpeed;
+                mPlayingAnim[mAnim04_Attack01.name].wrapMode = WrapMode.ClampForever;
+                mPlayingAnim.CrossFade(mAnim04_Attack01.name);
+            }
             else
             {
                 if (controller.velocity.sqrMagnitude < 0.1)
@@ -298,12 +357,20 @@ public class Horizontal2DController : MonoBehaviour
             }
         }
     }
+    void UpdateAssault()
+    {
+        if (mState == CharacterState.Skill01)
+            mAssaultMoveSpeed = mAssaultSkillMoveSpeed;
+        else
+            mAssaultMoveSpeed = 0.0f;
+    }
     void Update()
     {
         if (Input.GetButtonDown("Jump"))
             DoJump();
         if (mState == CharacterState.Running || mState == CharacterState.Idel)
             UpdateSmoothedMovementDirection();
+        UpdateAssault();
         // Apply gravity
         // - extra power jump modifies gravity
         // - controlledDescent mode modifies gravity
@@ -311,7 +378,7 @@ public class Horizontal2DController : MonoBehaviour
         // Apply jumping logic
         ApplyJumping();
         // Calculate actual motion
-        var movement = mMoveDirection * mMoveSpeed + new Vector3(0, mVerticalSpeed, 0) + mInAirVelocity;
+        var movement = mMoveDirection * (mMoveSpeed + mAssaultMoveSpeed) + new Vector3(0, mVerticalSpeed, 0) + mInAirVelocity;
         movement *= Time.deltaTime;
         // Move the controller
         var controller = GetComponent<CharacterController>();
@@ -352,6 +419,17 @@ public class Horizontal2DController : MonoBehaviour
         mAttackComboTimer -= Time.deltaTime;
         if (mAttackComboTimer <= 0.0f)
             mAttackComboNum = 0;
+        if (mState == CharacterState.Skill01)
+        {
+            mAssaultSkillTimer -= Time.deltaTime;
+            if (mAssaultSkillTimer <= 0.0f)
+            {
+                if (Moving)
+                    mState = CharacterState.Running;
+                else
+                    mState = CharacterState.Idel;
+            }
+        }
     }
 
     void FixedUpdate()
@@ -377,4 +455,7 @@ public class Horizontal2DController : MonoBehaviour
 
     int mAttackComboNum = 0;
     float mAttackComboTimer = 0.0f;
+
+    float mAssaultMoveSpeed = 0.0f;
+    float mAssaultSkillTimer = 0.0f;
 }
