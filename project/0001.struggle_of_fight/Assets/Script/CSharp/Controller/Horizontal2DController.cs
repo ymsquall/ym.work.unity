@@ -34,7 +34,7 @@ public class Horizontal2DController : MonoBehaviour
 
     public float mJumpAnimSpeed = 1.15f;
     public float mRunAnimSpeed = 1.0f;
-    public float mInLandAnimSpeed = 1.0f;
+    public float mInLandAnimSpeed = 0.1f;
     public bool mCanJump = true;
 
     public float mAttackAnimSpeed = 0.2f;
@@ -156,6 +156,12 @@ public class Horizontal2DController : MonoBehaviour
             mAssaultSkillTimer = mAssaultSkillMaxTime;
             if (mPlayingAnim.IsPlaying(mAnim03_Skill01.name))
                 mPlayingAnim.Stop(mAnim03_Skill01.name);
+            GameObject assaultEffect = GameObject.Find("AssaultEffect");
+            if (assaultEffect != null)
+            {
+                ImageFrameAnim pAnim = assaultEffect.GetComponent<ImageFrameAnim>();
+                pAnim.Play();
+            }
         }
     }
     public void DoHelfCutSkill()
@@ -364,7 +370,7 @@ public class Horizontal2DController : MonoBehaviour
             {
                 if (mController.velocity.sqrMagnitude < 0.1)
                 {
-                    mPlayingAnim[mAnim14_Idel.name].speed = 10.0f;
+                    mPlayingAnim[mAnim14_Idel.name].speed = mInLandAnimSpeed;
                     mPlayingAnim.CrossFade(mAnim14_Idel.name);
                 }
                 else

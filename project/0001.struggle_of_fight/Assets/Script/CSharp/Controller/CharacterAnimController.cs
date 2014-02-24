@@ -19,7 +19,7 @@ public class CharacterAnimController : MonoBehaviour
 
     public float mJumpAnimSpeed = 1.15f;
     public float mRunAnimSpeed = 1.0f;
-    public float mInLandAnimSpeed = 1.0f;
+    public float mInLandAnimSpeed = 0.1f;
     public float mBeAttackAnimSpeed = 0.1f;
     public float mBeAttackAnimMaxTime = 1.0f;
     public float mClobberAnimSpeed = 1.0f;
@@ -173,7 +173,7 @@ public class CharacterAnimController : MonoBehaviour
             {
                 if (mController.velocity.sqrMagnitude < 0.1)
                 {
-                    mPlayingAnim[mAnim14_Idel.name].speed = 10.0f;
+                    mPlayingAnim[mAnim14_Idel.name].speed = mInLandAnimSpeed;
                     mPlayingAnim.CrossFade(mAnim14_Idel.name);
                 }
                 else
