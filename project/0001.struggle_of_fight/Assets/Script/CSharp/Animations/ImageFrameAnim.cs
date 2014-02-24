@@ -11,6 +11,7 @@ public class ImageFrameAnim : MonoBehaviour
     public float mOnceLoopDelayTime = 1.0f;
     public int mStartFrameIndex = 0;
     public bool mPaused = false;
+    public float mDepthWithParent = 0.5f;
 
     public delegate bool EventHandler(Object sender, int totalTimes);
     public event EventHandler OnEndedOfOnce;
@@ -66,6 +67,7 @@ public class ImageFrameAnim : MonoBehaviour
             mRenderer.sprite = null;
         else
             mRenderer.sprite = mImages[mStartFrameIndex];
+        mStartPosition = transform.localPosition;
 	}
     void OnOnceEnded()
     {
@@ -102,18 +104,20 @@ public class ImageFrameAnim : MonoBehaviour
     {
         if(mParent != null)
         {
-            //var cameraTransform = Camera.main.transform;
-            //if (mParent.transform.rotation.y > 0.0f)
-            //{
-            //    transform.localRotation = mParent.transform.rotation
-            //    transform.Rotate(0,0,0);
-            //}
-            //else
-            //{
-            //    transform.Rotate(0, 180, 0);
-            //}
-            transform.localRotation = new Quaternion(0, mParent.transform.rotation.y / 2.0f, 0, 0);
-            Debug.Log(string.Format("player roatY{0}", mParent.transform.rotation.y / 2.0f));
+            Quaternion quat;
+            Vector3 pos = mStartPosition;
+            if (mParent.transform.rotation.y > 0.0f)
+            {
+                quat = Quaternion.Euler(0, 180, 0);
+                pos.x = mStartPosition.x + mDepthWithParent;
+            }
+            else
+            {
+                quat = Quaternion.Euler(0, 0, 0);
+                pos.x = mStartPosition.x - mDepthWithParent;
+            }
+            transform.rotation = quat;
+            transform.localPosition = pos;
         }
     }
 	// Update is called once per frame
@@ -149,4 +153,5 @@ public class ImageFrameAnim : MonoBehaviour
     int mTotalTimes = 0;
     bool mStoped = false;
     bool mEnded = false;
+    Vector3 mStartPosition;
 }
