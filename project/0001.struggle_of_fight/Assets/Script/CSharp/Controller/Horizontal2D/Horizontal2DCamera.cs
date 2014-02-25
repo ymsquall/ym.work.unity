@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-[AddComponentMenu("Extern/Horizontal2D/Camera")]
+[AddComponentMenu("自定义/横版2D/摄像机跟随主角")]
 public class Horizontal2DCamera : MonoBehaviour
 {
     public Transform mCameraTransform;

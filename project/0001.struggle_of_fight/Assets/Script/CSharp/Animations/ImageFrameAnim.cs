@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[AddComponentMenu("Extern/序列帧动画组件")]
+[AddComponentMenu("自定义/动画/序列帧动画")]
 public class ImageFrameAnim : MonoBehaviour
 {
     public Sprite[] mImages = null;

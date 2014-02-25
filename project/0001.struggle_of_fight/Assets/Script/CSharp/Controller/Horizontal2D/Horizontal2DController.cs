@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-[AddComponentMenu("Extern/Horizontal2DController")]
+[AddComponentMenu("自定义/横版2D/主角控制器")]
 public class Horizontal2DController : MonoBehaviour
 {
     public AnimationClip mAnim02_Jumpup;
