@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class GameMain_MoveStackEvent : MonoBehaviour
+public class H2DGUIMoveStackController : MonoBehaviour
 {
-	public GameMain_MoveStackPanel mLinkedUI;
+    public H2DGUIControllerPanel mLinkedUI;
 	// Use this for initialization
 	void Start ()
 	{
@@ -14,7 +14,7 @@ public class GameMain_MoveStackEvent : MonoBehaviour
 	
 	bool OnMoveStackButtonDown(Object sender, System.EventArgs args)
 	{
-		var mouseArgs = args as GameMain_MoveStackPanel.ButtonEventArgs;
+        var mouseArgs = args as H2DGUIControllerPanel.ButtonEventArgs;
 		if (sender == mLinkedUI.mMoveStackBar)
 		{
 			return true;
@@ -28,7 +28,7 @@ public class GameMain_MoveStackEvent : MonoBehaviour
 	
 	bool OnMoveStackButtonDrag(Object sender, System.EventArgs args)
 	{
-		var mouseArgs = args as GameMain_MoveStackPanel.ButtonEventArgs;
+        var mouseArgs = args as H2DGUIControllerPanel.ButtonEventArgs;
 		if (sender == mLinkedUI.mMoveStackBar)
 		{
 			return true;
@@ -42,7 +42,7 @@ public class GameMain_MoveStackEvent : MonoBehaviour
 	
 	bool OnMoveStackButtonUp(Object sender, System.EventArgs args)
 	{
-		var mouseArgs = args as GameMain_MoveStackPanel.ButtonEventArgs;
+        var mouseArgs = args as H2DGUIControllerPanel.ButtonEventArgs;
 		if (sender == mLinkedUI.mMoveStackBar)
 		{
 			return true;

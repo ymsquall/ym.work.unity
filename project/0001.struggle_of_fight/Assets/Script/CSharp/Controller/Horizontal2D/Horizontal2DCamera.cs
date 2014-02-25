@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-[AddComponentMenu("Extern/Horizontal2DCamera")]
+[AddComponentMenu("Extern/Horizontal2D/Camera")]
 public class Horizontal2DCamera : MonoBehaviour
 {
     public Transform mCameraTransform;
