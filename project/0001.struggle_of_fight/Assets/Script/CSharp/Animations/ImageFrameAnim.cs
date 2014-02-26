@@ -11,6 +11,7 @@ public class ImageFrameAnim : MonoBehaviour
     public float mOnceLoopDelayTime = 1.0f;
     public int mStartFrameIndex = 0;
     public bool mPaused = false;
+    public bool mFlipY = false;
     public float mDepthWithParent = 0.5f;
 
     public delegate bool EventHandler(Object sender, int totalTimes);
@@ -51,23 +52,41 @@ public class ImageFrameAnim : MonoBehaviour
         Stoped = false;
         mEnded = false;
     }
-	void Awake ()
+    protected virtual bool Init()
     {
+        bool ret = true;
         mRenderer = GetComponent<SpriteRenderer>();
         if (mRenderer == null)
+        {
             Debug.LogError("ImageFrameAnim组件必须依附于SpriteRenderer组件！");
+            ret = false;
+        }
         if (mImages == null || mImages.Length <= 1)
+        {
             Debug.LogError("ImageFrameAnim组件必须设置大于1张图片！");
+            ret = false;
+        }
         if (mStartFrameIndex >= mImages.Length)
+        {
             Debug.LogError("ImageFrameAnim组件起始帧索引不能大于帧数量！");
+            ret = false;
+        }
         if (mLoop && mTimes == 0)
-            Debug.Log("播放次数设为0是就不需要开启循环标志，该动画也将无限循环播放！");
+            Debug.Log("播放次数设为0是就不需要开启循环标志，循环标志只负责控制mTimes次结束后再次循环！");
         mParent = transform.parent.gameObject;
         if (mPaused)
             mRenderer.sprite = null;
         else
             mRenderer.sprite = mImages[mStartFrameIndex];
+        if (!mFlipY)
+            mDepthWithParent = -mDepthWithParent;
         mStartPosition = transform.localPosition;
+        mStartRotation = transform.rotation;
+        return ret;
+    }
+	void Awake ()
+    {
+        Init();
 	}
     void OnOnceEnded()
     {
@@ -98,7 +117,8 @@ public class ImageFrameAnim : MonoBehaviour
         mAnimCurrentTime = 0.0f;
         mFrameIndex = 0;
         mOnceLoopDelayTimer = mOnceLoopDelayTime;
-        mRenderer.sprite = null;
+        if (mOnceLoopDelayTimer > 0.0f && mTimes > 0)
+            mRenderer.sprite = null;
     }
     void ApplyTransform()
     {
@@ -108,29 +128,32 @@ public class ImageFrameAnim : MonoBehaviour
             Vector3 pos = mStartPosition;
             if (mParent.transform.rotation.y > 0.0f)
             {
-                quat = Quaternion.Euler(0, 180, 0);
-                pos.x = mStartPosition.x + mDepthWithParent;
+                quat = Quaternion.Euler(0, mFlipY ? 180 : 0, 0);
+                pos.x = mFlipY ? mStartPosition.x + mDepthWithParent : mStartPosition.x - mDepthWithParent;
             }
             else
             {
-                quat = Quaternion.Euler(0, 0, 0);
-                pos.x = mStartPosition.x - mDepthWithParent;
+                quat = Quaternion.Euler(0, mFlipY ? 0 : 180, 0);
+                pos.x = mFlipY ? mStartPosition.x - mDepthWithParent : mStartPosition.x + mDepthWithParent;
             }
-            transform.rotation = quat;
             transform.localPosition = pos;
+            transform.rotation = quat * mStartRotation;
         }
     }
-	// Update is called once per frame
-	void Update ()
+    protected virtual bool UpdateTransform()
     {
         if (mEnded || mPaused || mStoped)
-            return;
+            return false;
         if (mOnceLoopDelayTimer > 0.0f)
         {
             mOnceLoopDelayTimer -= Time.deltaTime;
-            return;
+            return false;
         }
         ApplyTransform();
+        return true;
+    }
+    protected virtual bool UpdateFrame()
+    {
         mFrameIndex = (int)(mAnimCurrentTime / mMaxTime * (float)mImages.Length);
         mAnimCurrentTime += Time.deltaTime;
         if (mAnimCurrentTime >= mMaxTime)
@@ -142,6 +165,14 @@ public class ImageFrameAnim : MonoBehaviour
             mRenderer.sprite = mImages[mFrameIndex];
             mLastFrameIndex = mFrameIndex;
         }
+        return true;
+    }
+	// Update is called once per frame
+	void Update ()
+    {
+        if (!UpdateTransform())
+            return;
+        UpdateFrame();
 	}
     SpriteRenderer mRenderer = null;
     GameObject mParent = null;
@@ -154,4 +185,5 @@ public class ImageFrameAnim : MonoBehaviour
     bool mStoped = false;
     bool mEnded = false;
     Vector3 mStartPosition;
+    Quaternion mStartRotation;
 }

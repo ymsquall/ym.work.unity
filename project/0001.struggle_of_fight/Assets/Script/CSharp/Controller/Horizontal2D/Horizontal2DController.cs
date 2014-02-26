@@ -156,7 +156,7 @@ public class Horizontal2DController : MonoBehaviour
             mAssaultSkillTimer = mAssaultSkillMaxTime;
             if (mPlayingAnim.IsPlaying(mAnim03_Skill01.name))
                 mPlayingAnim.Stop(mAnim03_Skill01.name);
-            GameObject assaultEffect = GameObject.Find("AssaultEffect");
+            GameObject assaultEffect = GameObject.Find("Effect.Assault");
             if (assaultEffect != null)
             {
                 ImageFrameAnim pAnim = assaultEffect.GetComponent<ImageFrameAnim>();
