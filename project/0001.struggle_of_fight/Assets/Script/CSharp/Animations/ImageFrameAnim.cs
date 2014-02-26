@@ -120,27 +120,39 @@ public class ImageFrameAnim : MonoBehaviour
         if (mOnceLoopDelayTimer > 0.0f && mTimes > 0)
             mRenderer.sprite = null;
     }
-    void ApplyTransform()
+    protected virtual void LockPosAndRotaForParent()
     {
-        if(mParent != null)
+        mFinalPosition = mStartPosition;
+        if (mParent != null)
         {
-            Quaternion quat;
-            Vector3 pos = mStartPosition;
             if (mParent.transform.rotation.y > 0.0f)
             {
-                quat = Quaternion.Euler(0, mFlipY ? 180 : 0, 0);
-                pos.x = mFlipY ? mStartPosition.x + mDepthWithParent : mStartPosition.x - mDepthWithParent;
+                mFinalRotation = Quaternion.Euler(0, mFlipY ? 180 : 0, 0) * mStartRotation;
+                mFinalPosition.x = mFlipY ? mStartPosition.x + mDepthWithParent : mStartPosition.x - mDepthWithParent;
             }
             else
             {
-                quat = Quaternion.Euler(0, mFlipY ? 0 : 180, 0);
-                pos.x = mFlipY ? mStartPosition.x - mDepthWithParent : mStartPosition.x + mDepthWithParent;
+                mFinalRotation = Quaternion.Euler(0, mFlipY ? 0 : 180, 0) * mStartRotation;
+                mFinalPosition.x = mFlipY ? mStartPosition.x - mDepthWithParent : mStartPosition.x + mDepthWithParent;
             }
-            transform.localPosition = pos;
-            transform.rotation = quat * mStartRotation;
+        }
+        else
+        {
+            mFinalRotation = mStartRotation;
         }
     }
-    protected virtual bool UpdateTransform()
+    protected virtual void CustonMove()
+    {
+    }
+    protected virtual void CustonRotation()
+    {
+    }
+    void ApplyTransform()
+    {
+        transform.localPosition = mFinalPosition;
+        transform.rotation = mFinalRotation;
+    }
+    protected bool UpdateTransform()
     {
         if (mEnded || mPaused || mStoped)
             return false;
@@ -149,6 +161,9 @@ public class ImageFrameAnim : MonoBehaviour
             mOnceLoopDelayTimer -= Time.deltaTime;
             return false;
         }
+        LockPosAndRotaForParent();
+        CustonMove();
+        CustonRotation();
         ApplyTransform();
         return true;
     }
@@ -186,4 +201,6 @@ public class ImageFrameAnim : MonoBehaviour
     bool mEnded = false;
     Vector3 mStartPosition;
     Quaternion mStartRotation;
+    Vector3 mFinalPosition;
+    Quaternion mFinalRotation;
 }
