@@ -37,7 +37,7 @@ public class Horizontal2DController : MonoBehaviour
     public float mInLandAnimSpeed = 0.1f;
     public bool mCanJump = true;
 
-    public float mAttackAnimSpeed = 0.2f;
+    public float mAttackAnimSpeed = 0.5f;
     public int mAttackComboMaxNum = 3;
     public float mAttackComboTimeout = 1.0f;
 
