@@ -12,7 +12,8 @@ public class ImageFrameAnim : MonoBehaviour
     public int mStartFrameIndex = 0;
     public bool mPaused = false;
     public bool mFlipY = false;
-    public float mDepthWithParent = 0.5f;
+    public float mDepthWithParent = 0.2f;
+    public Vector2 mPlanOffset = Vector2.zero;
 
     public delegate bool EventHandler(Object sender, int totalTimes);
     public event EventHandler OnEndedOfOnce;
@@ -140,6 +141,8 @@ public class ImageFrameAnim : MonoBehaviour
         {
             mFinalRotation = mStartRotation;
         }
+        mFinalPosition.y = mStartPosition.y + mPlanOffset.y;
+        mFinalPosition.z = mStartPosition.z + mPlanOffset.x;
     }
     protected virtual void CustonMove()
     {
