@@ -20,7 +20,6 @@ public class Horizontal2DController : MonoBehaviour
     public GameObject mWeaponPhysicsObject = null;
 
     public float mCharacterGravity = 20.0f;
-    public float mMoveSpeed = 0.0f;
     public float mSpeedSmoothing = 10.0f;
     public float mRotateSpeed = 500.0f;
     public float mTrotAfterSeconds = 3.0f;
@@ -322,65 +321,65 @@ public class Horizontal2DController : MonoBehaviour
             {
                 mPlayingAnim[mAnim02_Jumpup.name].speed = mJumpAnimSpeed;
                 mPlayingAnim[mAnim02_Jumpup.name].wrapMode = WrapMode.ClampForever;
-                mPlayingAnim.CrossFade(mAnim02_Jumpup.name);
+                mPlayingAnim.CrossFade(mAnim02_Jumpup.name, 0.1f);
             }
             else if (mState == CharacterState.JumpAir)
             {
                 mPlayingAnim[mAnim12_JumpAir.name].speed = mJumpAnimSpeed;
                 mPlayingAnim[mAnim12_JumpAir.name].wrapMode = WrapMode.ClampForever;
-                mPlayingAnim.CrossFade(mAnim12_JumpAir.name);
-            }
-            else if (mState == CharacterState.JumpDown)
+				mPlayingAnim.CrossFade(mAnim12_JumpAir.name, 0.1f);
+			}
+			else if (mState == CharacterState.JumpDown)
             {
                 mPlayingAnim[mAnim13_JumpDown.name].speed = mJumpAnimSpeed;
                 mPlayingAnim[mAnim13_JumpDown.name].wrapMode = WrapMode.ClampForever;
-                mPlayingAnim.CrossFade(mAnim13_JumpDown.name);
-            }
-            else if (mState == CharacterState.Attack01)
+				mPlayingAnim.CrossFade(mAnim13_JumpDown.name, 0.2f);
+			}
+			else if (mState == CharacterState.Attack01)
             {
                 mPlayingAnim[mAnim04_Attack01.name].speed = mAttackAnimSpeed;
                 mPlayingAnim[mAnim04_Attack01.name].wrapMode = WrapMode.ClampForever;
-                mPlayingAnim.CrossFade(mAnim04_Attack01.name);
-            }
-            else if (mState == CharacterState.Attack02)
+				mPlayingAnim.CrossFade(mAnim04_Attack01.name, 0.1f);
+			}
+			else if (mState == CharacterState.Attack02)
             {
                 mPlayingAnim[mAnim05_Attack02.name].speed = mAttackAnimSpeed;
                 mPlayingAnim[mAnim05_Attack02.name].wrapMode = WrapMode.ClampForever;
-                mPlayingAnim.CrossFade(mAnim05_Attack02.name);
-            }
-            else if (mState == CharacterState.Attack03)
+				mPlayingAnim.CrossFade(mAnim05_Attack02.name, 0.1f);
+			}
+			else if (mState == CharacterState.Attack03)
             {
                 mPlayingAnim[mAnim06_Attack03.name].speed = mAttackAnimSpeed;
                 mPlayingAnim[mAnim06_Attack03.name].wrapMode = WrapMode.ClampForever;
-                mPlayingAnim.CrossFade(mAnim06_Attack03.name);
-            }
-            else if (mState == CharacterState.Skill01)
+				mPlayingAnim.CrossFade(mAnim06_Attack03.name, 0.1f);
+			}
+			else if (mState == CharacterState.Skill01)
             {
                 mPlayingAnim[mAnim03_Skill01.name].speed = mAssaultAnimSpeed;
                 mPlayingAnim[mAnim03_Skill01.name].wrapMode = WrapMode.ClampForever;
-                mPlayingAnim.CrossFade(mAnim03_Skill01.name);
-            }
-            else if (mState == CharacterState.Skill02)
+				mPlayingAnim.CrossFade(mAnim03_Skill01.name, 0.1f);
+			}
+			else if (mState == CharacterState.Skill02)
             {
                 mPlayingAnim[mAnim04_Attack01.name].speed = mHelfCutAnimSpeed;
                 mPlayingAnim[mAnim04_Attack01.name].wrapMode = WrapMode.ClampForever;
-                mPlayingAnim.CrossFade(mAnim04_Attack01.name);
-            }
-            else
+				mPlayingAnim.CrossFade(mAnim04_Attack01.name, 0.1f);
+			}
+			else
             {
                 if (mController.velocity.sqrMagnitude < 0.1)
                 {
                     mPlayingAnim[mAnim14_Idel.name].speed = mInLandAnimSpeed;
-                    mPlayingAnim.CrossFade(mAnim14_Idel.name);
-                }
-                else
+					mPlayingAnim.CrossFade(mAnim14_Idel.name, 0.1f);
+				}
+				else
                 {
                     if (mState == CharacterState.Running)
                     {
                         mPlayingAnim[mAnim08_Running.name].speed = Mathf.Clamp(mController.velocity.magnitude, 0.0f, mRunAnimSpeed);
-                        mPlayingAnim.CrossFade(mAnim08_Running.name);
-                    }
-                }
+						mPlayingAnim.CrossFade(mAnim08_Running.name, 0.1f);
+					}
+				}
             }
         }
     }
@@ -474,8 +473,9 @@ public class Horizontal2DController : MonoBehaviour
     Animation mPlayingAnim = null;
     MeshPhysicsCollider mMeshPhysicsCollider = null;
     CharacterState mState = CharacterState.Idel;
-    Vector3 mMoveDirection = Vector3.zero;
-    float mVerticalSpeed = 0.0f;
+	Vector3 mMoveDirection = Vector3.zero;
+	float mMoveSpeed = 0.0f;
+	float mVerticalSpeed = 0.0f;
     Vector3 mInAirVelocity = Vector3.zero;
     bool mJumping = false;
     bool mIsMoving = false;

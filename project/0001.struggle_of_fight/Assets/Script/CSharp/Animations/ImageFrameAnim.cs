@@ -118,7 +118,7 @@ public class ImageFrameAnim : MonoBehaviour
         mAnimCurrentTime = 0.0f;
         mFrameIndex = 0;
         mOnceLoopDelayTimer = mOnceLoopDelayTime;
-        if (mOnceLoopDelayTimer > 0.0f && mTimes > 0)
+        if (mOnceLoopDelayTimer <= 0.0f && mTimes > 0)
             mRenderer.sprite = null;
     }
     protected virtual void LockPosAndRotaForParent()
