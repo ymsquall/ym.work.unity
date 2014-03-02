@@ -36,7 +36,9 @@ public class Horizontal2DController : MonoBehaviour
     public float mInLandAnimSpeed = 0.1f;
     public bool mCanJump = true;
 
-    public float mAttackAnimSpeed = 0.5f;
+    public float mAttack1AnimSpeed = 0.5f;
+    public float mAttack2AnimSpeed = 0.5f;
+    public float mAttack3AnimSpeed = 0.5f;
     public int mAttackComboMaxNum = 3;
     public float mAttackComboTimeout = 1.0f;
 
@@ -144,6 +146,8 @@ public class Horizontal2DController : MonoBehaviour
             mState = CharacterState.Jumpup;
             mJumping = true;
             mLastJumpButtonTime = Time.time;
+            if (mPlayingAnim.IsPlaying(mAnim13_JumpDown.name))
+                mPlayingAnim.Stop(mAnim13_JumpDown.name);
         }
     }
     public void DoAssaultSkill()
@@ -182,7 +186,7 @@ public class Horizontal2DController : MonoBehaviour
                 case CharacterState.Attack01:
                 case CharacterState.Attack02:
                 case CharacterState.Attack03:
-                case CharacterState.JumpDown:
+                //case CharacterState.JumpDown:
                     {
                         if (Moving)
                             mState = CharacterState.Running;
@@ -337,19 +341,19 @@ public class Horizontal2DController : MonoBehaviour
 			}
 			else if (mState == CharacterState.Attack01)
             {
-                mPlayingAnim[mAnim04_Attack01.name].speed = mAttackAnimSpeed;
+                mPlayingAnim[mAnim04_Attack01.name].speed = mAttack1AnimSpeed;
                 mPlayingAnim[mAnim04_Attack01.name].wrapMode = WrapMode.ClampForever;
 				mPlayingAnim.CrossFade(mAnim04_Attack01.name, 0.1f);
 			}
 			else if (mState == CharacterState.Attack02)
             {
-                mPlayingAnim[mAnim05_Attack02.name].speed = mAttackAnimSpeed;
+                mPlayingAnim[mAnim05_Attack02.name].speed = mAttack2AnimSpeed;
                 mPlayingAnim[mAnim05_Attack02.name].wrapMode = WrapMode.ClampForever;
 				mPlayingAnim.CrossFade(mAnim05_Attack02.name, 0.1f);
 			}
 			else if (mState == CharacterState.Attack03)
             {
-                mPlayingAnim[mAnim06_Attack03.name].speed = mAttackAnimSpeed;
+                mPlayingAnim[mAnim06_Attack03.name].speed = mAttack3AnimSpeed;
                 mPlayingAnim[mAnim06_Attack03.name].wrapMode = WrapMode.ClampForever;
 				mPlayingAnim.CrossFade(mAnim06_Attack03.name, 0.1f);
 			}
@@ -417,15 +421,24 @@ public class Horizontal2DController : MonoBehaviour
             // We are in jump mode but just became grounded
             //mLastGroundedTime = Time.time;
             mInAirVelocity = Vector3.zero;
-            if (mJumping && mState == CharacterState.JumpAir)
+            //if (mJumping && mState == CharacterState.JumpAir)
+            //{
+            //    mJumping = false;
+            //    mState = CharacterState.JumpDown;
+            //    SendMessage("DidLand", SendMessageOptions.DontRequireReceiver);
+            //}
+            if (mJumping && (mState == CharacterState.JumpAir || mState == CharacterState.JumpDown))
             {
-                mJumping = false;
-                mState = CharacterState.JumpDown;
-                SendMessage("DidLand", SendMessageOptions.DontRequireReceiver);
+                if (Moving)
+                    mState = CharacterState.Running;
+                else
+                    mState = CharacterState.Idel;
             }
         }
         else
         {
+            if (mJumping && mState == CharacterState.JumpAir && mVerticalSpeed < 0.0f)
+                mState = CharacterState.JumpDown;
             var xMove = movement;
             xMove.y = 0;
             xMove.z = 0;
