@@ -124,6 +124,10 @@ public class Horizontal2DController : MonoBehaviour
     {
         get { return mState; }
     }
+
+    public delegate bool SkillEventHandler(Object sender, int skillID);
+    public event SkillEventHandler OnSkillBegining;
+
     public void DoAttack()
     {
         if (CharacterState.Idel == mState || CharacterState.Running == mState)
@@ -180,6 +184,13 @@ public class Horizontal2DController : MonoBehaviour
             mState = CharacterState.Skill02;
             if (mPlayingAnim.IsPlaying(mAnim04_Attack01.name))
                 mPlayingAnim.Stop(mAnim04_Attack01.name);
+            GameObject hmcEffect = GameObject.Find("Effect.HelfMoonCut");
+            if (hmcEffect != null)
+            {
+                ColliderImageFrameAnim pAnim = hmcEffect.GetComponent<ColliderImageFrameAnim>();
+                pAnim.Play();
+                pAnim.ActiveCollider = true;
+            }
         }
     }
     public void OnAnimationOvered(CharacterState state)

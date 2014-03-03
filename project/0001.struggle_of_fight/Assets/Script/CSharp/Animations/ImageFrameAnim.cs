@@ -13,6 +13,7 @@ public class ImageFrameAnim : MonoBehaviour
     public bool mPaused = false;
     public bool mFlipY = false;
     public float mDepthWithParent = 0.2f;
+    public float mSelfMoveSpeed = 0.0f;
     public Vector2 mPlanOffset = Vector2.zero;
 
     public delegate bool EventHandler(Object sender, int totalTimes);
@@ -53,6 +54,7 @@ public class ImageFrameAnim : MonoBehaviour
         Stoped = false;
         mEnded = false;
     }
+    protected virtual void PlayImpl() { }
     protected virtual bool Init()
     {
         bool ret = true;
@@ -192,8 +194,9 @@ public class ImageFrameAnim : MonoBehaviour
             return;
         UpdateFrame();
 	}
+    protected GameObject mParent = null;
+    protected Vector3 mSelfMoveDir;
     SpriteRenderer mRenderer = null;
-    GameObject mParent = null;
     float mAnimCurrentTime = 0.0f;
     float mOnceLoopDelayTimer = 0.0f;
     int mFrameIndex = 0;
