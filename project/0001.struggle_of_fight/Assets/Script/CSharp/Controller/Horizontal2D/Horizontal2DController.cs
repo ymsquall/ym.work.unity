@@ -120,6 +120,10 @@ public class Horizontal2DController : MonoBehaviour
     {
         get { return mAttackComboNum; }
     }
+    public CharacterState ActionState
+    {
+        get { return mState; }
+    }
     public void DoAttack()
     {
         if (CharacterState.Idel == mState || CharacterState.Running == mState)
@@ -165,6 +169,7 @@ public class Horizontal2DController : MonoBehaviour
                 ImageFrameAnim pAnim = assaultEffect.GetComponent<ImageFrameAnim>();
                 pAnim.Play();
             }
+            mMeshPhysicsCollider.ActivePhysics(true);
         }
     }
     public void DoHelfCutSkill()

@@ -32,7 +32,9 @@ public class MeshPhysicsCollider : MonoBehaviour
                 if (mPlayerMainController != null)
                 {
                     bool right = charAminController.transform.position.x > mPlayerMainController.transform.position.x;
-                    if (mPlayerMainController.AttackComboNum >= mPlayerMainController.mAttackComboMaxNum)
+                    if (mPlayerMainController.AttackComboNum >= mPlayerMainController.mAttackComboMaxNum ||
+                        mPlayerMainController.ActionState == Horizontal2DController.CharacterState.Skill01 ||
+                        mPlayerMainController.ActionState == Horizontal2DController.CharacterState.Skill02)
                         charAminController.DoBeAttack(true, right ? 1.0f : -1.0f);
                     else
                         charAminController.DoBeAttack(false, right ? 1.0f : -1.0f);
