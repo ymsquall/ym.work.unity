@@ -433,7 +433,11 @@ public class Horizontal2DController : MonoBehaviour
         // Set rotation to the move direction
         if (Grounded)
         {
-            transform.rotation = Quaternion.LookRotation(mMoveDirection);
+            //transform.rotation = Quaternion.LookRotation(mMoveDirection);
+            transform.rotation = Quaternion.LookRotation(Vector3.right);
+            Vector3 scale = transform.localScale;
+            scale.z = mMoveDirection.x > 0.0f ? 1.0f : -1.0f;
+            transform.localScale = scale;
             // We are in jump mode but just became grounded
             //mLastGroundedTime = Time.time;
             mInAirVelocity = Vector3.zero;
@@ -460,7 +464,11 @@ public class Horizontal2DController : MonoBehaviour
             xMove.z = 0;
             if (xMove.sqrMagnitude > 0.001f)
             {
-                transform.rotation = Quaternion.LookRotation(xMove);
+                //transform.rotation = Quaternion.LookRotation(xMove);
+                transform.rotation = Quaternion.LookRotation(Vector3.right);
+                Vector3 scale = transform.localScale;
+                scale.z = xMove.x > 0.0f ? 1.0f : -1.0f;
+                transform.localScale = scale;
             }
         }
         mAttackComboTimer -= Time.deltaTime;
