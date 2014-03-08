@@ -79,12 +79,12 @@ public class CharacterGravityController : MonoBehaviour
         mCollisionFlags = mController.Move(movement);
         return movement;
     }
-    public void DoClobber(float clobberDirX)
+	public void DoClobber(float clobberDirX)
     {
         mMoveDirection.x = clobberDirX;
         mMoveDirection.y = mMoveDirection.z = 0.0f;
         mMoveDirection.Normalize();
-        mClobberSpeed = mClobberMoveSpeed;
+		mClobberSpeed = mClobberMoveSpeed;
         mFaceDirection.x = -clobberDirX;
         mFaceDirection.Normalize();
     }

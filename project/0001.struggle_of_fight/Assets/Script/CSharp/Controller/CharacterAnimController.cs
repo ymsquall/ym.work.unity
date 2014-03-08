@@ -28,7 +28,9 @@ public class CharacterAnimController : MonoBehaviour
     public float mAttackAnimSpeed = 0.2f;
     public float mSkill1AnimSpeed = 1.0f;
     public float mSkill1MoveSpeed = 15.0f;
-    public float mSkill2AnimSpeed = 0.3f;
+	public float mSkill2AnimSpeed = 0.3f;
+
+	public float mModelScaleFactor = 2.0f;
     
     public CharacterGravityController mGravityController = null;
 
@@ -60,7 +62,10 @@ public class CharacterAnimController : MonoBehaviour
         {
             mPlayingAnim = null;
             Debug.Log("No idle animation found. Turning off animations.");
-        }
+		}
+		Vector3 modelScale = transform.localScale;
+		modelScale.x = modelScale.y = modelScale.z = mModelScaleFactor;
+		transform.localScale = modelScale;
     }
 
     public void DoBeAttack(bool clobber, float clobberDirX)
