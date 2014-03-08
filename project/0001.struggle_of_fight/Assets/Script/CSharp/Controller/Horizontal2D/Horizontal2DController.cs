@@ -397,14 +397,14 @@ public class Horizontal2DController : MonoBehaviour
                 if (mController.velocity.sqrMagnitude < 0.1)
                 {
                     mPlayingAnim[mAnim14_Idel.name].speed = mInLandAnimSpeed;
-					mPlayingAnim.CrossFade(mAnim14_Idel.name, 0.1f);
+					mPlayingAnim.CrossFade(mAnim14_Idel.name, 0.2f);
 				}
 				else
                 {
                     if (mState == CharacterState.Running)
                     {
                         mPlayingAnim[mAnim08_Running.name].speed = Mathf.Clamp(mController.velocity.magnitude, 0.0f, mRunAnimSpeed);
-						mPlayingAnim.CrossFade(mAnim08_Running.name, 0.1f);
+						mPlayingAnim.CrossFade(mAnim08_Running.name, 0.2f);
 					}
 				}
             }
