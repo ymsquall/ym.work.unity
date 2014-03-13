@@ -95,14 +95,14 @@ public class Horizontal2DCamera : MonoBehaviour
             currentAngle = Mathf.SmoothDampAngle(currentAngle, targetAngle, ref mAngleVelocity, mAngularSmoothLag, mAngularMaxSpeed);
         }
 	    // When jumping don't move camera upwards but only down!
-        if (mController.Jumping)
-	    {
-		    // We'd be moving the camera upwards, do that only if it's really high
-		    var newTargetHeight = targetCenter.y + mHeight;
-		    if (newTargetHeight < mTargetHeight || newTargetHeight - mTargetHeight > 5)
-			    mTargetHeight = targetCenter.y + mHeight;
-	    }
-	    else
+        //if (mController.Jumping)
+        //{
+        //    // We'd be moving the camera upwards, do that only if it's really high
+        //    var newTargetHeight = targetCenter.y + mHeight;
+        //    if (newTargetHeight < mTargetHeight || newTargetHeight - mTargetHeight > 5)
+        //        mTargetHeight = targetCenter.y + mHeight;
+        //}
+        //else
         {
             // When walking always update the target height
 		    mTargetHeight = targetCenter.y + mHeight;
