@@ -86,6 +86,7 @@ public class Horizontal2DController : MonoBehaviour
 		transform.localScale = modelScale;
 		mJumpHeight *= mModelScaleFactor;
 		mRunSpeed *= mModelScaleFactor;
+        mDefaultControllLayer = gameObject.layer;
     }
 
     public static float CalculateJumpVerticalSpeed(float jumpHeight)
@@ -135,6 +136,9 @@ public class Horizontal2DController : MonoBehaviour
     public delegate bool SkillEventHandler(Object sender, int skillID);
     public event SkillEventHandler OnSkillBegining;
 
+    public delegate void JumpEventHandler(Object sender, CharacterState state);
+    public event JumpEventHandler OnCreatureJumping;
+
     public void DoAttack()
     {
         if (CharacterState.Idel == mState || CharacterState.Running == mState)
@@ -163,6 +167,8 @@ public class Horizontal2DController : MonoBehaviour
             mLastJumpButtonTime = Time.time;
             if (mPlayingAnim.IsPlaying(mAnim13_JumpDown.name))
                 mPlayingAnim.Stop(mAnim13_JumpDown.name);
+            if (OnCreatureJumping != null)
+                OnCreatureJumping(this, CharacterState.Jumpup);
         }
     }
     public void DoAssaultSkill()
@@ -220,6 +226,9 @@ public class Horizontal2DController : MonoBehaviour
                 case CharacterState.Jumpup:
                     {
                         mState = CharacterState.JumpAir;
+                        if (OnCreatureJumping != null)
+                            OnCreatureJumping(this, CharacterState.JumpAir);
+                        gameObject.layer = 10;
                     }
                     break;
             }
@@ -465,7 +474,12 @@ public class Horizontal2DController : MonoBehaviour
         else
         {
             if (mJumping && mState == CharacterState.JumpAir && mVerticalSpeed < 0.0f)
+            {
                 mState = CharacterState.JumpDown;
+                if (OnCreatureJumping != null)
+                    OnCreatureJumping(this, CharacterState.JumpDown);
+                mController.gameObject.layer = mDefaultControllLayer;
+            }
             var xMove = movement;
             xMove.y = 0;
             xMove.z = 0;
@@ -532,4 +546,6 @@ public class Horizontal2DController : MonoBehaviour
 
     float mAssaultMoveSpeed = 0.0f;
     float mAssaultSkillTimer = 0.0f;
+
+    int mDefaultControllLayer;
 }
