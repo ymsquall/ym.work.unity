@@ -62,7 +62,7 @@ public class Horizontal2DCamera : MonoBehaviour
 	    if (!mController)
 		    return;
         var targetCenter = mTarget.position + mCenterOffset;
-        var targetHead = mTarget.position + mHeadOffset;
+        //var targetHead = mTarget.position + mHeadOffset;
         DebugDrawStuff();
 	    // Calculate the current & target rotation angles
         var originalTargetAngle = mTarget.eulerAngles.y;

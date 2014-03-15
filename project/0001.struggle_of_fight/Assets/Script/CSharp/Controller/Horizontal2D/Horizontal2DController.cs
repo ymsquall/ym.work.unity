@@ -134,7 +134,7 @@ public class Horizontal2DController : MonoBehaviour
     }
 
     public delegate bool SkillEventHandler(Object sender, int skillID);
-    public event SkillEventHandler OnSkillBegining;
+    //public event SkillEventHandler OnSkillBegining;
 
     public delegate void JumpEventHandler(Object sender, CharacterState state);
     public event JumpEventHandler OnCreatureJumping;
@@ -284,7 +284,7 @@ public class Horizontal2DController : MonoBehaviour
             // moveDirection is always normalized, and we only update it if there is user input.
             if (targetDirection != Vector3.zero)
             {
-                Vector3 oldDir = mMoveDirection;
+                //Vector3 oldDir = mMoveDirection;
                 //mMoveDirection = Vector3.RotateTowards(mMoveDirection, targetDirection, mRotateSpeed * Mathf.Deg2Rad * Time.deltaTime, 1000);
                 mMoveDirection = targetDirection;
                 if (mMoveDirection.z != 0.0f)
@@ -319,7 +319,7 @@ public class Horizontal2DController : MonoBehaviour
     void ApplyGravity()
     {
         // Apply gravity
-        var jumpButton = Input.GetButton("Jump");
+        //var jumpButton = Input.GetButton("Jump");
         // When we reach the apex of the jump we send out a message
         if (mJumping && mVerticalSpeed <= 0.0)
         {

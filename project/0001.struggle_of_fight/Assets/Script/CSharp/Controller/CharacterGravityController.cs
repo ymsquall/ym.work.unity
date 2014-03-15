@@ -41,7 +41,7 @@ public class CharacterGravityController : MonoBehaviour
     void ApplyGravity()
     {
         // Apply gravity
-        var jumpButton = Input.GetButton("Jump");
+        //var jumpButton = Input.GetButton("Jump");
         // When we reach the apex of the jump we send out a message
         if (mJumping && mVerticalSpeed <= 0.0)
         {

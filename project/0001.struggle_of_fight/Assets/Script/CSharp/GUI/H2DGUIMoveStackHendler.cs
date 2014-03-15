@@ -14,7 +14,7 @@ public class H2DGUIMoveStackController : MonoBehaviour
 	
 	bool OnMoveStackButtonDown(Object sender, System.EventArgs args)
 	{
-        var mouseArgs = args as H2DGUIControllerPanel.ButtonEventArgs;
+        //var mouseArgs = args as H2DGUIControllerPanel.ButtonEventArgs;
 		if (sender == mLinkedUI.mMoveStackBar)
 		{
 			return true;
@@ -28,7 +28,7 @@ public class H2DGUIMoveStackController : MonoBehaviour
 	
 	bool OnMoveStackButtonDrag(Object sender, System.EventArgs args)
 	{
-        var mouseArgs = args as H2DGUIControllerPanel.ButtonEventArgs;
+        //var mouseArgs = args as H2DGUIControllerPanel.ButtonEventArgs;
 		if (sender == mLinkedUI.mMoveStackBar)
 		{
 			return true;
@@ -42,7 +42,7 @@ public class H2DGUIMoveStackController : MonoBehaviour
 	
 	bool OnMoveStackButtonUp(Object sender, System.EventArgs args)
 	{
-        var mouseArgs = args as H2DGUIControllerPanel.ButtonEventArgs;
+        //var mouseArgs = args as H2DGUIControllerPanel.ButtonEventArgs;
 		if (sender == mLinkedUI.mMoveStackBar)
 		{
 			return true;
