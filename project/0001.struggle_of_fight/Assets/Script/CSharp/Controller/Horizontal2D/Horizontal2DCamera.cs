@@ -16,6 +16,8 @@ public class Horizontal2DCamera : MonoBehaviour
     public float mSnapMaxSpeed = 720.0f;
     public float mClampHeadPositionScreenSpace = 0.75f;
     public float mLockCameraTimeout = 0.2f;
+    public static float s_DefaultMainCameraViewPointSize = 3.71f;
+    public static Vector2 s_DefaultScreenSize = new Vector3(1280,768);
 
     void Awake ()
     {
@@ -40,8 +42,18 @@ public class Horizontal2DCamera : MonoBehaviour
             mHeadOffset.y = characterController.bounds.max.y - mTarget.position.y;
 	    }
 	    else
-		    Debug.Log("Please assign a target to the camera that has a ThirdPersonController script attached.");
+            Debug.Log("Please assign a target to the camera that has a ThirdPersonController script attached.");
         Cut(mTarget, mCenterOffset);
+        //
+        //Vector2 screenScale = new Vector2((float)Screen.width / s_DefaultScreenSize.x, (float)Screen.height / s_DefaultScreenSize.y);
+        //Vector2 screenScale = new Vector2((float)Screen.currentResolution.width / s_DefaultScreenSize.x, (float)Screen.currentResolution.height / s_DefaultScreenSize.y);
+        //float viewPointSize = s_DefaultMainCameraViewPointSize * screenScale.x;
+        //Debug.Log(string.Format("screen size = ({1}, {2}), viewPointSize = {0}", viewPointSize, Screen.currentResolution.width, Screen.currentResolution.height));
+        //foreach (var cam in Camera.allCameras)
+        //{
+        //    cam.aspect = Screen.width / Screen.height;
+        //    cam.orthographicSize = viewPointSize;
+        //}
     }
 
     void DebugDrawStuff ()
