@@ -66,7 +66,7 @@ namespace Assets.Script.Tools
             private set { mIndex = value; }
         }
 
-        public static T[,] BuildBox9Grids<T, TParam>(int rowNum, int colNum)
+        public static T[,] BuildBox9Grids<T>(int rowNum, int colNum)
             where T : StyleBox9Grid, new()
         {
             T[,] pRet = new T[rowNum, colNum];

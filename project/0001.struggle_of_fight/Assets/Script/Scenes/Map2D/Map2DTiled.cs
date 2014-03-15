@@ -12,8 +12,8 @@ namespace Assets.Script.Scenes.Map2D
         public int 总列数 = 1;
         public bool 按行循环 = false;
         public bool 按列循环 = false;
-        public Sprite[] 总背景图 = new Sprite[1];
-        public string[] 贴图列表 = new string[1];
+		public GameObject[] 贴图列表 = null;
+        //public string[] 贴图列表 = new string[1];
         void Awake()
         {
             if (总行数 <= 0)
@@ -31,13 +31,15 @@ namespace Assets.Script.Scenes.Map2D
                 Debug.LogException(new Exception("无缝地图设置的行列数与总图片数不匹配！"));
                 return;
             }
-            mGrids = StyleBox9Grid.BuildBox9Grids<Map2DGrid, string>(总行数, 总列数);
-            Map2DGrid.EnumLinkedMapGrids<Map2DGrid, string>(mGrids, 贴图列表);
+            mGrids = StyleBox9Grid.BuildBox9Grids<Map2DGrid>(总行数, 总列数);
+            Map2DGrid.EnumLinkedMapGrids<Map2DGrid>(mGrids, 贴图列表);
         }
 
         void Start()
         {
-
+            foreach(Map2DGrid grid in mGrids)
+            {
+            }
         }
 
         Map2DGrid[,] mGrids = null;
