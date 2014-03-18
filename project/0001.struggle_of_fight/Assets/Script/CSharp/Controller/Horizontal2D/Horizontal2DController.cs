@@ -442,8 +442,8 @@ public class Horizontal2DController : MonoBehaviour
         // Calculate actual motion
         var movement = mMoveDirection * (mMoveSpeed + mAssaultMoveSpeed) + new Vector3(0, mVerticalSpeed, 0) + mInAirVelocity;
         movement *= Time.deltaTime;
-        // Move the controller
-        mCollisionFlags = mController.Move(movement);
+		// Move the controller
+		mCollisionFlags = mController.Move(movement);
         // ANIMATION sector
         AnimationSector();
         // Set rotation to the move direction
@@ -515,6 +515,18 @@ public class Horizontal2DController : MonoBehaviour
 
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
+		if (hit.gameObject.layer == 9)
+		{
+			//CapsuleCollider collider = this.collider.bounds;
+			if(this.collider.bounds.center.y < hit.collider.bounds.max.y)
+			{
+				PlayerController c = this.collider as PlayerController;
+				//CapsuleCollider collider = this.collider as CapsuleCollider;
+				//gameObject.layer = 10;
+				return;
+			}
+		}
+		gameObject.layer = mDefaultControllLayer;
     }
     void OnTriggerEnter(Collider other)
     {
