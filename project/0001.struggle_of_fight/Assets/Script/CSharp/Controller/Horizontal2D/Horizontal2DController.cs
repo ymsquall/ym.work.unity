@@ -520,7 +520,7 @@ public class Horizontal2DController : MonoBehaviour
 			//CapsuleCollider collider = this.collider.bounds;
 			if(this.collider.bounds.center.y < hit.collider.bounds.max.y)
 			{
-				PlayerController c = this.collider as PlayerController;
+				//PlayerController c = this.collider as PlayerController;
 				//CapsuleCollider collider = this.collider as CapsuleCollider;
 				//gameObject.layer = 10;
 				return;
