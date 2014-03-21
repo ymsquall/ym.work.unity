@@ -15,6 +15,7 @@ namespace Assets.Script.Controller
                 mAnimCrossFadeList[i] = 0.1f;
                 mAnimWarpModeList[i] = WrapMode.ClampForever;
             }
+            mPlayerInstance = instacne;
         }
         public AnimationType NowAnimType
         {
@@ -27,26 +28,32 @@ namespace Assets.Script.Controller
         }
         public bool SetAnimClip(AnimationType type, AnimationClip clip, float speed, float cross, WrapMode mode)
         {
-            if (type >= AnimationType.EANT_Max || type < AnimationType.EANT_Idel)
+            if (null == clip || type >= AnimationType.EANT_Max || type < AnimationType.EANT_Idel)
                 return false;
             int index = (int)type;
             mAnimClipList[index] = clip;
             mAnimClipSpeedList[index] = speed;
             mAnimCrossFadeList[index] = cross;
             mAnimWarpModeList[index] = mode;
+            if (null == mAnimation && null != mPlayerInstance)
+                mAnimation = mPlayerInstance.AnimationInst;
+            mAnimation.AddClip(clip, clip.name);
+            if (null != mAnimation && null == mAnimation.clip)
+                mAnimation.clip = clip;
             return true;
         }
         public void Update()
         {
-            AnimationClip pClip = mAnimClipList[(int)mNowAnimType];
+            int index = (int)mNowAnimType;
+            AnimationClip pClip = mAnimClipList[index];
             if (pClip && mAnimation)
             {
                 AnimationState pState = mAnimation[pClip.name];
                 if (pState)
                 {
-                    pState.speed = mAnimClipSpeedList[(int)AnimationType.EANT_Idel];
-                    pState.wrapMode = WrapMode.ClampForever;
-                    mAnimation.CrossFade(pClip.name, mAnimCrossFadeList[(int)AnimationType.EANT_Idel]);
+                    pState.speed = mAnimClipSpeedList[index];
+                    pState.wrapMode = mAnimWarpModeList[index];
+                    mAnimation.CrossFade(pClip.name, mAnimCrossFadeList[index]);
                 }
             }
         }

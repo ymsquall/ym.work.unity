@@ -25,6 +25,7 @@ namespace Assets.Script.Controller
     }
     public interface IH2DCAnimation<T>
     {
+        Animation AnimationInst { get; }
         bool Init();
         bool ChangeAnim(AnimationType animType);
         bool Update();

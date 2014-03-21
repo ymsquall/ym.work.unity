@@ -10,6 +10,11 @@ namespace Assets.Script.Controller
         {
             mH2DCGravity = instance;
         }
+        public float VerticalSpeed
+        {
+            set { mVerticalSpeed = value; }
+            get { return mVerticalSpeed; }
+        }
         public bool Init()
         {
             return true;

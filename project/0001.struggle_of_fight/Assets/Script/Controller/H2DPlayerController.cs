@@ -56,19 +56,64 @@ namespace Assets.Script.Controller
         }
         bool PlayerMovableSuperT.Moving
         {
-            get
-            {
-                return true;
-            }
+            get { return mMovableController.IsMoving; }
+        }
+        float PlayerMovableSuperT.SpeedScaleX
+        {
+            get{ return 跑动速度; }
+        }
+        float PlayerMovableSuperT.InputSpeedX
+        {
+            get{ return Input.GetAxisRaw("Horizontal"); }
+        }
+        float PlayerMovableSuperT.SpeedSmoothing
+        {
+            get { return 位移平滑速度; }
+        }
+        float PlayerMovableSuperT.InAirControlAcceleration
+        {
+            get { return 空中加速度; }
+        }
+        float PlayerMovableSuperT.JumpHeight
+        {
+            get { return 跳跃高度; }
         }
         bool PlayerMovableSuperT.Init()
         {
             mMovableController = new H2DMovableController(ThisMovable);
+            mMovableController.FaceDirection = transform.TransformDirection(Vector3.right);
             return mGravityController.Init();
         }
         bool PlayerMovableSuperT.Update()
         {
-            return mGravityController.Update();
+            bool wasMoving = ThisMovable.Moving;
+            if (!mMovableController.UpdateSmoothedMovementDirection(ThisGrivaty.Grounded, transform))
+                return false;
+            if (ThisGrivaty.Grounded)
+            {
+                // Lock camera for short period when transitioning moving & standing still
+                mLockCameraTimer += Time.deltaTime;
+                if (ThisMovable.Moving != wasMoving)
+                    mLockCameraTimer = 0.0f;
+                ThisAnim.ChangeAnim(AnimationType.EANT_Running);
+            }
+            else
+            {
+                // Lock camera while in air
+                if (ThisMovable.Jumping)
+                    mLockCameraTimer = 0.0f;
+            }
+            // apply gravity
+            if (!mGravityController.Update())
+                return false;
+            // apply jump
+            //mGravityController.VerticalSpeed = mMovableController.UpdateVerticalMovement(ThisGrivaty.Grounded, ThisGrivaty.Gravity);
+            // movement
+            if (!mMovableController.Movement(0.0f, mGravityController.VerticalSpeed, transform))
+                return false;
+            if (!mMovableController.MovementAfter(ThisGrivaty.Grounded, transform))
+                return false;
+            return true;
         }
         PlayerMovableSuperT ThisMovable { get { return this; } }
 #endregion
@@ -138,7 +183,15 @@ namespace Assets.Script.Controller
         public float            动作速度_死亡;
         public float            混合速度_死亡;
         public WrapMode         混合模式_死亡;
-        H2DAnimController       mAnimController;
+        H2DAnimController mAnimController;
+        Animation PlayerAnimSuperT.AnimationInst
+        {
+            get
+            {
+                //GameObject model = GetComponentInChildren<Animation>();
+                return GetComponentInChildren<Animation>();
+            }
+        }
         // 实现动画接口的初始化方法
         bool PlayerAnimSuperT.Init()
         {
@@ -177,17 +230,27 @@ namespace Assets.Script.Controller
 #region 碰撞相关
         public Collider 地面碰撞层 = null;
 #endregion
+
+        public float LockCameraTimer
+        {
+            get { return mLockCameraTimer; }
+        }
+
         // Use this for initialization
         void Awake()
         {
             ThisGrivaty.Init();
+            ThisMovable.Init();
             ThisAnim.Init();
         }
         // Update is called once per frame
         void Update()
         {
-            ThisGrivaty.Update();
+            //ThisGrivaty.Update();
+            ThisMovable.Update();
             ThisAnim.Update();
         }
+
+        float mLockCameraTimer = 0.0f;
     }
 }

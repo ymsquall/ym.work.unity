@@ -8,6 +8,11 @@ namespace Assets.Script.Controller
         bool Jumping { get; }
         bool Droping { get; }
         bool Moving { get; }
+        float SpeedScaleX { get; }
+        float InputSpeedX { get; }
+        float SpeedSmoothing { get; }
+        float InAirControlAcceleration { get; }
+        float JumpHeight { get; }
         bool Init();
         bool Update();
     }
