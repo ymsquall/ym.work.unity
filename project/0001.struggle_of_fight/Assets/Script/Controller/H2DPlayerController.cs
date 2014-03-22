@@ -6,10 +6,15 @@ namespace Assets.Script.Controller
     using PlayerGravitySuperT = IH2DCGravity<H2DGravityController>;
     using PlayerMovableSuperT = IH2DCMovable<H2DMovableController>;
     using PlayerAnimSuperT = IH2DCAnimation<H2DAnimController>;
+    using PlayerColliderSuperT = IH2DCCollider<H2DColliderController>;
+    using PlayerColliderSelecterT = IH2DCreatureCollideSelecter;
     public class H2DPlayerController : MonoBehaviour,
                                        PlayerGravitySuperT,
                                        PlayerMovableSuperT,
-                                       PlayerAnimSuperT
+                                       PlayerAnimSuperT,
+                                       PlayerColliderSuperT,
+                                       PlayerColliderSelecterT,
+                                       IH2DCCamera
     {
 #region 重力相关
         public float 重力 = 30.0f;
@@ -20,7 +25,7 @@ namespace Assets.Script.Controller
         }
         bool PlayerGravitySuperT.Grounded
         {
-            get { return true; }
+            get { return mInGrounded; }
         }
         bool PlayerGravitySuperT.Init()
         {
@@ -82,12 +87,15 @@ namespace Assets.Script.Controller
         {
             mMovableController = new H2DMovableController(ThisMovable);
             mMovableController.FaceDirection = transform.TransformDirection(Vector3.right);
+            transform.rotation = Quaternion.LookRotation(mMovableController.FaceDirection);
             return mGravityController.Init();
         }
         bool PlayerMovableSuperT.Update()
         {
             bool wasMoving = ThisMovable.Moving;
             if (!mMovableController.UpdateSmoothedMovementDirection(ThisGrivaty.Grounded, transform))
+                return false;
+            if (!mColliderController.UpdateCreature(transform))
                 return false;
             if (ThisGrivaty.Grounded)
             {
@@ -110,6 +118,8 @@ namespace Assets.Script.Controller
             //mGravityController.VerticalSpeed = mMovableController.UpdateVerticalMovement(ThisGrivaty.Grounded, ThisGrivaty.Gravity);
             // movement
             if (!mMovableController.Movement(0.0f, mGravityController.VerticalSpeed, transform))
+                return false;
+            if (!mColliderController.Update(mMovableController.LastMovement))
                 return false;
             if (!mMovableController.MovementAfter(ThisGrivaty.Grounded, transform))
                 return false;
@@ -228,13 +238,82 @@ namespace Assets.Script.Controller
 #endregion
 
 #region 碰撞相关
-        public Collider 地面碰撞层 = null;
+        public Collider 碰撞层_地面 = null;
+        public Collider 碰撞层_非地面 = null;
+        H2DColliderController mColliderController;
+        bool PlayerColliderSuperT.Grounded
+        {
+            get { return mInGrounded; }
+        }
+        Collider PlayerColliderSuperT.GroundCollider
+        {
+            get { return 碰撞层_地面; }
+        }
+        Collider PlayerColliderSuperT.NoGroundCollider
+        {
+            get { return 碰撞层_非地面; }
+        }
+        bool PlayerColliderSuperT.Init()
+        {
+            mColliderController = new H2DColliderController(ThisCollider);
+            return true;
+        }
+        bool PlayerColliderSuperT.Update()
+        {
+            return true;
+        }
+        PlayerColliderSuperT ThisCollider { get { return this; } }
 #endregion
 
+#region 碰撞选择器实现
+        bool PlayerColliderSelecterT.OnH2DCCollisionEnter(Collision collisionInfo, H2DCCollideSelecterType type)
+        {
+            Debug.Log(string.Format("OnH2DCCollisionEnter:{0}", type.ToString()));
+            switch(type)
+            {
+                case H2DCCollideSelecterType.地面:
+                    mInGrounded = true;
+                    break;
+                case H2DCCollideSelecterType.非地面:
+                    break;
+            }
+            return true;
+        }
+        bool PlayerColliderSelecterT.OnH2DCCollisionExit(Collision collisionInfo, H2DCCollideSelecterType type)
+        {
+            Debug.Log(string.Format("OnH2DCCollisionEnter:{0}", type.ToString()));
+            switch(type)
+            {
+                case H2DCCollideSelecterType.地面:
+                    mInGrounded = false;
+                    break;
+                case H2DCCollideSelecterType.非地面:
+                    break;
+            }
+            return true;
+        }
+        bool PlayerColliderSelecterT.OnH2DCCollisionStay(Collision collisionInfo, H2DCCollideSelecterType type)
+        {
+            Debug.Log(string.Format("OnH2DCCollisionEnter:{0}", type.ToString()));
+            return true;
+        }
+        bool mInGrounded = false;
+#endregion
+
+#region 摄像机需求的参数
+        float IH2DCCamera.LockCameraTimer
+        {
+            get { return mLockCameraTimer; }
+        }
+        Bounds IH2DCCamera.Bounds
+        {
+            get { return 碰撞层_非地面.bounds; }
+        }
         public float LockCameraTimer
         {
             get { return mLockCameraTimer; }
         }
+#endregion
 
         // Use this for initialization
         void Awake()
@@ -242,6 +321,7 @@ namespace Assets.Script.Controller
             ThisGrivaty.Init();
             ThisMovable.Init();
             ThisAnim.Init();
+            ThisCollider.Init();
         }
         // Update is called once per frame
         void Update()
@@ -249,6 +329,17 @@ namespace Assets.Script.Controller
             //ThisGrivaty.Update();
             ThisMovable.Update();
             ThisAnim.Update();
+        }
+        void OnControllerColliderHit(ControllerColliderHit hit)
+        {
+        }
+        void OnTriggerEnter(Collider other)
+        {
+
+        }
+        void OnCollisionEnter(Collision collisionInfo)
+        {
+
         }
 
         float mLockCameraTimer = 0.0f;

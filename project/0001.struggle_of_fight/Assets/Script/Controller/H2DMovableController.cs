@@ -43,9 +43,13 @@ namespace Assets.Script.Controller
             var h = Input.GetAxisRaw("Horizontal");
             mIsMoving = Mathf.Abs(mPlayerInstance.InputSpeedX) > 0.1;
             if (h > 0.001f)
-                mFaceDirection = trans.TransformDirection(Vector3.right);
-            else if (h < 0.001f)
-                mFaceDirection = trans.TransformDirection(Vector3.left);
+            {
+                mFaceDirection = cameraTransform.TransformDirection(Vector3.right);
+            }
+            else if (h < -0.001f)
+            {
+                mFaceDirection = cameraTransform.TransformDirection(Vector3.left);
+            }
             // Target direction relative to the camera
             var targetDirection = h * right;
             // Grounded controls
@@ -94,7 +98,7 @@ namespace Assets.Script.Controller
         {
             mLastMovement = mMoveDirection * (mMoveSpeed + addSpeed) + new Vector3(0, verticalSpeed, 0) + mInAirVelocity;
             mLastMovement *= Time.deltaTime;
-            trans.position += mLastMovement;
+            //trans.position += mLastMovement;
             //// Move the controller
             //mCollisionFlags = mController.Move(movement);
             return true;
