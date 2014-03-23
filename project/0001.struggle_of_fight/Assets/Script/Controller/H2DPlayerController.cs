@@ -268,7 +268,7 @@ namespace Assets.Script.Controller
 #region 碰撞选择器实现
         bool PlayerColliderSelecterT.OnH2DCCollisionEnter(Collision collisionInfo, H2DCCollideSelecterType type)
         {
-            Debug.Log(string.Format("OnH2DCCollisionEnter:{0}", type.ToString()));
+            //Debug.Log(string.Format("OnH2DCCollisionEnter:{0}", type.ToString()));
             switch(type)
             {
                 case H2DCCollideSelecterType.地面:
@@ -281,7 +281,7 @@ namespace Assets.Script.Controller
         }
         bool PlayerColliderSelecterT.OnH2DCCollisionExit(Collision collisionInfo, H2DCCollideSelecterType type)
         {
-            Debug.Log(string.Format("OnH2DCCollisionEnter:{0}", type.ToString()));
+            //Debug.Log(string.Format("OnH2DCCollisionEnter:{0}", type.ToString()));
             switch(type)
             {
                 case H2DCCollideSelecterType.地面:
@@ -294,7 +294,7 @@ namespace Assets.Script.Controller
         }
         bool PlayerColliderSelecterT.OnH2DCCollisionStay(Collision collisionInfo, H2DCCollideSelecterType type)
         {
-            Debug.Log(string.Format("OnH2DCCollisionEnter:{0}", type.ToString()));
+            //Debug.Log(string.Format("OnH2DCCollisionEnter:{0}", type.ToString()));
             return true;
         }
         bool mInGrounded = false;

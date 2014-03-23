@@ -98,7 +98,7 @@ namespace Assets.Script.Controller
         {
             mLastMovement = mMoveDirection * (mMoveSpeed + addSpeed) + new Vector3(0, verticalSpeed, 0) + mInAirVelocity;
             mLastMovement *= Time.deltaTime;
-            //trans.position += mLastMovement;
+            trans.position += mLastMovement;
             //// Move the controller
             //mCollisionFlags = mController.Move(movement);
             return true;
