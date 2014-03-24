@@ -240,6 +240,7 @@ namespace Assets.Script.Controller
 #region 碰撞相关
         public Collider 碰撞层_地面 = null;
         public Collider 碰撞层_非地面 = null;
+        public LayerMask 地面层掩码 = 0;
         H2DColliderController mColliderController;
         bool PlayerColliderSuperT.Grounded
         {
@@ -252,6 +253,10 @@ namespace Assets.Script.Controller
         Collider PlayerColliderSuperT.NoGroundCollider
         {
             get { return 碰撞层_非地面; }
+        }
+        LayerMask PlayerColliderSuperT.GroundLayerMask
+        {
+            get { return 地面层掩码; }
         }
         bool PlayerColliderSuperT.Init()
         {

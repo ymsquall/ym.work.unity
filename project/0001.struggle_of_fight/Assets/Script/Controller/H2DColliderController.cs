@@ -36,8 +36,8 @@ namespace Assets.Script.Controller
             Debug.DrawLine(gcMinBottomRay, gcMinBottomRay + rayDir * 100.0f, Color.green);
             Debug.DrawLine(gcMaxBottomRay, gcMaxBottomRay + rayDir * 100.0f, Color.green);
             RaycastHit gcMinCast, gcMaxCast;
-            bool minRayHit = Physics.Raycast(new Ray(gcMinBottomRay, rayDir), out gcMinCast, 100.0f);
-            bool maxRayHit = Physics.Raycast(new Ray(gcMaxBottomRay, rayDir), out gcMaxCast, 100.0f);
+            bool minRayHit = Physics.Raycast(new Ray(gcMinBottomRay, rayDir), out gcMinCast, 100.0f, mH2DCCollider.GroundLayerMask);
+            bool maxRayHit = Physics.Raycast(new Ray(gcMaxBottomRay, rayDir), out gcMaxCast, 100.0f, mH2DCCollider.GroundLayerMask);
             if (minRayHit)
             {
                 GameObject dbgSphere = GameObject.Find("dbgMinCastSphere");
