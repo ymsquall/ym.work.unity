@@ -95,8 +95,6 @@ namespace Assets.Script.Controller
             bool wasMoving = ThisMovable.Moving;
             if (!mMovableController.UpdateSmoothedMovementDirection(ThisGrivaty.Grounded, transform))
                 return false;
-            if (!mColliderController.UpdateCreature(transform))
-                return false;
             if (ThisGrivaty.Grounded)
             {
                 // Lock camera for short period when transitioning moving & standing still
@@ -119,9 +117,9 @@ namespace Assets.Script.Controller
             // movement
             if (!mMovableController.Movement(0.0f, mGravityController.VerticalSpeed, transform))
                 return false;
-            if (!mColliderController.Update(mMovableController.LastMovement))
+            if (!mColliderController.Update(mMovableController.LastMovement, transform.position))
                 return false;
-            if (!mMovableController.MovementAfter(ThisGrivaty.Grounded, transform))
+            if (!mMovableController.MovementAfter(ThisGrivaty.Grounded, mColliderController.FixedPosition, transform))
                 return false;
             return true;
         }
@@ -242,9 +240,15 @@ namespace Assets.Script.Controller
         public Collider 碰撞层_非地面 = null;
         public LayerMask 地面层掩码 = 0;
         H2DColliderController mColliderController;
-        bool PlayerColliderSuperT.Grounded
+        bool PlayerColliderSuperT.RayInGround
         {
-            get { return mInGrounded; }
+            set
+            {
+                mRayInGround = value;
+                if (mRayInGround)
+                    mGravityController.VerticalSpeed = 0.0f;
+            }
+            get { return mRayInGround; }
         }
         Collider PlayerColliderSuperT.GroundCollider
         {
@@ -267,7 +271,8 @@ namespace Assets.Script.Controller
         {
             return true;
         }
-        PlayerColliderSuperT ThisCollider { get { return this; } }
+        public PlayerColliderSuperT ThisCollider { get { return this; } }
+        bool mRayInGround = false;
 #endregion
 
 #region 碰撞选择器实现

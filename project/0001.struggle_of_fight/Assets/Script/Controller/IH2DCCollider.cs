@@ -5,7 +5,7 @@ namespace Assets.Script.Controller
 {
     public interface IH2DCCollider<T>
     {
-        bool Grounded { get; }
+        bool RayInGround { set; get; }
         LayerMask GroundLayerMask { get; }
         Collider GroundCollider { get; }
         Collider NoGroundCollider { get; }

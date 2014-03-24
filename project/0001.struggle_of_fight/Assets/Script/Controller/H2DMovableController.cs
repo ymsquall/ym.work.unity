@@ -103,8 +103,9 @@ namespace Assets.Script.Controller
             //mCollisionFlags = mController.Move(movement);
             return true;
         }
-        public bool MovementAfter(bool grounded, Transform trans)
+        public bool MovementAfter(bool grounded, Vector3 fixedPosition, Transform trans)
         {
+            trans.position = fixedPosition;
             if (grounded)
             {
                 //mClobberSpeed = Vector3.zero;
