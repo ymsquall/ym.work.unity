@@ -10,17 +10,13 @@ namespace Assets.Script.Controller
         {
             mH2DCCollider = instance;
         }
-        public Vector3 FixedPosition
-        {
-            get { return mFixedPosition; }
-        }
         public bool Init()
         {
             return true;
         }
-        public bool Update(Vector3 movement, Vector3 pos)
+        public bool GroundMoveTest(bool droping, ref Vector3 pos)
         {
-            mFixedPosition = pos;
+            bool inGround = false;
             // ground
             Vector3 gcMinBottomRay = mH2DCCollider.GroundCollider.bounds.min;
             Vector3 gcMaxBottomRay = mH2DCCollider.GroundCollider.bounds.max;
@@ -91,13 +87,14 @@ namespace Assets.Script.Controller
             if (minHit || maxHit)
             {
                 //Debug.Log(string.Format("min={0}\tmovement={1}", mH2DCCollider.GroundCollider.bounds.min.ToString(), mFixedMovement.ToString()));
-                float sideY = mH2DCCollider.GroundCollider.bounds.min.y - movement.y;
-                if (sideY <= groundHeightPos.y)
+                if (pos.y <= groundHeightPos.y)
                 {
                     //Debug.Log(string.Format("sideY={0}\tgroundHeightPos={1}\tFixedPosition={2}",
                     //    sideY, groundHeightPos.ToString(), mFixedPosition.ToString()));
-                    mFixedPosition.y = groundHeightPos.y;
-                    mH2DCCollider.RayInGround = true;
+                    pos.y = groundHeightPos.y;
+                    //if (droping && pos.y < groundHeightPos.y)
+                    //    mH2DCCollider.RayInGround = true;
+                    inGround = true;
                 }
             }
             else
@@ -134,9 +131,8 @@ namespace Assets.Script.Controller
             if (!maxHit)
                 GameObject.DestroyObject(GameObject.Find("dbgMaxCastSphere"));
             //-- debug
-            return true;
+            return inGround;
         }
         PlayerColliderInstance mH2DCCollider = null;
-        Vector3 mFixedPosition;
     }
 }

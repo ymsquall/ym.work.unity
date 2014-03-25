@@ -23,7 +23,7 @@ namespace Assets.Script.Controller
         {
             if (null == mH2DCGravity)
                 return false;
-            if (mH2DCGravity.Grounded)
+            if (mH2DCGravity.Grounded && mVerticalSpeed < 0.0f)
                 mVerticalSpeed = 0.0f;
             else
                 mVerticalSpeed -= mH2DCGravity.Gravity * Time.deltaTime;

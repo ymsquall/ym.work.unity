@@ -49,14 +49,14 @@ namespace Assets.Script.Controller
         {
             get
             {
-                return true;
+                return mGravityController.VerticalSpeed > 0.0f;
             }
         }
         bool PlayerMovableSuperT.Droping
         {
             get
             {
-                return true;
+                return !ThisMovable.Jumping && !ThisGrivaty.Grounded;
             }
         }
         bool PlayerMovableSuperT.Moving
@@ -117,14 +117,17 @@ namespace Assets.Script.Controller
             if (!mGravityController.Update())
                 return false;
             // apply jump
-            //mGravityController.VerticalSpeed = mMovableController.UpdateVerticalMovement(ThisGrivaty.Grounded, ThisGrivaty.Gravity);
+            if (ThisGrivaty.Grounded && Input.GetButtonDown("Jump"))
+            {
+                mGravityController.VerticalSpeed += mMovableController.UpdateVerticalMovement(ThisGrivaty.Grounded, ThisGrivaty.Gravity);
+                mInGrounded = false;
+            }
             // movement
             Vector3 outPos = transform.position;
             if (!mMovableController.Movement(0.0f, mGravityController.VerticalSpeed, ref outPos))
                 return false;
-            if (!mColliderController.Update(mMovableController.LastMovement, outPos))
-                return false;
-            if (!mMovableController.MovementAfter(ThisGrivaty.Grounded, mColliderController.FixedPosition, transform))
+            mInGrounded = mColliderController.GroundMoveTest(ThisMovable.Droping, ref outPos);
+            if (!mMovableController.MovementAfter(ThisGrivaty.Grounded, outPos, transform))
                 return false;
             return true;
         }
