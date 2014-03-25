@@ -13,6 +13,7 @@ namespace Assets.Script.Controller
         float SpeedSmoothing { get; }
         float InAirControlAcceleration { get; }
         float JumpHeight { get; }
+        CharacterController Controller { get; }
         bool Init();
         bool Update();
     }

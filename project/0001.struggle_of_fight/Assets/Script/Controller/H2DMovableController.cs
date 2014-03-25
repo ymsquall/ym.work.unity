@@ -94,18 +94,19 @@ namespace Assets.Script.Controller
                 return CalculateJumpVerticalSpeed(mPlayerInstance.JumpHeight, grivaty);
             return 0.0f;
         }
-        public bool Movement(float addSpeed, float verticalSpeed, Transform trans)
+        public bool Movement(float addSpeed, float verticalSpeed, ref Vector3 outPos)
         {
             mLastMovement = mMoveDirection * (mMoveSpeed + addSpeed) + new Vector3(0, verticalSpeed, 0) + mInAirVelocity;
             mLastMovement *= Time.deltaTime;
-            trans.position += mLastMovement;
-            //// Move the controller
-            //mCollisionFlags = mController.Move(movement);
+            //mPlayerInstance.Controller.Move(mLastMovement);
+            outPos += mLastMovement;
             return true;
         }
         public bool MovementAfter(bool grounded, Vector3 fixedPosition, Transform trans)
         {
-            trans.position = fixedPosition;
+            Vector3 movement = fixedPosition - trans.position;
+            mPlayerInstance.Controller.Move(movement);
+            //trans.position = fixedPosition;
             if (grounded)
             {
                 //mClobberSpeed = Vector3.zero;

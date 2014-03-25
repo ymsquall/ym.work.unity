@@ -21,6 +21,7 @@ namespace Assets.Script.Controller
         public bool Update(Vector3 movement, Vector3 pos)
         {
             mFixedPosition = pos;
+            // ground
             Vector3 gcMinBottomRay = mH2DCCollider.GroundCollider.bounds.min;
             Vector3 gcMaxBottomRay = mH2DCCollider.GroundCollider.bounds.max;
             gcMaxBottomRay.y = gcMinBottomRay.y = 10.0f;
@@ -52,10 +53,6 @@ namespace Assets.Script.Controller
                         minRayHit = hit;
                     }
                 }
-                if (minRayHit.point.y > -5)
-                {
-                    minRayHit = minRayHit;
-                }
             }
             if (gcMaxCastList.Length > 0)
             {
@@ -78,28 +75,6 @@ namespace Assets.Script.Controller
                         maxRayHit = hit;
                     }
                 }
-                if (maxRayHit.point.y > -5)
-                {
-                    maxRayHit = gcMaxCastList[0];
-                    dist1 = Vector3.Distance(mH2DCCollider.GroundCollider.bounds.max, maxRayHit.point);
-                    for (int i = 0; i < gcMaxCastList.Length; ++i)
-                    {
-                        RaycastHit hit = gcMaxCastList[i];
-                        float myMinY = mH2DCCollider.GroundCollider.bounds.min.y;
-                        if (hit.point.y > (myMinY + 0.1f))
-                        {
-                            if (i == 0)
-                                dist1 = 1000.0f;
-                            continue;
-                        }
-                        float dist2 = Vector3.Distance(mH2DCCollider.GroundCollider.bounds.max, hit.point);
-                        if (dist1 > dist2)
-                        {
-                            dist1 = dist2;
-                            maxRayHit = hit;
-                        }
-                    }
-                }
             }
             Vector3 groundHeightPos = Vector3.zero;
             if (minHit && maxHit)
@@ -117,10 +92,10 @@ namespace Assets.Script.Controller
             {
                 //Debug.Log(string.Format("min={0}\tmovement={1}", mH2DCCollider.GroundCollider.bounds.min.ToString(), mFixedMovement.ToString()));
                 float sideY = mH2DCCollider.GroundCollider.bounds.min.y - movement.y;
-                if (sideY < groundHeightPos.y)
+                if (sideY <= groundHeightPos.y)
                 {
-                    Debug.Log(string.Format("sideY={0}\tgroundHeightPos={1}\tFixedPosition={2}",
-                        sideY, groundHeightPos.ToString(), mFixedPosition.ToString()));
+                    //Debug.Log(string.Format("sideY={0}\tgroundHeightPos={1}\tFixedPosition={2}",
+                    //    sideY, groundHeightPos.ToString(), mFixedPosition.ToString()));
                     mFixedPosition.y = groundHeightPos.y;
                     mH2DCCollider.RayInGround = true;
                 }

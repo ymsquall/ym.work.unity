@@ -83,6 +83,10 @@ namespace Assets.Script.Controller
         {
             get { return 跳跃高度; }
         }
+        CharacterController PlayerMovableSuperT.Controller
+        {
+            get { return GetComponent<CharacterController>(); }
+        }
         bool PlayerMovableSuperT.Init()
         {
             mMovableController = new H2DMovableController(ThisMovable);
@@ -115,9 +119,10 @@ namespace Assets.Script.Controller
             // apply jump
             //mGravityController.VerticalSpeed = mMovableController.UpdateVerticalMovement(ThisGrivaty.Grounded, ThisGrivaty.Gravity);
             // movement
-            if (!mMovableController.Movement(0.0f, mGravityController.VerticalSpeed, transform))
+            Vector3 outPos = transform.position;
+            if (!mMovableController.Movement(0.0f, mGravityController.VerticalSpeed, ref outPos))
                 return false;
-            if (!mColliderController.Update(mMovableController.LastMovement, transform.position))
+            if (!mColliderController.Update(mMovableController.LastMovement, outPos))
                 return false;
             if (!mMovableController.MovementAfter(ThisGrivaty.Grounded, mColliderController.FixedPosition, transform))
                 return false;
@@ -237,7 +242,7 @@ namespace Assets.Script.Controller
 
 #region 碰撞相关
         public Collider 碰撞层_地面 = null;
-        public Collider 碰撞层_非地面 = null;
+        //public Collider 碰撞层_非地面 = null;
         public LayerMask 地面层掩码 = 0;
         H2DColliderController mColliderController;
         bool PlayerColliderSuperT.RayInGround
@@ -254,10 +259,10 @@ namespace Assets.Script.Controller
         {
             get { return 碰撞层_地面; }
         }
-        Collider PlayerColliderSuperT.NoGroundCollider
-        {
-            get { return 碰撞层_非地面; }
-        }
+        //Collider PlayerColliderSuperT.NoGroundCollider
+        //{
+        //    get { return 碰撞层_非地面; }
+        //}
         LayerMask PlayerColliderSuperT.GroundLayerMask
         {
             get { return 地面层掩码; }
@@ -317,7 +322,7 @@ namespace Assets.Script.Controller
         }
         Bounds IH2DCCamera.Bounds
         {
-            get { return 碰撞层_非地面.bounds; }
+            get { return GetComponent<CharacterController>().bounds; }
         }
         public float LockCameraTimer
         {

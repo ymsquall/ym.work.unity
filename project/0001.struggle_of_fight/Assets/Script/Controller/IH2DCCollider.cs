@@ -8,7 +8,7 @@ namespace Assets.Script.Controller
         bool RayInGround { set; get; }
         LayerMask GroundLayerMask { get; }
         Collider GroundCollider { get; }
-        Collider NoGroundCollider { get; }
+        //Collider NoGroundCollider { get; }
         bool Init();
         bool Update();
     }
