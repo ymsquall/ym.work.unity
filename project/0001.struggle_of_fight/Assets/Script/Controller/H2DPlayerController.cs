@@ -8,12 +8,14 @@ namespace Assets.Script.Controller
     using PlayerAnimSuperT = IH2DCAnimation<H2DAnimController>;
     using PlayerColliderSuperT = IH2DCCollider<H2DColliderController>;
     using PlayerColliderSelecterT = IH2DCreatureCollideSelecter;
+    using PlayerOperationsSuperT = IH2DCOperations<H2DOperationsController>;
     public class H2DPlayerController : MonoBehaviour,
                                        PlayerGravitySuperT,
                                        PlayerMovableSuperT,
                                        PlayerAnimSuperT,
                                        PlayerColliderSuperT,
                                        PlayerColliderSelecterT,
+                                       PlayerOperationsSuperT,
                                        IH2DCCamera
     {
 #region 重力相关
@@ -92,12 +94,36 @@ namespace Assets.Script.Controller
             mMovableController = new H2DMovableController(ThisMovable);
             mMovableController.FaceDirection = transform.TransformDirection(Vector3.right);
             transform.rotation = Quaternion.LookRotation(mMovableController.FaceDirection);
-            return mGravityController.Init();
+            return mMovableController.Init();
         }
         bool PlayerMovableSuperT.Update()
         {
             bool wasMoving = ThisMovable.Moving;
             if (!mMovableController.UpdateSmoothedMovementDirection(ThisGrivaty.Grounded, transform))
+                return false;
+            // apply gravity
+            if (!mGravityController.Update())
+                return false;
+            // apply jump
+            if (ThisGrivaty.Grounded && (Input.GetButtonDown("Jump") || mJumpBtnTouched))
+            {
+                mGravityController.VerticalSpeed += mMovableController.UpdateVerticalMovement(ThisGrivaty.Grounded, ThisGrivaty.Gravity);
+                mInGrounded = false;
+                ThisAnim.ChangeAnim(AnimationType.EANT_Jumpup);
+            }
+            if (ThisMovable.Droping)
+                ThisAnim.ChangeAnim(AnimationType.EANT_Droping);
+            if (mAnimController.NowAnimType == AnimationType.EANT_Droping && ThisGrivaty.Grounded)
+                ThisAnim.ChangeAnim(AnimationType.EANT_JumpDown);
+            // 移动流程：先Movement计算好目标位置但不移动过去，用GroundMoveTest（双脚射线查询）测试目标位置会不会被地面挡住
+            // 如果测试结果会被目标挡住则修正位置为地面位置并设置Grounded标志位true
+            // 最后通过MovementAfter移动到目标位置（修复后的）
+            // 因为GroundMoveTest每帧都会调用，所以不存在Grounded设为ture后走到空中无法感知的问题
+            Vector3 outPos = transform.position;
+            if (!mMovableController.Movement(0.0f, mGravityController.VerticalSpeed, ref outPos))
+                return false;
+            mInGrounded = mColliderController.GroundMoveTest(ThisMovable.Droping, ref outPos);
+            if (!mMovableController.MovementAfter(ThisGrivaty.Grounded, outPos, transform))
                 return false;
             if (ThisGrivaty.Grounded)
             {
@@ -105,7 +131,14 @@ namespace Assets.Script.Controller
                 mLockCameraTimer += Time.deltaTime;
                 if (ThisMovable.Moving != wasMoving)
                     mLockCameraTimer = 0.0f;
-                ThisAnim.ChangeAnim(AnimationType.EANT_Running);
+                if (ThisMovable.Moving)
+                    ThisAnim.ChangeAnim(AnimationType.EANT_Running);
+                else if (mAnimController.NowAnimType != AnimationType.EANT_Attack01 &&
+                            mAnimController.NowAnimType != AnimationType.EANT_Attack02 &&
+                            mAnimController.NowAnimType != AnimationType.EANT_Attack03 &&
+                            mAnimController.NowAnimType != AnimationType.EANT_Skill01 &&
+                            mAnimController.NowAnimType != AnimationType.EANT_Skill02)
+                    ThisAnim.ChangeAnim(AnimationType.EANT_Idel);
             }
             else
             {
@@ -113,22 +146,6 @@ namespace Assets.Script.Controller
                 if (ThisMovable.Jumping)
                     mLockCameraTimer = 0.0f;
             }
-            // apply gravity
-            if (!mGravityController.Update())
-                return false;
-            // apply jump
-            if (ThisGrivaty.Grounded && Input.GetButtonDown("Jump"))
-            {
-                mGravityController.VerticalSpeed += mMovableController.UpdateVerticalMovement(ThisGrivaty.Grounded, ThisGrivaty.Gravity);
-                mInGrounded = false;
-            }
-            // movement
-            Vector3 outPos = transform.position;
-            if (!mMovableController.Movement(0.0f, mGravityController.VerticalSpeed, ref outPos))
-                return false;
-            mInGrounded = mColliderController.GroundMoveTest(ThisMovable.Droping, ref outPos);
-            if (!mMovableController.MovementAfter(ThisGrivaty.Grounded, outPos, transform))
-                return false;
             return true;
         }
         PlayerMovableSuperT ThisMovable { get { return this; } }
@@ -204,7 +221,6 @@ namespace Assets.Script.Controller
         {
             get
             {
-                //GameObject model = GetComponentInChildren<Animation>();
                 return GetComponentInChildren<Animation>();
             }
         }
@@ -235,12 +251,50 @@ namespace Assets.Script.Controller
             mAnimController.NowAnimType = animType;
             return true;
         }
+        bool PlayerAnimSuperT.OnAnimOvered(AnimationType animType)
+        {
+            if (mAnimController.NowAnimType == animType)
+            {
+                switch (animType)
+                {
+                    case AnimationType.EANT_Attack01:
+                    case AnimationType.EANT_Attack02:
+                    case AnimationType.EANT_Attack03:
+                        {
+                            if (ThisMovable.Moving)
+                                ThisAnim.ChangeAnim(AnimationType.EANT_Running);
+                            else
+                                ThisAnim.ChangeAnim(AnimationType.EANT_Idel);
+                            //mMeshPhysicsCollider.ActivePhysics(false);
+                        }
+                        break;
+                    case AnimationType.EANT_Jumpup:
+                        ThisAnim.ChangeAnim(AnimationType.EANT_Airing);
+                        break;
+                }
+            }
+            else if ((mAnimController.NowAnimType == AnimationType.EANT_Skill02) &&
+                    (mAnimController.NowAnimType == AnimationType.EANT_Attack01))
+            {
+                if (ThisMovable.Moving)
+                    ThisAnim.ChangeAnim(AnimationType.EANT_Running);
+                else
+                    ThisAnim.ChangeAnim(AnimationType.EANT_Idel);
+            }
+            else
+            {
+                Debug.Log(string.Format("未知的动画播放完成事件{0}", animType.ToString()));
+                return false;
+            }
+            return true;
+        }
         bool PlayerAnimSuperT.Update()
         {
             mAnimController.Update();
             return true;
         }
         PlayerAnimSuperT ThisAnim { get { return this; } }
+        
 #endregion
 
 #region 碰撞相关
@@ -248,24 +302,10 @@ namespace Assets.Script.Controller
         //public Collider 碰撞层_非地面 = null;
         public LayerMask 地面层掩码 = 0;
         H2DColliderController mColliderController;
-        bool PlayerColliderSuperT.RayInGround
-        {
-            set
-            {
-                mRayInGround = value;
-                if (mRayInGround)
-                    mGravityController.VerticalSpeed = 0.0f;
-            }
-            get { return mRayInGround; }
-        }
         Collider PlayerColliderSuperT.GroundCollider
         {
             get { return 碰撞层_地面; }
         }
-        //Collider PlayerColliderSuperT.NoGroundCollider
-        //{
-        //    get { return 碰撞层_非地面; }
-        //}
         LayerMask PlayerColliderSuperT.GroundLayerMask
         {
             get { return 地面层掩码; }
@@ -280,7 +320,6 @@ namespace Assets.Script.Controller
             return true;
         }
         public PlayerColliderSuperT ThisCollider { get { return this; } }
-        bool mRayInGround = false;
 #endregion
 
 #region 碰撞选择器实现
@@ -318,7 +357,85 @@ namespace Assets.Script.Controller
         bool mInGrounded = false;
 #endregion
 
-#region 摄像机需求的参数
+#region 玩家操作相关
+        public int 普攻最大连击数 = 3;
+        public float 普攻连击超时时间 = 1.0f;
+        public float 技能1持续时间 = 0.3f;
+        bool mJumpBtnTouched = false;
+        H2DOperationsController mOperationsController;
+        public AnimationType AnimType
+        {
+            get { return mAnimController.NowAnimType; }
+        }
+        int PlayerOperationsSuperT.AttackComboMaxNum
+        {
+            get { return 普攻最大连击数; }
+        }
+        float PlayerOperationsSuperT.AttackComboTimeout
+        {
+            get { return 普攻连击超时时间; }
+        }
+        float PlayerOperationsSuperT.Skill1MaxTime
+        {
+            get { return 技能1持续时间; }
+        }
+        bool PlayerOperationsSuperT.Init()
+        {
+            mOperationsController = new H2DOperationsController(ThisOperate);
+            return true;
+        }
+        bool PlayerOperationsSuperT.Update()
+        {
+            mOperationsController.Update();
+            return true;
+        }
+        bool PlayerOperationsSuperT.DoTouchBegin(OperationType ot)
+        {
+            switch (ot)
+            {
+                case OperationType.jump:
+                    mJumpBtnTouched = true;
+                    break;
+                case OperationType.attack:
+                    mMovableController.MoveSpeed = 0.0f;
+                    mOperationsController.DoAttack();
+                    //mMeshPhysicsCollider.ActivePhysics(true);
+                    break;
+                case OperationType.skill1:
+                    mMovableController.MoveSpeed = 0.0f;
+                    mOperationsController.DoSkill(1);
+                    //mMeshPhysicsCollider.ActivePhysics(true);
+                    break;
+                case OperationType.skill2:
+                    mOperationsController.DoSkill(2);
+                    break;
+            }
+            return true;
+        }
+        bool PlayerOperationsSuperT.DoTouchEnded(OperationType ot)
+        {
+            switch (ot)
+            {
+                case OperationType.jump:
+                    mJumpBtnTouched = false;
+                    break;
+                case OperationType.attack:
+                    break;
+                case OperationType.skill1:
+                    break;
+                case OperationType.skill2:
+                    break;
+            }
+            return true;
+        }
+        bool PlayerOperationsSuperT.ChangeAnimType(AnimationType animType)
+        {
+            return ThisAnim.ChangeAnim(animType);
+        }
+        public PlayerOperationsSuperT ThisOperate { get { return this; } }
+#endregion
+
+        #region 摄像机需求的参数
         float IH2DCCamera.LockCameraTimer
         {
             get { return mLockCameraTimer; }
@@ -340,6 +457,7 @@ namespace Assets.Script.Controller
             ThisMovable.Init();
             ThisAnim.Init();
             ThisCollider.Init();
+            ThisOperate.Init();
         }
         // Update is called once per frame
         void Update()
@@ -347,6 +465,7 @@ namespace Assets.Script.Controller
             //ThisGrivaty.Update();
             ThisMovable.Update();
             ThisAnim.Update();
+            ThisOperate.Update();
         }
         void OnControllerColliderHit(ControllerColliderHit hit)
         {

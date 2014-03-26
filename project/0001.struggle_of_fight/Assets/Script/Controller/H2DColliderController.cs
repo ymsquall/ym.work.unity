@@ -74,31 +74,19 @@ namespace Assets.Script.Controller
             }
             Vector3 groundHeightPos = Vector3.zero;
             if (minHit && maxHit)
-            {
-                groundHeightPos = minRayHit.point;
-                if (minRayHit.point.y > mH2DCCollider.GroundCollider.bounds.min.y)
-                    groundHeightPos = maxRayHit.point;
-                //groundHeightPos = minRayHit.point.y > maxRayHit.point.y ? minRayHit.point : maxRayHit.point;
-            }
+                groundHeightPos = minRayHit.point.y > maxRayHit.point.y ? minRayHit.point : maxRayHit.point;
             else if (minHit)
                 groundHeightPos = minRayHit.point;
             else if (maxHit)
                 groundHeightPos = maxRayHit.point;
             if (minHit || maxHit)
             {
-                //Debug.Log(string.Format("min={0}\tmovement={1}", mH2DCCollider.GroundCollider.bounds.min.ToString(), mFixedMovement.ToString()));
                 if (pos.y <= groundHeightPos.y)
                 {
-                    //Debug.Log(string.Format("sideY={0}\tgroundHeightPos={1}\tFixedPosition={2}",
-                    //    sideY, groundHeightPos.ToString(), mFixedPosition.ToString()));
                     pos.y = groundHeightPos.y;
-                    //if (droping && pos.y < groundHeightPos.y)
-                    //    mH2DCCollider.RayInGround = true;
                     inGround = true;
                 }
             }
-            else
-                mH2DCCollider.RayInGround = false;
             //-- debug
             Debug.DrawLine(gcMinBottomRay, gcMinBottomRay + rayDir * 100.0f, Color.green);
             Debug.DrawLine(gcMaxBottomRay, gcMaxBottomRay + rayDir * 100.0f, Color.green);

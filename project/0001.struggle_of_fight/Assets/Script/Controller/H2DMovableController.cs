@@ -29,6 +29,15 @@ namespace Assets.Script.Controller
         {
             get { return mLastMovement; }
         }
+        public float MoveSpeed
+        {
+            set { mMoveSpeed = value; }
+            get { return mMoveSpeed; }
+        }
+        public bool Init()
+        {
+            return true;
+        }
         public bool UpdateSmoothedMovementDirection(bool grounded, Transform trans)
         {
             var cameraTransform = Camera.main.transform;
@@ -41,7 +50,7 @@ namespace Assets.Script.Controller
             // Always orthogonal to the forward vector
             var right = cameraTransform.TransformDirection(Vector3.right);
             var h = Input.GetAxisRaw("Horizontal");
-            mIsMoving = Mathf.Abs(mPlayerInstance.InputSpeedX) > 0.1;
+            mIsMoving = Mathf.Abs(mPlayerInstance.InputSpeedX) > 0.1f;
             if (h > 0.001f)
             {
                 mFaceDirection = cameraTransform.TransformDirection(Vector3.right);
@@ -98,14 +107,16 @@ namespace Assets.Script.Controller
         {
             mLastMovement = mMoveDirection * (mMoveSpeed + addSpeed) + new Vector3(0, verticalSpeed, 0) + mInAirVelocity;
             mLastMovement *= Time.deltaTime;
-            //mPlayerInstance.Controller.Move(mLastMovement);
+            // 这里先计算好位置，等经过GroundMoveTest之后才知道会不会被地面挡住
             outPos += mLastMovement;
             return true;
         }
         public bool MovementAfter(bool grounded, Vector3 fixedPosition, Transform trans)
         {
-            Vector3 movement = fixedPosition - trans.position;
-            mPlayerInstance.Controller.Move(movement);
+            // 经过GroundMoveTest之后如果被挡住会将Movement中计算的位置修正为地面的位置
+            mLastMovement = fixedPosition - trans.position;
+            // 计算差值后移动过去
+            mPlayerInstance.Controller.Move(mLastMovement);
             //trans.position = fixedPosition;
             if (grounded)
             {

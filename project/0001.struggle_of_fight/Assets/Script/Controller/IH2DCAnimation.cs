@@ -28,6 +28,7 @@ namespace Assets.Script.Controller
         Animation AnimationInst { get; }
         bool Init();
         bool ChangeAnim(AnimationType animType);
+        bool OnAnimOvered(AnimationType animType);
         bool Update();
     }
 }
