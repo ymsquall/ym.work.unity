@@ -46,6 +46,10 @@ namespace Assets.Script.Controller
         public float 位移平滑速度 = 10.0f;
         public float 空中加速度 = 3.0f;
         public float 跳跃高度 = 1.0f;
+        // 由于跳跃判断是在Update中，有时感觉已经落地，经由反射神经下意识按跳可能出现帧差，导致这次跳跃按键不起跳，这样感受不好
+        // 所以从玩家抬起跳跃按纽后延迟一段时间保证跳跃标记能够保留到下一帧，这样就不会出现跳跃按钮空按的情况了
+        public float 跳跃操作延时 = 0.2f;
+        float mJumpBtnTouchEndedTimer = 0.0f;
         H2DMovableController mMovableController;
         bool PlayerMovableSuperT.Jumping
         {
@@ -71,7 +75,13 @@ namespace Assets.Script.Controller
         }
         float PlayerMovableSuperT.InputSpeedX
         {
-            get{ return Input.GetAxisRaw("Horizontal"); }
+            get
+            {
+                if (mAnimController.NowAnimType != AnimationType.EANT_Idel &&
+                    mAnimController.NowAnimType != AnimationType.EANT_Running)
+                    return 0.0f;
+                return Input.GetAxisRaw("Horizontal");
+            }
         }
         float PlayerMovableSuperT.SpeedSmoothing
         {
@@ -105,7 +115,8 @@ namespace Assets.Script.Controller
             if (!mGravityController.Update())
                 return false;
             // apply jump
-            if (ThisGrivaty.Grounded && (Input.GetButtonDown("Jump") || mJumpBtnTouched))
+            if ((ThisGrivaty.Grounded && !ThisMovable.Jumping && !ThisMovable.Droping) && 
+                (Input.GetButtonDown("Jump") || mUpdateCanJump))
             {
                 mGravityController.VerticalSpeed += mMovableController.UpdateVerticalMovement(ThisGrivaty.Grounded, ThisGrivaty.Gravity);
                 mInGrounded = false;
@@ -371,6 +382,7 @@ namespace Assets.Script.Controller
         public float 技能1持续时间 = 0.5f;
         public float 技能1附加位移速度 = 8.0f;
         bool mJumpBtnTouched = false;
+        bool mUpdateCanJump = false;
         H2DOperationsController mOperationsController;
         public AnimationType AnimType
         {
@@ -395,6 +407,12 @@ namespace Assets.Script.Controller
         }
         bool PlayerOperationsSuperT.Update()
         {
+            if (!mJumpBtnTouched)
+            {
+                mJumpBtnTouchEndedTimer -= Time.deltaTime;
+                if (mJumpBtnTouchEndedTimer <= 0.0f)
+                    mUpdateCanJump = false;
+            }
             mOperationsController.Update();
             return true;
         }
@@ -404,6 +422,14 @@ namespace Assets.Script.Controller
             {
                 case OperationType.jump:
                     mJumpBtnTouched = true;
+                    mUpdateCanJump = true;
+                    Debug.Log("jump button touch begin");
+                    if (AnimationType.EANT_Idel == mAnimController.NowAnimType ||
+                        AnimationType.EANT_Running == mAnimController.NowAnimType ||
+                        AnimationType.EANT_JumpDown == mAnimController.NowAnimType)
+                    {
+                        mJumpBtnTouchEndedTimer = 跳跃操作延时;
+                    }
                     break;
                 case OperationType.attack:
                     mMovableController.MoveSpeed = 0.0f;
@@ -427,6 +453,7 @@ namespace Assets.Script.Controller
             {
                 case OperationType.jump:
                     mJumpBtnTouched = false;
+                    Debug.Log("jump button touch ended");
                     break;
                 case OperationType.attack:
                     break;

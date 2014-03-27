@@ -19,10 +19,23 @@ namespace Assets.Script.Controller
         }
         public AnimationType NowAnimType
         {
-            set 
+            set
             {
-                mNowAnimType = value;
-                Update();
+                if (value == AnimationType.EANT_Attack01 ||
+                    value == AnimationType.EANT_Skill02)
+                {
+                    string name1 = mAnimClipList[(int)AnimationType.EANT_Attack01].name;
+                    string name2 = mAnimClipList[(int)AnimationType.EANT_Skill02].name;
+                    if (mAnimation.IsPlaying(name1))
+                        mAnimation.Stop(name1);
+                    if (mAnimation.IsPlaying(name2))
+                        mAnimation.Stop(name2);
+                }
+                if (mNowAnimType != value)
+                {
+                    mNowAnimType = value;
+                    Update();
+                }
             }
             get { return mNowAnimType; }
         }

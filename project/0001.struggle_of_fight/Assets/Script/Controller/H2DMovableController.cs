@@ -54,8 +54,8 @@ namespace Assets.Script.Controller
             // Right vector relative to the camera
             // Always orthogonal to the forward vector
             var right = cameraTransform.TransformDirection(Vector3.right);
-            var h = Input.GetAxisRaw("Horizontal");
-            mIsMoving = Mathf.Abs(mPlayerInstance.InputSpeedX) > 0.1f;
+            var h = mPlayerInstance.InputSpeedX;
+            mIsMoving = Mathf.Abs(h) > 0.1f;
             if (h > 0.001f)
             {
                 mFaceDirection = cameraTransform.TransformDirection(Vector3.right);
