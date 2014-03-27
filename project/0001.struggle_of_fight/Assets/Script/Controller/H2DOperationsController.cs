@@ -19,6 +19,14 @@ namespace Assets.Script.Controller
             mAttackComboTimer -= Time.deltaTime;
             if (mAttackComboTimer <= 0.0f)
                 mAttackComboNum = 0;
+            if (AnimationType.EANT_Skill01 == mH2DCOperations.AnimType)
+            {
+                mSkill1Timer -= Time.deltaTime;
+                if (mSkill1Timer <= 0.0f)
+                {
+                    mH2DCOperations.OnSkillOvered(1);
+                }
+            }
             return true;
         }
         public void DoAttack()

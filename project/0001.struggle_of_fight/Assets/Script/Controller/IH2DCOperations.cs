@@ -21,6 +21,7 @@ namespace Assets.Script.Controller
         bool DoTouchBegin(OperationType ot);
         bool DoTouchEnded(OperationType ot);
         bool ChangeAnimType(AnimationType animType);
+        bool OnSkillOvered(int id);
     }
 }
 

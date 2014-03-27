@@ -34,8 +34,13 @@ namespace Assets.Script.Controller
             set { mMoveSpeed = value; }
             get { return mMoveSpeed; }
         }
+        public float Deceleration
+        {
+            set { mDeceleration = value; }
+        }
         public bool Init()
         {
+            mMoveDirection = mFaceDirection;
             return true;
         }
         public bool UpdateSmoothedMovementDirection(bool grounded, Transform trans)
@@ -103,10 +108,11 @@ namespace Assets.Script.Controller
                 return CalculateJumpVerticalSpeed(mPlayerInstance.JumpHeight, grivaty);
             return 0.0f;
         }
-        public bool Movement(float addSpeed, float verticalSpeed, ref Vector3 outPos)
+        public bool Movement(float addHorSpeed, float verticalSpeed, ref Vector3 outPos)
         {
-            mLastMovement = mMoveDirection * (mMoveSpeed + addSpeed) + new Vector3(0, verticalSpeed, 0) + mInAirVelocity;
+            mLastMovement = mMoveDirection * (mMoveSpeed + addHorSpeed + mDeceleration) + new Vector3(0, verticalSpeed, 0) + mInAirVelocity;
             mLastMovement *= Time.deltaTime;
+            mDeceleration -= mDeceleration * Time.deltaTime;
             // 这里先计算好位置，等经过GroundMoveTest之后才知道会不会被地面挡住
             outPos += mLastMovement;
             return true;
@@ -141,6 +147,7 @@ namespace Assets.Script.Controller
         Vector3 mFaceDirection = Vector3.zero;
         Vector3 mMoveDirection = Vector3.zero;
         Vector3 mInAirVelocity = Vector3.zero;
+        float mDeceleration = 0.0f;
         float mMoveSpeed = 0.0f;
         bool mIsMoving = false;
         Vector3 mLastMovement = Vector3.zero;

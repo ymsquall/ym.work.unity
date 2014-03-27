@@ -27,7 +27,7 @@ namespace Assets.Script.Controller
         }
         bool PlayerGravitySuperT.Grounded
         {
-            get { return mInGrounded; }
+            get { return mInGrounded || (mAnimController.NowAnimType == AnimationType.EANT_Skill01); }
         }
         bool PlayerGravitySuperT.Init()
         {
@@ -115,12 +115,15 @@ namespace Assets.Script.Controller
                 ThisAnim.ChangeAnim(AnimationType.EANT_Droping);
             if (mAnimController.NowAnimType == AnimationType.EANT_Droping && ThisGrivaty.Grounded)
                 ThisAnim.ChangeAnim(AnimationType.EANT_JumpDown);
+            float addedSpeed = 0;
+            if (mAnimController.NowAnimType == AnimationType.EANT_Skill01)
+                addedSpeed = 技能1附加位移速度;
             // 移动流程：先Movement计算好目标位置但不移动过去，用GroundMoveTest（双脚射线查询）测试目标位置会不会被地面挡住
             // 如果测试结果会被目标挡住则修正位置为地面位置并设置Grounded标志位true
             // 最后通过MovementAfter移动到目标位置（修复后的）
             // 因为GroundMoveTest每帧都会调用，所以不存在Grounded设为ture后走到空中无法感知的问题
             Vector3 outPos = transform.position;
-            if (!mMovableController.Movement(0.0f, mGravityController.VerticalSpeed, ref outPos))
+            if (!mMovableController.Movement(addedSpeed, mGravityController.VerticalSpeed, ref outPos))
                 return false;
             mInGrounded = mColliderController.GroundMoveTest(ThisMovable.Droping, ref outPos);
             if (!mMovableController.MovementAfter(ThisGrivaty.Grounded, outPos, transform))
@@ -146,6 +149,8 @@ namespace Assets.Script.Controller
                 if (ThisMovable.Jumping)
                     mLockCameraTimer = 0.0f;
             }
+            if (mInGrounded)
+                mMovableController.Deceleration = 0;
             return true;
         }
         PlayerMovableSuperT ThisMovable { get { return this; } }
@@ -253,7 +258,10 @@ namespace Assets.Script.Controller
         }
         bool PlayerAnimSuperT.OnAnimOvered(AnimationType animType)
         {
-            if (mAnimController.NowAnimType == animType)
+            if (AnimationType.EANT_JumpDown == animType)
+                return true;
+            AnimationType nowAnimType = mAnimController.NowAnimType;
+            if (nowAnimType == animType)
             {
                 switch (animType)
                 {
@@ -273,8 +281,8 @@ namespace Assets.Script.Controller
                         break;
                 }
             }
-            else if ((mAnimController.NowAnimType == AnimationType.EANT_Skill02) &&
-                    (mAnimController.NowAnimType == AnimationType.EANT_Attack01))
+            else if ((nowAnimType == AnimationType.EANT_Skill02) &&
+                    (animType == AnimationType.EANT_Attack01))
             {
                 if (ThisMovable.Moving)
                     ThisAnim.ChangeAnim(AnimationType.EANT_Running);
@@ -360,7 +368,8 @@ namespace Assets.Script.Controller
 #region 玩家操作相关
         public int 普攻最大连击数 = 3;
         public float 普攻连击超时时间 = 1.0f;
-        public float 技能1持续时间 = 0.3f;
+        public float 技能1持续时间 = 0.5f;
+        public float 技能1附加位移速度 = 8.0f;
         bool mJumpBtnTouched = false;
         H2DOperationsController mOperationsController;
         public AnimationType AnimType
@@ -431,6 +440,16 @@ namespace Assets.Script.Controller
         bool PlayerOperationsSuperT.ChangeAnimType(AnimationType animType)
         {
             return ThisAnim.ChangeAnim(animType);
+        }
+        bool PlayerOperationsSuperT.OnSkillOvered(int id)
+        {
+            if (ThisMovable.Moving)
+                ThisAnim.ChangeAnim(AnimationType.EANT_Running);
+            else
+                ThisAnim.ChangeAnim(AnimationType.EANT_Idel);
+            if(id == 1)
+                mMovableController.Deceleration = 技能1附加位移速度;
+            return true;
         }
         public PlayerOperationsSuperT ThisOperate { get { return this; } }
 #endregion
