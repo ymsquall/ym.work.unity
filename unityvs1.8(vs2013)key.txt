@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<license id="fc91d764-ec60-577b-b1f7-d44260eaedf4" expiration="2020-04-30T12:10:33.1215442" type="Standard" email="leesuchieng@cracked.com" update-expiration="4/30/2020">
+	<name>leesuchieng</name>
+	<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+		<SignedInfo>
+			<CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+			<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+			<Reference URI="">
+				<Transforms>
+					<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+				</Transforms>
+				<DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+				<DigestValue>TP7XnKh9KlExbBTK2cvbNpKIlxo=</DigestValue>
+			</Reference>
+		</SignedInfo>
+		<SignatureValue>MVq1XtU6KmDhwDJxB1P6aGbAvOBpLNLNl4M+vYoLdRBUHIxDhws3RwJLc0mGbQrduvSmtFMt4OmqJ4wRakuoDcJRSkMtf4qiN2p1fYZgryaxVPG2ba2pC0NdVD0OO7hHLZPHfIKSoxCz81/f6I6xHH38gIYSOI9wbTafkzsqYoM=</SignatureValue>
+	</Signature>
+</license>

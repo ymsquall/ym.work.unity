@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Assets.Script.Controller
 {
-    public class H2DCreatureCollideSelecter : MonoBehaviour
+    public class H2DCharacterCollideSelecter : MonoBehaviour
     {
         public Object 宿主程序;
         public H2DCCollideSelecterType 碰撞标记;
@@ -20,7 +20,7 @@ namespace Assets.Script.Controller
                 Debug.LogError("H2DCreatureCollideSelecter的宿主程序设置非法！");
                 return;
             }
-            mSelecter = componet as IH2DCreatureCollideSelecter;
+            mSelecter = componet as IH2DCharacterCollideSelecter;
             if (null == mSelecter)
             {
                 Debug.LogError("H2DCreatureCollideSelecter的宿主程序必须继承自IH2DCreatureCollideSelecter！");
@@ -39,6 +39,6 @@ namespace Assets.Script.Controller
         {
             mSelecter.OnH2DCCollisionStay(collisionInfo, 碰撞标记);
         }
-        IH2DCreatureCollideSelecter mSelecter = null;
+        IH2DCharacterCollideSelecter mSelecter = null;
     }
 }

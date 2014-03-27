@@ -37,9 +37,9 @@ namespace Assets.Script.Scenes.Map2D
 
         void Start()
         {
-            foreach(Map2DGrid grid in mGrids)
-            {
-            }
+            //foreach(Map2DGrid grid in mGrids)
+            //{
+            //}
         }
 
         Map2DGrid[,] mGrids = null;

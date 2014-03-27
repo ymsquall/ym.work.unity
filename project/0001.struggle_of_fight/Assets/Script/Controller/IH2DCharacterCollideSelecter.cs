@@ -9,7 +9,7 @@ namespace Assets.Script.Controller
         地面,
         非地面,
     }
-    public interface IH2DCreatureCollideSelecter
+    public interface IH2DCharacterCollideSelecter
     {
         bool OnH2DCCollisionEnter(Collision collisionInfo, H2DCCollideSelecterType type);
         bool OnH2DCCollisionExit(Collision collisionInfo, H2DCCollideSelecterType type);

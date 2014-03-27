@@ -106,7 +106,7 @@ namespace Assets.Script.Controller
             mSnapSmoothLag = 0.001f;
             mHeightSmoothLag = 0.001f;
 
-            mSnap = true;
+            //mSnap = true;
             Apply(transform, Vector3.zero);
 
             mHeightSmoothLag = oldHeightSmooth;
@@ -160,7 +160,7 @@ namespace Assets.Script.Controller
         private Vector3 mCenterOffset = Vector3.zero;
         private float mHeightVelocity = 0.0f;
         private float mAngleVelocity = 0.0f;
-        private bool mSnap = false;
+        //private bool mSnap = false;
         private IH2DCCamera mController = null;
         private float mTargetHeight = 100000.0f;
     }
