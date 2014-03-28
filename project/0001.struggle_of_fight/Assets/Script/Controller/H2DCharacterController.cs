@@ -45,7 +45,6 @@ namespace Assets.Script.Controller
         public float 跳跃高度 = 1.0f;
         public float 技能1附加位移速度 = 8.0f;
         public bool 使用模型镜像 = true;
-        protected bool mUpdateCanJump = false;
         protected H2DMovableController mMovableController;
         bool PlayerMovableSuperT.Jumping
         {
@@ -73,10 +72,7 @@ namespace Assets.Script.Controller
         {
             get
             {
-                if (mAnimController.NowAnimType != AnimationType.EANT_Idel &&
-                    mAnimController.NowAnimType != AnimationType.EANT_Running)
-                    return 0.0f;
-                return Input.GetAxisRaw("Horizontal");
+                return 0.0f;
             }
         }
         float PlayerMovableSuperT.SpeedSmoothing
@@ -115,8 +111,7 @@ namespace Assets.Script.Controller
             if (!mGravityController.Update())
                 return false;
             // apply jump
-            if ((ThisGrivaty.Grounded && !ThisMovable.Jumping && !ThisMovable.Droping) && 
-                (Input.GetButtonDown("Jump") || mUpdateCanJump))
+            if (UpdateCanJump && (ThisGrivaty.Grounded && !ThisMovable.Jumping && !ThisMovable.Droping))
             {
                 mGravityController.VerticalSpeed += mMovableController.UpdateVerticalMovement(ThisGrivaty.Grounded, ThisGrivaty.Gravity);
                 mInGrounded = false;
@@ -367,7 +362,10 @@ namespace Assets.Script.Controller
         }
         protected bool mInGrounded = false;
 #endregion
-
+        protected virtual bool UpdateCanJump
+        {
+            get{ return false; }
+        }
         // Use this for initialization
         void Awake()
         {

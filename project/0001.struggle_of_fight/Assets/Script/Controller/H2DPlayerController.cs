@@ -18,6 +18,16 @@ namespace Assets.Script.Controller
                                        PlayerOperationsSuperT,
                                        IH2DCCamera
     {
+        float PlayerMovableSuperT.InputSpeedX
+        {
+            get
+            {
+                if (mAnimController.NowAnimType != AnimationType.EANT_Idel &&
+                    mAnimController.NowAnimType != AnimationType.EANT_Running)
+                    return 0.0f;
+                return Input.GetAxisRaw("Horizontal");
+            }
+        }
 #region 玩家操作相关
         public int 普攻最大连击数 = 3;
         public float 普攻连击超时时间 = 1.0f;
@@ -139,7 +149,11 @@ namespace Assets.Script.Controller
             get { return mLockCameraTimer; }
         }
 #endregion
-
+        bool mUpdateCanJump = false;
+        protected override bool UpdateCanJump
+        {
+            get { return Input.GetButtonDown("Jump") || mUpdateCanJump; }
+        }
         // Use this for initialization
         protected override bool AwakeImpl()
         {
