@@ -39,6 +39,17 @@ namespace Assets.Script.Controller
         {
             mAnimController.OnAnimOvered(animType);
         }
+        void OnControllerColliderHit(ControllerColliderHit hit)
+        {
+        }
+        void OnTriggerEnter(Collider other)
+        {
+
+        }
+        void OnCollisionEnter(Collision collisionInfo)
+        {
+
+        }
         //Animation mAnimation;
         CharaAnimSuperT mAnimController;
     }
