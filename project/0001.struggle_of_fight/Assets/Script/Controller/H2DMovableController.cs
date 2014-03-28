@@ -56,11 +56,11 @@ namespace Assets.Script.Controller
             var right = cameraTransform.TransformDirection(Vector3.right);
             var h = mPlayerInstance.InputSpeedX;
             mIsMoving = Mathf.Abs(h) > 0.1f;
-            if (h > 0.001f)
+            if (h > 0.1f)
             {
                 mFaceDirection = cameraTransform.TransformDirection(Vector3.right);
             }
-            else if (h < -0.001f)
+            else if (h < -0.1f)
             {
                 mFaceDirection = cameraTransform.TransformDirection(Vector3.left);
             }
@@ -124,10 +124,11 @@ namespace Assets.Script.Controller
             // 计算差值后移动过去
             mPlayerInstance.Controller.Move(mLastMovement);
             //trans.position = fixedPosition;
+            bool needRota = false;
             if (grounded)
             {
                 //mClobberSpeed = Vector3.zero;
-                trans.rotation = Quaternion.LookRotation(mFaceDirection);
+                needRota = true;
                 // We are in jump mode but just became grounded
                 mInAirVelocity = Vector3.zero;
             }
@@ -136,10 +137,19 @@ namespace Assets.Script.Controller
                 var xMove = mLastMovement;
                 xMove.y = 0;
                 xMove.z = 0;
-                if (xMove.sqrMagnitude > 0.001f)
+                needRota = xMove.sqrMagnitude > 0.001f;
+            }
+            if (needRota)
+            {
+                if (mPlayerInstance.UsedModelFlipX)
                 {
-                    trans.rotation = Quaternion.LookRotation(mFaceDirection);
+                    trans.rotation = Quaternion.LookRotation(Vector3.right);
+                    Vector3 scale = trans.localScale;
+                    scale.z = mFaceDirection.x * System.Math.Abs(scale.z);
+                    trans.localScale = scale;
                 }
+                else
+                    trans.rotation = Quaternion.LookRotation(mFaceDirection);
             }
             return true;
         }

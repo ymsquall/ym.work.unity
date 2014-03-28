@@ -44,6 +44,7 @@ namespace Assets.Script.Controller
         public float 空中加速度 = 3.0f;
         public float 跳跃高度 = 1.0f;
         public float 技能1附加位移速度 = 8.0f;
+        public bool 使用模型镜像 = true;
         protected bool mUpdateCanJump = false;
         protected H2DMovableController mMovableController;
         bool PlayerMovableSuperT.Jumping
@@ -89,6 +90,10 @@ namespace Assets.Script.Controller
         float PlayerMovableSuperT.JumpHeight
         {
             get { return 跳跃高度; }
+        }
+        bool PlayerMovableSuperT.UsedModelFlipX
+        {
+            get { return 使用模型镜像; }
         }
         CharacterController PlayerMovableSuperT.Controller
         {
