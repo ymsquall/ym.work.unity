@@ -8,7 +8,8 @@ namespace UniLua
 {
 	internal class LuaFile
 	{
-		private static readonly string LUA_ROOT = System.IO.Path.Combine(Application.streamingAssetsPath, "LuaRoot");
+        //private static readonly string LUA_ROOT = System.IO.Path.Combine(Application.streamingAssetsPath, "LuaRoot");
+        private static readonly string LUA_ROOT = Application.dataPath;
 
 		public static FileLoadInfo OpenFile( string filename )
 		{
