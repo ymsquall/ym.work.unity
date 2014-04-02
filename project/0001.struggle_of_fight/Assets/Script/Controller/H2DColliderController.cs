@@ -30,18 +30,20 @@ namespace Assets.Script.Controller
             RaycastHit minRayHit = new RaycastHit(), maxRayHit = new RaycastHit();
             if (gcMinCastList.Length > 0)
             {
-                minHit = true;
                 minRayHit = gcMinCastList[0];
                 float dist1 = Vector3.Distance(mH2DCCollider.GroundCollider.bounds.min, minRayHit.point);
                 for (int i = 0; i < gcMinCastList.Length; ++i)
                 {
                     RaycastHit hit = gcMinCastList[i];
+                    if (hit.collider == mH2DCCollider.GroundCollider)
+                        continue;
                     if (hit.point.y > (mH2DCCollider.GroundCollider.bounds.min.y + 0.1f))
                     {
                         if (i == 0)
-                            dist1 = 1000.0f;
+                            dist1 = 999999999.0f;
                         continue;
                     }
+                    minHit = true;
                     float dist2 = Vector3.Distance(mH2DCCollider.GroundCollider.bounds.min, hit.point);
                     if (dist1 > dist2)
                     {
@@ -52,18 +54,20 @@ namespace Assets.Script.Controller
             }
             if (gcMaxCastList.Length > 0)
             {
-                maxHit = true;
                 maxRayHit = gcMaxCastList[0];
                 float dist1 = Vector3.Distance(mH2DCCollider.GroundCollider.bounds.max, maxRayHit.point);
                 for (int i = 0; i < gcMaxCastList.Length; ++ i)
                 {
                     RaycastHit hit = gcMaxCastList[i];
+                    if (hit.collider == mH2DCCollider.GroundCollider)
+                        continue;
                     if (hit.point.y > (mH2DCCollider.GroundCollider.bounds.min.y + 0.1f))
                     {
                         if (i == 0)
-                            dist1 = 1000.0f;
+                            dist1 = 999999999.0f;
                         continue;
                     }
+                    maxHit = true;
                     float dist2 = Vector3.Distance(mH2DCCollider.GroundCollider.bounds.max, hit.point);
                     if (dist1 > dist2)
                     {

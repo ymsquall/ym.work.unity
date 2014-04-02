@@ -18,12 +18,10 @@ namespace Assets.Script.Scenes
         // Use this for initialization
         void Awake()
         {
+            string[] fileList = { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
             string[] startedList = { "01", "02", "03", "04" };
             string[] endedList = { "09", "10", "11", "12" };
             string[] scrollList = { "05", "06", "07", "08" };
-            string sceneName = Application.loadedLevelName;
-            string sceneResPath = string.Format("Assets/Scenes/{0}/resources/MapUnits", sceneName);
-            string[] fileList = FileUtils.EnumAllFilesByPath(sceneResPath, true);
             List<GameObject> startMapList = new List<GameObject>(0);
             List<GameObject> endedMapList = new List<GameObject>(0);
             List<GameObject> scrollMapList = new List<GameObject>(0);
@@ -31,8 +29,7 @@ namespace Assets.Script.Scenes
             bool first = false;
             foreach (string f in fileList)
             {
-                string name = f.Substring(f.LastIndexOf("\\")+1);
-                name = name.Substring(0, name.LastIndexOf("."));
+                string name = f;
                 GameObject obj = Resources.Load<GameObject>("MapUnits/" + name);
                 foreach(string s in startedList)
                 {
@@ -95,7 +92,7 @@ namespace Assets.Script.Scenes
                         {
                             if (g.Block.name == name)
                             {
-                                LoadMapAreaByGrid(g, obj, sprite.bounds, false);
+                                LoadMapAreaByGrid(g, obj, sprite.bounds, true, false, false);
                                 mLastInMapUnit = obj;
                                 return;
                             }
@@ -104,7 +101,7 @@ namespace Assets.Script.Scenes
                         {
                             if (g.Block.name == name)
                             {
-                                LoadMapAreaByGrid(g, obj, sprite.bounds, false);
+                                LoadMapAreaByGrid(g, obj, sprite.bounds, false, false, true);
                                 mLastInMapUnit = obj;
                                 return;
                             }
@@ -114,7 +111,7 @@ namespace Assets.Script.Scenes
                             string blockName = string.Format("{0}({1})", g.Block.name, mGroupColScrolledCount);
                             if (blockName == name)
                             {
-                                LoadMapAreaByGrid(g, obj, sprite.bounds, true);
+                                LoadMapAreaByGrid(g, obj, sprite.bounds, false, true, false);
                                 mLastInMapUnit = obj;
                                 return;
                             }
@@ -124,25 +121,25 @@ namespace Assets.Script.Scenes
                 }
             }
         }
-        bool LoadMapAreaByGrid(Map2D.Map2DGrid grid, GameObject inSceneObj, Bounds bounds, bool inLoop)
+        bool LoadMapAreaByGrid(Map2D.Map2DGrid grid, GameObject inSceneObj, Bounds bounds, bool inStart, bool inLoop, bool inEnded)
         {
             bool inGroupLastMap = GridInGroupLastMap(grid);
             if (inGroupLastMap)
             {
-                if (!inLoop)
+                if (inStart)
                     grid.LinkAnotherGrids(mSceneScrollGroupMapList, 上到下地图卷动, 左到右地图卷动);
-                else
+                else if (inLoop)
                 {
                     if (横向卷动地图)
                     {
-                        if (mGroupRowScrolledCount < 横向卷动次数)
+                        if (mGroupRowScrolledCount < (横向卷动次数-1))
                             mGroupRowScrolledCount++;
                         else
                             grid.LinkAnotherGrids(mSceneEndedMapList, 上到下地图卷动, 左到右地图卷动);
                     }
                     if (纵向卷动地图)
                     {
-                        if (mGroupColScrolledCount < 纵向卷动次数)
+                        if (mGroupColScrolledCount < (纵向卷动次数 - 1))
                             mGroupColScrolledCount++;
                         else
                             grid.LinkAnotherGrids(mSceneEndedMapList, 上到下地图卷动, 左到右地图卷动);
