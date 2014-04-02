@@ -6,6 +6,7 @@ namespace Assets.Script.Controller
     public class H2DCameraController : MonoBehaviour
     {
         public Object 宿主程序;
+        public Camera mCamera;
         public Transform mCameraTransform;
         // The distance in the x-z plane to the target
         public float mDistance = 7.0f;
@@ -18,12 +19,16 @@ namespace Assets.Script.Controller
         public float mSnapMaxSpeed = 720.0f;
         public float mClampHeadPositionScreenSpace = 0.75f;
         public float mLockCameraTimeout = 0.2f;
+        public Collider 摄像机锁定左边界;
+        public Collider 摄像机锁定右边界;
+        public Collider 摄像机锁定上边界;
+        public Collider 摄像机锁定下边界;
         public static float s_DefaultMainCameraViewPointSize = 3.71f;
         public static Vector2 s_DefaultScreenSize = new Vector3(1280, 768);
         void Awake()
         {
-            if (!mCameraTransform && Camera.main)
-                mCameraTransform = Camera.main.transform;
+            if (!mCameraTransform && mCamera)
+                mCameraTransform = mCamera.transform;
             if (!mCameraTransform)
             {
                 Debug.Log("Please assign a camera to the H2DCamera script.");
@@ -90,6 +95,25 @@ namespace Assets.Script.Controller
             cameraPosition += currentRotation * Vector3.back * mDistance;
             // Set the height of the camera
             cameraPosition.y = currentHeight;
+            //mCameraTransform.position = cameraPosition;
+            // bound locket
+            float cameraH2WScale = mCamera.pixelWidth / mCamera.pixelHeight;
+            float leftEdge = 摄像机锁定左边界.bounds.min.x;
+            float rightEdge = 摄像机锁定右边界.bounds.max.x;
+            float topEdge = 摄像机锁定上边界.bounds.max.y;
+            float bottomEdge = 摄像机锁定下边界.bounds.min.y;
+            float camLeftEdge = cameraPosition.x - (mCamera.orthographicSize * cameraH2WScale);
+            float camRightEdge = cameraPosition.x + (mCamera.orthographicSize * cameraH2WScale);
+            float camTopEdge = cameraPosition.y + mCamera.orthographicSize;
+            float camBottomEdge = cameraPosition.y - mCamera.orthographicSize;
+            if (camLeftEdge < leftEdge)
+                cameraPosition.x = leftEdge + (mCamera.orthographicSize * cameraH2WScale);
+            else if (camRightEdge > rightEdge)
+                cameraPosition.x = rightEdge - (mCamera.orthographicSize * cameraH2WScale);
+            if (camBottomEdge < bottomEdge)
+                cameraPosition.y = bottomEdge + mCamera.orthographicSize;
+            else if (camTopEdge > topEdge)
+                cameraPosition.y = topEdge - mCamera.orthographicSize;
             mCameraTransform.position = cameraPosition;
         }
         void LateUpdate()

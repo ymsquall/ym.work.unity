@@ -112,7 +112,6 @@ namespace Assets.Script.Controller
                         if (targetDirection.normalized != mMoveDirection)
                             mInAirVelocity = dir * Time.deltaTime * airSpeed;
                     }
-                    Debug.Log(string.Format("{0}", mMoveSpeed));
                 }
             }
             return true;
