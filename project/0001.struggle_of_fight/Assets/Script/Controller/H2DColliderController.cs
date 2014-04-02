@@ -20,7 +20,7 @@ namespace Assets.Script.Controller
             // ground
             Vector3 gcMinBottomRay = mH2DCCollider.GroundCollider.bounds.min;
             Vector3 gcMaxBottomRay = mH2DCCollider.GroundCollider.bounds.max;
-            gcMaxBottomRay.y = gcMinBottomRay.y = 100.0f;
+            gcMaxBottomRay.y = gcMinBottomRay.y = pos.y + 100.0f;
             gcMinBottomRay.z = gcMaxBottomRay.z = mH2DCCollider.GroundCollider.bounds.center.z;
             Vector3 rayDir = mH2DCCollider.GroundCollider.transform.TransformDirection(Vector3.down);
             RaycastHit[] gcMinCastList = Physics.RaycastAll(new Ray(gcMinBottomRay, rayDir), 200.0f, mH2DCCollider.GroundLayerMask.value);
@@ -88,8 +88,8 @@ namespace Assets.Script.Controller
                 }
             }
             //-- debug
-            Debug.DrawLine(gcMinBottomRay, gcMinBottomRay + rayDir * 100.0f, Color.green);
-            Debug.DrawLine(gcMaxBottomRay, gcMaxBottomRay + rayDir * 100.0f, Color.green);
+            Debug.DrawLine(gcMinBottomRay, gcMinBottomRay + rayDir * 200.0f, Color.green);
+            Debug.DrawLine(gcMaxBottomRay, gcMaxBottomRay + rayDir * 200.0f, Color.green);
             if (minHit)
             {
                 GameObject dbgSphere = GameObject.Find("dbgMinCastSphere");

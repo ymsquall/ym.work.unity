@@ -105,7 +105,8 @@ namespace Assets.Script.Controller
         bool PlayerMovableSuperT.Update()
         {
             bool wasMoving = ThisMovable.Moving;
-            if (!mMovableController.UpdateSmoothedMovementDirection(ThisGrivaty.Grounded, transform))
+            if (!mMovableController.UpdateSmoothedMovementDirection(ThisGrivaty.Grounded,
+                mAnimController.NowAnimType == AnimationType.EANT_Airing, mAnimController.NowAnimType == AnimationType.EANT_Droping, transform))
                 return false;
             // apply gravity
             if (!mGravityController.Update())

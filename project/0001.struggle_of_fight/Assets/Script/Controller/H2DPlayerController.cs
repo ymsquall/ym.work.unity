@@ -23,7 +23,9 @@ namespace Assets.Script.Controller
             get
             {
                 if (mAnimController.NowAnimType != AnimationType.EANT_Idel &&
-                    mAnimController.NowAnimType != AnimationType.EANT_Running)
+                    mAnimController.NowAnimType != AnimationType.EANT_Running &&
+                    mAnimController.NowAnimType != AnimationType.EANT_Airing &&
+                    mAnimController.NowAnimType != AnimationType.EANT_Droping)
                     return 0.0f;
                 return Input.GetAxisRaw("Horizontal");
             }

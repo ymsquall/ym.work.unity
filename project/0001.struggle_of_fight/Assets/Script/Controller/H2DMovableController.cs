@@ -25,6 +25,10 @@ namespace Assets.Script.Controller
             set { mFaceDirection = value; }
             get { return mFaceDirection; }
         }
+        public Vector3 MoveDirection
+        {
+            get { return mMoveDirection; }
+        }
         public Vector3 LastMovement
         {
             get { return mLastMovement; }
@@ -43,7 +47,7 @@ namespace Assets.Script.Controller
             mMoveDirection = mFaceDirection;
             return true;
         }
-        public bool UpdateSmoothedMovementDirection(bool grounded, Transform trans)
+        public bool UpdateSmoothedMovementDirection(bool grounded, bool inJumpAir, bool inDroping, Transform trans)
         {
             var cameraTransform = Camera.main.transform;
             // Forward vector relative to the camera along the x-z plane	
@@ -98,7 +102,18 @@ namespace Assets.Script.Controller
             {
                 // In air controls
                 if (mIsMoving)
-                    mInAirVelocity += targetDirection.normalized * Time.deltaTime * mPlayerInstance.InAirControlAcceleration;
+                {
+                    if (inDroping || inJumpAir)
+                    {
+                        float airSpeed = mPlayerInstance.InAirControlAcceleration;
+                        Vector3 dir = targetDirection.normalized;
+                        if (mMoveSpeed <= 0.1f)
+                            mInAirVelocity = dir * Time.deltaTime * airSpeed;
+                        if (targetDirection.normalized != mMoveDirection)
+                            mInAirVelocity = dir * Time.deltaTime * airSpeed;
+                    }
+                    Debug.Log(string.Format("{0}", mMoveSpeed));
+                }
             }
             return true;
         }
@@ -110,8 +125,9 @@ namespace Assets.Script.Controller
         }
         public bool Movement(float addHorSpeed, float verticalSpeed, ref Vector3 outPos)
         {
-            mLastMovement = mMoveDirection * (mMoveSpeed + addHorSpeed + mDeceleration) + new Vector3(0, verticalSpeed, 0) + mInAirVelocity;
+            mLastMovement = mMoveDirection * (mMoveSpeed + addHorSpeed + mDeceleration) + new Vector3(0, verticalSpeed, 0);
             mLastMovement *= Time.deltaTime;
+            mLastMovement += mInAirVelocity;
             mDeceleration -= mDeceleration * Time.deltaTime;
             // 这里先计算好位置，等经过GroundMoveTest之后才知道会不会被地面挡住
             outPos += mLastMovement;
