@@ -39,21 +39,22 @@ public class LuaScriptController : MonoBehaviour
     IEnumerator Start()
     {
         CallMethod(mStartRef);
-        // -- sample code for loading binary Asset Bundles --------------------  
-        String s = "file:///" + Application.streamingAssetsPath + "/testx.unity3d";
-        WWW www = new WWW(s);
-        yield return www;
-        if (www.assetBundle.mainAsset != null)
-        {
-            TextAsset cc = (TextAsset)www.assetBundle.mainAsset;
-            var status = mLuaState.L_LoadBytes(cc.bytes, "test");
-            if (status != ThreadStatus.LUA_OK)
-                throw new Exception(mLuaState.ToString(-1));
-            status = mLuaState.PCall(0, 0, 0);
-            if (status != ThreadStatus.LUA_OK)
-                throw new Exception(mLuaState.ToString(-1));
-            Debug.Log("---- call done ----");
-        }
+        //// -- sample code for loading binary Asset Bundles --------------------  
+        //String s = "file:///" + Application.streamingAssetsPath + "/testx.unity3d";
+        //WWW www = new WWW(s);
+        //yield return www;
+        //if (www.assetBundle.mainAsset != null)
+        //{
+        //    TextAsset cc = (TextAsset)www.assetBundle.mainAsset;
+        //    var status = mLuaState.L_LoadBytes(cc.bytes, "test");
+        //    if (status != ThreadStatus.LUA_OK)
+        //        throw new Exception(mLuaState.ToString(-1));
+        //    status = mLuaState.PCall(0, 0, 0);
+        //    if (status != ThreadStatus.LUA_OK)
+        //        throw new Exception(mLuaState.ToString(-1));
+        //    Debug.Log("---- call done ----");
+        //}
+        return null;
     }
     void Update()
     {
@@ -101,5 +102,5 @@ public class LuaScriptController : MonoBehaviour
                 lua.PushString("(no error message)");
         }
         return 1;
-    }  
+    }
 }
