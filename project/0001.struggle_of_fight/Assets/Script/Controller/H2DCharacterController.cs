@@ -24,7 +24,7 @@ namespace Assets.Script.Controller
         }
         bool PlayerGravitySuperT.Grounded
         {
-            get { return mInGrounded || (mAnimController.NowAnimType == AnimationType.EANT_Skill01); }
+            get { return mInGrounded; }
         }
         bool PlayerGravitySuperT.Init()
         {
@@ -57,7 +57,7 @@ namespace Assets.Script.Controller
         {
             get
             {
-                return !ThisMovable.Jumping && !ThisGrivaty.Grounded;
+                return !ThisMovable.Jumping && (mGravityController.VerticalSpeed < 0.0f) && !ThisGrivaty.Grounded;
             }
         }
         bool PlayerMovableSuperT.Moving
@@ -114,11 +114,17 @@ namespace Assets.Script.Controller
             // apply jump
             if (UpdateCanJump && (ThisGrivaty.Grounded && !ThisMovable.Jumping && !ThisMovable.Droping))
             {
-                mGravityController.VerticalSpeed += mMovableController.UpdateVerticalMovement(ThisGrivaty.Grounded, ThisGrivaty.Gravity);
+                mGravityController.VerticalSpeed = mMovableController.UpdateVerticalMovement(ThisGrivaty.Grounded, ThisGrivaty.Gravity);
                 mInGrounded = false;
                 ThisAnim.ChangeAnim(AnimationType.EANT_Jumpup);
             }
-            if (ThisMovable.Droping)
+            if (mAnimController.NowAnimType == AnimationType.EANT_Skill01 ||
+                mAnimController.NowAnimType == AnimationType.EANT_Skill02 ||
+                mAnimController.NowAnimType == AnimationType.EANT_AirAttack01)
+            {
+                mGravityController.VerticalSpeed = 0.0f;
+            }
+            else if (ThisMovable.Droping)
                 ThisAnim.ChangeAnim(AnimationType.EANT_Droping);
             if (mAnimController.NowAnimType == AnimationType.EANT_Droping && ThisGrivaty.Grounded)
                 ThisAnim.ChangeAnim(AnimationType.EANT_JumpDown);
@@ -277,6 +283,14 @@ namespace Assets.Script.Controller
                         break;
                     case AnimationType.EANT_Jumpup:
                         ThisAnim.ChangeAnim(AnimationType.EANT_Airing);
+                        break;
+                    case AnimationType.EANT_AirAttack01:
+                        {
+                            if (ThisMovable.Moving)
+                                ThisAnim.ChangeAnim(AnimationType.EANT_Running);
+                            else
+                                ThisAnim.ChangeAnim(AnimationType.EANT_Idel);
+                        }
                         break;
                 }
             }

@@ -39,12 +39,17 @@ namespace Assets.Script.Controller
                 mH2DCOperations.ChangeAnimType((AnimationType)(nowNum + mAttackComboNum++));
                 mAttackComboTimer = mH2DCOperations.AttackComboTimeout;
             }
+            else if(AnimationType.EANT_Airing == mH2DCOperations.AnimType || AnimationType.EANT_Droping == mH2DCOperations.AnimType)
+            {
+                mH2DCOperations.ChangeAnimType(AnimationType.EANT_AirAttack01);
+            }
         }
         public void DoSkill(int skillID)
         {
-            if (skillID == 1)
+            if (AnimationType.EANT_Idel == mH2DCOperations.AnimType || AnimationType.EANT_Running == mH2DCOperations.AnimType ||
+                AnimationType.EANT_Airing == mH2DCOperations.AnimType || AnimationType.EANT_Droping == mH2DCOperations.AnimType)
             {
-                if (AnimationType.EANT_Idel == mH2DCOperations.AnimType || AnimationType.EANT_Running == mH2DCOperations.AnimType)
+                if (skillID == 1)
                 {
                     mH2DCOperations.ChangeAnimType(AnimationType.EANT_Skill01);
                     mSkill1Timer = mH2DCOperations.Skill1MaxTime;
@@ -55,10 +60,7 @@ namespace Assets.Script.Controller
                         pAnim.Play();
                     }
                 }
-            }
-            else if (skillID == 2)
-            {
-                if (AnimationType.EANT_Idel == mH2DCOperations.AnimType || AnimationType.EANT_Running == mH2DCOperations.AnimType)
+                else if (skillID == 2)
                 {
                     mH2DCOperations.ChangeAnimType(AnimationType.EANT_Skill02);
                     GameObject hmcEffect = GameObject.Find("Effect.HelfMoonCut");

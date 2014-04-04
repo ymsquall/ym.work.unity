@@ -75,8 +75,8 @@ namespace Assets.Script.Controller
             var animInst = mPlayerInstance as PlayerAnimInstance;
             if (null == grivatyInst || null == animInst)
                 return false;
-            if (grounded)
-            {
+            //if (grounded)
+            //{
                 // We store speed and direction seperately,
                 // so that when the character stands still we still have a valid forward direction
                 // moveDirection is always normalized, and we only update it if there is user input.
@@ -97,23 +97,23 @@ namespace Assets.Script.Controller
                 // Pick speed modifier
                 targetSpeed *= mPlayerInstance.SpeedScaleX;
                 mMoveSpeed = Mathf.Lerp(mMoveSpeed, targetSpeed, curSmooth);
-            }
-            else
-            {
-                // In air controls
-                if (mIsMoving)
-                {
-                    if (inDroping || inJumpAir)
-                    {
-                        float airSpeed = mPlayerInstance.InAirControlAcceleration;
-                        Vector3 dir = targetDirection.normalized;
-                        if (mMoveSpeed <= 0.1f)
-                            mInAirVelocity = dir * Time.deltaTime * airSpeed;
-                        if (targetDirection.normalized != mMoveDirection)
-                            mInAirVelocity = dir * Time.deltaTime * airSpeed;
-                    }
-                }
-            }
+            //}
+            //else
+            //{
+            //    // In air controls
+            //    if (mIsMoving)
+            //    {
+            //        if (inDroping || inJumpAir)
+            //        {
+            //            float airSpeed = mPlayerInstance.InAirControlAcceleration;
+            //            Vector3 dir = targetDirection.normalized;
+            //            if (mMoveSpeed <= 0.1f)
+            //                mInAirVelocity = dir * Time.deltaTime * airSpeed;
+            //            if (targetDirection.normalized != mMoveDirection)
+            //                mInAirVelocity = dir * Time.deltaTime * airSpeed;
+            //        }
+            //    }
+            //}
             return true;
         }
         public float UpdateVerticalMovement(bool grounded, float grivaty)

@@ -22,14 +22,23 @@ namespace Assets.Script.Controller
             set
             {
                 if (value == AnimationType.EANT_Attack01 ||
+                    value == AnimationType.EANT_AirAttack01 ||
                     value == AnimationType.EANT_Skill02)
                 {
                     string name1 = mAnimClipList[(int)AnimationType.EANT_Attack01].name;
-                    string name2 = mAnimClipList[(int)AnimationType.EANT_Skill02].name;
+                    string name2 = mAnimClipList[(int)AnimationType.EANT_AirAttack01].name;
+                    string name3 = mAnimClipList[(int)AnimationType.EANT_Skill02].name;
                     if (mAnimation.IsPlaying(name1))
                         mAnimation.Stop(name1);
                     if (mAnimation.IsPlaying(name2))
                         mAnimation.Stop(name2);
+                    if (mAnimation.IsPlaying(name3))
+                        mAnimation.Stop(name3);
+                }
+                if (value == AnimationType.EANT_AirAttack01)
+                {
+                    int i = 0;
+                    i++;
                 }
                 if (mNowAnimType != value)
                 {
