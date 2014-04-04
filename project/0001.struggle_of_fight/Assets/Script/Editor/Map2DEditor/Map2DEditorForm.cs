@@ -5,9 +5,11 @@ using UnityEditor;
 
 namespace Assets.Script.Editor.Map2DEditor
 {
-    public class Map2DEditorForm : EditorWindow
+    public class Map2DEditorForm : EditorBaseWindow<Map2DEditorForm>
     {
-
+        void OnGUI()
+        {
+        }
     }
 }
 
