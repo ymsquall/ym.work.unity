@@ -11,8 +11,20 @@ namespace Assets.Script.Editor.Map2DEditor
         [MenuItem("Editor/横版地图编辑器")]
         static void DoIt()
         {
-            Map2DEditorForm.CreateForm(MainFormName, "横版地图编辑器");
+            var mainForm = GetEditorForm();
+            if(null == mainForm)
+            {
+                mainForm = Map2DEditorForm.CreateForm(MainFormName, "横版地图编辑器");
+                mainForm.mSceneDelegate = new SceneView.OnSceneFunc(OnDrawSceneFunc);
+                SceneView.onSceneGUIDelegate += mainForm.mSceneDelegate;
+            }
         }
+
+        static public void OnDrawSceneFunc(SceneView sceneView)
+        {
+            var mainForm = GetEditorForm();
+            mainForm.DrawSceneGUI(sceneView);
+        }  
 
         public static Map2DEditorForm GetEditorForm()
         {
