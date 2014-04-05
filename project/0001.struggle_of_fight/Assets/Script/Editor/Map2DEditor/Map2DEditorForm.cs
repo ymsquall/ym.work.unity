@@ -16,14 +16,8 @@ namespace Assets.Script.Editor.Map2DEditor
         bool mRowCountToggle = false;
         bool mColCountToggle = false;
         Sprite[,] mMapUnitList = new Sprite[1, 1];
-        //Camera mMainCamera = null;
         void OnEnable()
         {
-            //GameObject cam = new GameObject("Map2DMainCamera", typeof(Camera));
-            //mMainCamera = cam.camera;
-            //mMainCamera.aspect = 60.0f;
-            //mMainCamera.backgroundColor = new Color(1, 0, 0, 1);
-            //mMainCamera.clearFlags = CameraClearFlags.Color;
         }
         void OnDisable()
         {
@@ -36,8 +30,6 @@ namespace Assets.Script.Editor.Map2DEditor
 
         internal void DrawSceneGUI(SceneView view)
         {
-            //Debug.Log("DrawSceneGUI");
-            //SceneView.RepaintAll();
         }
 
         void OnGUI()
@@ -47,9 +39,6 @@ namespace Assets.Script.Editor.Map2DEditor
             mUnitImageWidth = int.Parse(GUILayout.TextField(mUnitImageWidth.ToString(), GUILayout.Width(40)));
             GUILayout.Label("\t图片高度: ");
             mUnitImageHeight = int.Parse(GUILayout.TextField(mUnitImageHeight.ToString(), GUILayout.Width(40)));
-            //
-            GUILayout.FlexibleSpace();
-            mMapViewScrollRate = EditorGUILayout.Slider(mMapViewScrollRate, 10.0f, 1000.0f);
             //
             GUILayout.FlexibleSpace();
             int rowCount = mMapUnitList.GetLength(0);
@@ -68,6 +57,9 @@ namespace Assets.Script.Editor.Map2DEditor
             else
                 newColCount = int.Parse(GUILayout.TextField(colCount.ToString(), GUILayout.Width(30)));
             mColCountToggle = GUILayout.Toggle(mColCountToggle, "锁定列");
+            //
+            GUILayout.FlexibleSpace();
+            mMapViewScrollRate = EditorGUILayout.Slider(mMapViewScrollRate, 3, 1000.0f);
             GUILayout.EndHorizontal();
             mScrollViewPos = GUILayout.BeginScrollView(mScrollViewPos); // begin ver scroll bar
             GUILayout.BeginVertical();
