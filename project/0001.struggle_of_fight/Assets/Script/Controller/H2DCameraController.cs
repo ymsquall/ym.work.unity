@@ -98,10 +98,10 @@ namespace Assets.Script.Controller
             //mCameraTransform.position = cameraPosition;
             // bound locket
             float cameraH2WScale = mCamera.pixelWidth / mCamera.pixelHeight;
-            float leftEdge = 摄像机锁定左边界.bounds.min.x;
-            float rightEdge = 摄像机锁定右边界.bounds.max.x;
-            float topEdge = 摄像机锁定上边界.bounds.max.y;
-            float bottomEdge = 摄像机锁定下边界.bounds.min.y;
+            float leftEdge = 摄像机锁定左边界.bounds.max.x;
+            float rightEdge = 摄像机锁定右边界.bounds.min.x;
+            float topEdge = 摄像机锁定上边界.bounds.min.y;
+            float bottomEdge = 摄像机锁定下边界.bounds.max.y;
             float camLeftEdge = cameraPosition.x - (mCamera.orthographicSize * cameraH2WScale);
             float camRightEdge = cameraPosition.x + (mCamera.orthographicSize * cameraH2WScale);
             float camTopEdge = cameraPosition.y + mCamera.orthographicSize;

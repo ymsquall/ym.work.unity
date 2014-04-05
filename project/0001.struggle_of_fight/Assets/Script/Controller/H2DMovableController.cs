@@ -118,9 +118,9 @@ namespace Assets.Script.Controller
         }
         public float UpdateVerticalMovement(bool grounded, float grivaty)
         {
-            if (grounded)
+            //if (grounded)
                 return CalculateJumpVerticalSpeed(mPlayerInstance.JumpHeight, grivaty);
-            return 0.0f;
+            //return 0.0f;
         }
         public bool Movement(float addHorSpeed, float verticalSpeed, ref Vector3 outPos)
         {

@@ -22,7 +22,7 @@ namespace Assets.Script.Scenes.Map2D
             int rowCount = array.GetLength(0);
             int colCount = array.GetLength(1);
             int lastRowIndex = rowCount - 1;
-            int lastColIndex = colCount - 1;
+            //int lastColIndex = colCount - 1;
             foreach (T pObj in array)
             {
                 int topIndex = pObj.RowIndex - 1;
@@ -101,8 +101,8 @@ namespace Assets.Script.Scenes.Map2D
         {
             int rowCount = anotherGrids.GetLength(0);
             int colCount = anotherGrids.GetLength(1);
-            int lastRowIndex = rowCount - 1;
-            int lastColIndex = colCount - 1;
+            //int lastRowIndex = rowCount - 1;
+            //int lastColIndex = colCount - 1;
             if (t2b)
             {
                 this[Style.bottom] = anotherGrids[0, ColIndex];

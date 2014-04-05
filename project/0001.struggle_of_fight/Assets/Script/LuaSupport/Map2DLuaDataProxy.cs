@@ -30,7 +30,7 @@ namespace Assets.Script.LuaSupport
             base.Awake();
             if (null == 场景名 || 场景名.Length <= 0)
                 场景名 = Application.loadedLevelName;
-            string data = CallMethod(LUASetVariableFuncName, new string[] { 场景名 });
+            CallMethod(LUASetVariableFuncName, new string[] { 场景名 });
 
         }
         void Update()

@@ -27,6 +27,8 @@ namespace Assets.Script.Controller
                 mVerticalSpeed = 0.0f;
             else
                 mVerticalSpeed -= mH2DCGravity.Gravity * Time.deltaTime;
+            if (mVerticalSpeed < -30.0f)
+                mVerticalSpeed = -30.0f;
             return true;
         }
         PlayerGravityInstance mH2DCGravity = null;

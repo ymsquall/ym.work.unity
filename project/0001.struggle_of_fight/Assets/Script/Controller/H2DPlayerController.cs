@@ -25,7 +25,9 @@ namespace Assets.Script.Controller
                 if (mAnimController.NowAnimType != AnimationType.EANT_Idel &&
                     mAnimController.NowAnimType != AnimationType.EANT_Running &&
                     mAnimController.NowAnimType != AnimationType.EANT_Airing &&
-                    mAnimController.NowAnimType != AnimationType.EANT_Droping)
+                    mAnimController.NowAnimType != AnimationType.EANT_Droping &&
+                    mAnimController.NowAnimType != AnimationType.EANT_AirAttack01 &&
+                    mAnimController.NowAnimType != AnimationType.EANT_Skill02)
                     return 0.0f;
                 return Input.GetAxisRaw("Horizontal");
             }
@@ -39,6 +41,7 @@ namespace Assets.Script.Controller
         public float 跳跃操作延时 = 0.2f;
         float mJumpBtnTouchEndedTimer = 0.0f;
         bool mJumpBtnTouched = false;
+        int mComboWithJumpCount = 0;
         H2DOperationsController mOperationsController;
         public AnimationType AnimType
         {
@@ -63,20 +66,41 @@ namespace Assets.Script.Controller
         }
         bool PlayerOperationsSuperT.Update()
         {
-            if (!mJumpBtnTouched)
-            {
-                mJumpBtnTouchEndedTimer -= Time.deltaTime;
-                if (mJumpBtnTouchEndedTimer <= 0.0f)
-                    mUpdateCanJump = false;
-            }
+            //if (!mJumpBtnTouched)
+            //{
+            //    mJumpBtnTouchEndedTimer -= Time.deltaTime;
+            //    if (mJumpBtnTouchEndedTimer <= 0.0f)
+            //        mUpdateCanJump = false;
+            //}
             mOperationsController.Update();
             return true;
+        }
+        protected override void OnJumpDown()
+        {
+            mComboWithJumpCount = 0;
         }
         bool PlayerOperationsSuperT.DoTouchBegin(OperationType ot)
         {
             switch (ot)
             {
                 case OperationType.jump:
+                    if (mComboWithJumpCount == 0 &&
+                        (AnimationType.EANT_Idel == mAnimController.NowAnimType ||
+                        AnimationType.EANT_Running == mAnimController.NowAnimType ||
+                        AnimationType.EANT_JumpDown == mAnimController.NowAnimType))
+                        mJumpHeight = 跳跃高度;
+                    else if (mComboWithJumpCount == 1 &&
+                        (AnimationType.EANT_Airing == mAnimController.NowAnimType ||
+                        AnimationType.EANT_Droping == mAnimController.NowAnimType))
+                        mJumpHeight = 跳跃高度 * 0.6f;
+                    else if (mComboWithJumpCount == 0 && AnimationType.EANT_Droping == mAnimController.NowAnimType)
+                    {
+                        mJumpHeight = 跳跃高度 * 0.6f;
+                        mComboWithJumpCount = 1;
+                    }
+                    else
+                        break;
+                    mComboWithJumpCount++;
                     mJumpBtnTouched = true;
                     mUpdateCanJump = true;
                     Debug.Log("jump button touch begin");
@@ -88,7 +112,8 @@ namespace Assets.Script.Controller
                     }
                     break;
                 case OperationType.attack:
-                    mMovableController.MoveSpeed = 0.0f;
+                    if (AnimationType.EANT_Idel == mAnimController.NowAnimType || AnimationType.EANT_Running == mAnimController.NowAnimType)
+                        mMovableController.MoveSpeed = 0.0f;
                     mOperationsController.DoAttack();
                     //mMeshPhysicsCollider.ActivePhysics(true);
                     break;
@@ -154,6 +179,7 @@ namespace Assets.Script.Controller
         bool mUpdateCanJump = false;
         protected override bool UpdateCanJump
         {
+            set { mUpdateCanJump = value; }
             get { return Input.GetButtonDown("Jump") || mUpdateCanJump; }
         }
         // Use this for initialization

@@ -45,6 +45,7 @@ namespace Assets.Script.Controller
         public float 跳跃高度 = 1.0f;
         public float 技能1附加位移速度 = 8.0f;
         public bool 使用模型镜像 = true;
+        protected float mJumpHeight = 1.0f;
         protected H2DMovableController mMovableController;
         bool PlayerMovableSuperT.Jumping
         {
@@ -85,7 +86,7 @@ namespace Assets.Script.Controller
         }
         float PlayerMovableSuperT.JumpHeight
         {
-            get { return 跳跃高度; }
+            get { return mJumpHeight; }
         }
         bool PlayerMovableSuperT.UsedModelFlipX
         {
@@ -112,19 +113,21 @@ namespace Assets.Script.Controller
             if (!mGravityController.Update())
                 return false;
             // apply jump
-            if (UpdateCanJump && (ThisGrivaty.Grounded && !ThisMovable.Jumping && !ThisMovable.Droping))
+            if (UpdateCanJump)
             {
                 mGravityController.VerticalSpeed = mMovableController.UpdateVerticalMovement(ThisGrivaty.Grounded, ThisGrivaty.Gravity);
-                mInGrounded = false;
                 ThisAnim.ChangeAnim(AnimationType.EANT_Jumpup);
+                mInGrounded = false;
+                UpdateCanJump = false;
+                Debug.Log(string.Format("jump:{0}", mGravityController.VerticalSpeed));
             }
-            if (mAnimController.NowAnimType == AnimationType.EANT_Skill01 ||
-                mAnimController.NowAnimType == AnimationType.EANT_Skill02 ||
-                mAnimController.NowAnimType == AnimationType.EANT_AirAttack01)
+            if (mAnimController.NowAnimType == AnimationType.EANT_Skill01)
             {
                 mGravityController.VerticalSpeed = 0.0f;
             }
-            else if (ThisMovable.Droping)
+            else if (ThisMovable.Droping && 
+                mAnimController.NowAnimType != AnimationType.EANT_Skill02 &&
+                mAnimController.NowAnimType != AnimationType.EANT_AirAttack01)
                 ThisAnim.ChangeAnim(AnimationType.EANT_Droping);
             if (mAnimController.NowAnimType == AnimationType.EANT_Droping && ThisGrivaty.Grounded)
                 ThisAnim.ChangeAnim(AnimationType.EANT_JumpDown);
@@ -149,8 +152,10 @@ namespace Assets.Script.Controller
                             mAnimController.NowAnimType != AnimationType.EANT_Attack02 &&
                             mAnimController.NowAnimType != AnimationType.EANT_Attack03 &&
                             mAnimController.NowAnimType != AnimationType.EANT_Skill01 &&
-                            mAnimController.NowAnimType != AnimationType.EANT_Skill02)
+                            mAnimController.NowAnimType != AnimationType.EANT_Skill02 &&
+                            mAnimController.NowAnimType != AnimationType.EANT_AirAttack01)
                     ThisAnim.ChangeAnim(AnimationType.EANT_Idel);
+                OnJumpDown();
             }
             UpdateMovementImpl(wasMoving);
             if (mInGrounded)
@@ -158,6 +163,7 @@ namespace Assets.Script.Controller
             return true;
         }
         virtual protected bool UpdateMovementImpl(bool wasMoving) { return true; }
+        protected virtual void OnJumpDown() { }
         protected PlayerMovableSuperT ThisMovable { get { return this; } }
 #endregion
 
@@ -273,6 +279,7 @@ namespace Assets.Script.Controller
                     case AnimationType.EANT_Attack01:
                     case AnimationType.EANT_Attack02:
                     case AnimationType.EANT_Attack03:
+                    case AnimationType.EANT_AirAttack01:
                         {
                             if (ThisMovable.Moving)
                                 ThisAnim.ChangeAnim(AnimationType.EANT_Running);
@@ -284,14 +291,6 @@ namespace Assets.Script.Controller
                     case AnimationType.EANT_Jumpup:
                         ThisAnim.ChangeAnim(AnimationType.EANT_Airing);
                         break;
-                    case AnimationType.EANT_AirAttack01:
-                        {
-                            if (ThisMovable.Moving)
-                                ThisAnim.ChangeAnim(AnimationType.EANT_Running);
-                            else
-                                ThisAnim.ChangeAnim(AnimationType.EANT_Idel);
-                        }
-                        break;
                 }
             }
             else if ((nowAnimType == AnimationType.EANT_Skill02) &&
@@ -302,9 +301,16 @@ namespace Assets.Script.Controller
                 else
                     ThisAnim.ChangeAnim(AnimationType.EANT_Idel);
             }
+            else if (animType == AnimationType.EANT_AirAttack01)
+            {
+                if (ThisMovable.Moving)
+                    ThisAnim.ChangeAnim(AnimationType.EANT_Running);
+                else
+                    ThisAnim.ChangeAnim(AnimationType.EANT_Idel);
+            }
             else
             {
-                Debug.Log(string.Format("未知的动画播放完成事件{0}", animType.ToString()));
+                Debug.Log(string.Format("未知的动画播放完成事件{0}, 当前动作{1}", animType.ToString(), nowAnimType.ToString()));
                 return false;
             }
             return true;
@@ -379,7 +385,8 @@ namespace Assets.Script.Controller
 #endregion
         protected virtual bool UpdateCanJump
         {
-            get{ return false; }
+            set { }
+            get { return false; }
         }
         // Use this for initialization
         void Awake()

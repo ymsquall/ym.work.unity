@@ -91,6 +91,7 @@ namespace Assets.Script.Controller
                     inGround = true;
                 }
             }
+#if UNITY_EDITOR
             //-- debug
             Debug.DrawLine(gcMinBottomRay, gcMinBottomRay + rayDir * 200.0f, Color.green);
             Debug.DrawLine(gcMaxBottomRay, gcMaxBottomRay + rayDir * 200.0f, Color.green);
@@ -123,6 +124,7 @@ namespace Assets.Script.Controller
             if (!maxHit)
                 GameObject.DestroyObject(GameObject.Find("dbgMaxCastSphere"));
             //-- debug
+#endif
             return inGround;
         }
         PlayerColliderInstance mH2DCCollider = null;
