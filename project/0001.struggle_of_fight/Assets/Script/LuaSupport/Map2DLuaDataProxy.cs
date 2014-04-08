@@ -25,7 +25,7 @@ namespace Assets.Script.LuaSupport
             ret.Add(LUASetVariableFuncName);
             return ret.ToArray();
         }
-        void Awake()
+        new void Awake()
         {
             base.Awake();
             if (null == 场景名 || 场景名.Length <= 0)

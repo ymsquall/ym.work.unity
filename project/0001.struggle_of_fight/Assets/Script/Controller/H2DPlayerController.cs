@@ -40,7 +40,7 @@ namespace Assets.Script.Controller
         // 所以从玩家抬起跳跃按纽后延迟一段时间保证跳跃标记能够保留到下一帧，这样就不会出现跳跃按钮空按的情况了
         public float 跳跃操作延时 = 0.2f;
         float mJumpBtnTouchEndedTimer = 0.0f;
-        bool mJumpBtnTouched = false;
+        //bool mJumpBtnTouched = false;
         int mComboWithJumpCount = 0;
         H2DOperationsController mOperationsController;
         public AnimationType AnimType
@@ -101,7 +101,7 @@ namespace Assets.Script.Controller
                     else
                         break;
                     mComboWithJumpCount++;
-                    mJumpBtnTouched = true;
+                    //mJumpBtnTouched = true;
                     mUpdateCanJump = true;
                     Debug.Log("jump button touch begin");
                     if (AnimationType.EANT_Idel == mAnimController.NowAnimType ||
@@ -133,7 +133,7 @@ namespace Assets.Script.Controller
             switch (ot)
             {
                 case OperationType.jump:
-                    mJumpBtnTouched = false;
+                    //mJumpBtnTouched = false;
                     Debug.Log("jump button touch ended");
                     break;
                 case OperationType.attack:

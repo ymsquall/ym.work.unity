@@ -36,8 +36,8 @@ namespace Assets.Script.Editor
             else
             {
                 Debug.Log(string.Format("CreateWindow<{0}>({1}, {2})", typeof(T).ToString(), name, title));
-                //form = EditorWindow.GetWindow<T>(title);
-                form = EditorWindow.CreateInstance<T>();
+                form = EditorWindow.GetWindow<T>(title, true);
+                //form = EditorWindow.CreateInstance<T>();
                 form.title = title;
                 form.name = name;
                 form.Show();
@@ -53,6 +53,17 @@ namespace Assets.Script.Editor
             if (mWindowList.ContainsKey(name))
                 form = mWindowList[name] as T;
             return form;
+        }
+
+        public static EditorWindow ClosedWindow(string name)
+        {
+            EditorWindow wnd = null;
+            if (mWindowList.ContainsKey(name))
+            {
+                wnd = mWindowList[name];
+                mWindowList.Remove(name);
+            }
+            return wnd;
         }
 
         static Dictionary<string, EditorWindow> mWindowList = new Dictionary<string,EditorWindow>(0);

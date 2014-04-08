@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<world>
+    <map id="1" width="100" height="100" bx='出生点x' by='出生点y'> 
+        <blocks>
+		    <id='0' x='0' y='0' width='100' height='10' type='普通阻挡'/>
+			<id='1' x='0' y='0' width='100' height='10' type='碰到会有周期性伤害'/>
+			<id='2' x='0' y='0' width='100' height='10' type='碰到会触发状态'/>
+        </blocks>
+        <npcs>
+		    <id='0' x='33' y='44' type='npc'/>
+		    <id='1' x='33' y='44' type='enemy'/>
+        </npcs>
+    </map>
+</world>

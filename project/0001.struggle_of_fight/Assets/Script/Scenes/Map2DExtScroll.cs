@@ -45,6 +45,8 @@ namespace Assets.Script.Scenes
                             SpriteRenderer sprite = objClean.renderer as SpriteRenderer;
                             pos.y += sprite.bounds.size.y;
                             first = true;
+                            Transform t = objClean.transform.GetChild(0);
+                            GameObject tg = t.gameObject;
                         }
                         startMapList.Add(obj);
                     }
