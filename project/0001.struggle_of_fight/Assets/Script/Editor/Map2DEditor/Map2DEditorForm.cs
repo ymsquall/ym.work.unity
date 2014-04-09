@@ -24,6 +24,17 @@ namespace Assets.Script.Editor.Map2DEditor
         Map2DGridUnit[,] mMapUnitList = new Map2DGridUnit[1, 1];
         Dictionary<int, Map2DGridUnit> mMapUnitDictionary = new Dictionary<int, Map2DGridUnit>(1);
 
+        public Map2DGridUnit this[int r, int c]
+        {
+            get
+            {
+                int rowCount = mMapUnitList.GetLength(0);
+                int colCount = mMapUnitList.GetLength(1);
+                if (r < 0 || r >= rowCount || c < 0 || c >= colCount)
+                    return null;
+                return mMapUnitList[r, c];
+            }
+        }
 #region 文件读写
         bool SaveMap2DConfig()
         {
@@ -196,10 +207,15 @@ namespace Assets.Script.Editor.Map2DEditor
                 for (int j = 0; j < colCount; ++j)
                 {
                     mMapUnitList[i, j] = new Map2DGridUnit();
-                    SpriteRenderer sr = mMapUnitList[i, j].GridUnit.AddComponent<SpriteRenderer>();
+                    mMapUnitList[i, j].OnEditorMenuItemCommand += (Map2DGridUnit sender, int rIndex, int cIndex) =>
+                                                                    {
+                                                                        Map2DEditor.GetOrNewGridEditorForm(rIndex, cIndex);
+                                                                    };
+                    SpriteRenderer sr = mMapUnitList[i, j].GridUnit.GetComponent<SpriteRenderer>();
                     int instanceID = BitConverter.ToInt32(buffer, readIndex); readIndex += sizeof(int);
                     ushort texWidth = BitConverter.ToUInt16(buffer, readIndex); readIndex += sizeof(ushort);
-                    ushort texHeight = BitConverter.ToUInt16(buffer, readIndex); readIndex += sizeof(ushort);
+                    ushort texHeight =  BitConverter.ToUInt16(buffer, readIndex); readIndex += sizeof(ushort);
+                    mMapUnitList[i, j].ImageSize = new Vector2((float)texWidth, (float)texHeight);
                     char childCount = BitConverter.ToChar(buffer, readIndex); readIndex += sizeof(char);
                     for (int c = 0; c < childCount; ++ c)
                     {
@@ -316,7 +332,7 @@ namespace Assets.Script.Editor.Map2DEditor
         {
             if (mSceneDelegate != null)
                 SceneView.onSceneGUIDelegate -= mSceneDelegate;
-            EditorWindowsManager.ClosedWindow(Map2DEditor.MainFormName);
+            Map2DEditor.OnFormClosed(Map2DEditor.MainFormName);
             SaveMap2DConfig();
             SaveMap2DData();
             int rowCount = mMapUnitList.GetLength(0);
@@ -462,10 +478,24 @@ namespace Assets.Script.Editor.Map2DEditor
                     int instanceID = i * newColCount + j;
                     int id = EditorGUIUtility.GetControlID(instanceID.GetHashCode(), FocusType.Passive, gridRect);
                     if (mMapUnitList[i, j] == null)
+                    {
                         mMapUnitList[i, j] = GUIUtility.GetStateObject(typeof(Map2DGridUnit), id) as Map2DGridUnit;
+                        mMapUnitList[i, j].OnEditorMenuItemCommand += (Map2DGridUnit sender, int rIndex, int cIndex) =>
+                                                                        {
+                                                                            Map2DEditor.GetOrNewGridEditorForm(rIndex, cIndex);
+                                                                        };
+                    }
                     Texture2D newTex = EditorGUILayout.ObjectField(mMapUnitList[i, j].Image, typeof(Texture2D), true,
                         GUILayout.Width(gridRect.width), GUILayout.Height(gridRect.height)) as Texture2D;
+                    if(newTex != null)
+                    {
+                        if(mUnitImageWidth < (ushort)newTex.width)
+                            mUnitImageWidth = (ushort)newTex.width;
+                        if (mUnitImageHeight < (ushort)newTex.height)
+                            mUnitImageHeight = (ushort)newTex.height;
+                    }
                     mMapUnitList[i, j].Init(id, i, j, gridRect, newTex);
+                    mMapUnitList[i, j].ImageSize = new Vector2((float)mUnitImageWidth, (float)mUnitImageHeight);
                     mMapUnitDictionary[id] = mMapUnitList[i, j];
                     mMapUnitList[i, j].OnEvent(Event.current);
                 }
@@ -475,7 +505,6 @@ namespace Assets.Script.Editor.Map2DEditor
             GUILayout.EndScrollView();
         }
 #endregion
-
     }
 }
 #endif

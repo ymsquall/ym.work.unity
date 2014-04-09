@@ -25,6 +25,8 @@ namespace Assets.Script.Editor
         public static T CreateWindow<T>(string name, string title)
             where T : EditorWindow, new()
         {
+            if (EditorMouseDelegate.Current == null)
+                EditorMouseDelegate.CreateInstance<EditorMouseDelegate>();
             T form = null;
             if (mWindowList.ContainsKey(name))
             {
@@ -36,8 +38,8 @@ namespace Assets.Script.Editor
             else
             {
                 Debug.Log(string.Format("CreateWindow<{0}>({1}, {2})", typeof(T).ToString(), name, title));
-                form = EditorWindow.GetWindow<T>(title, true);
-                //form = EditorWindow.CreateInstance<T>();
+                //form = EditorWindow.GetWindow<T>(title, false);
+                form = EditorWindow.CreateInstance<T>();
                 form.title = title;
                 form.name = name;
                 form.Show();

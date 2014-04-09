@@ -1,14 +1,23 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+
+using UnityEngine;
 using UnityEditor;
 
 namespace Assets.Script.Editor.Map2DEditor
 {
     public class Map2DGridUnit
     {
+        static GUIContent[] MRBMenuItemList = 
+            new GUIContent[] { new GUIContent("编辑单元"),
+                             };
+        public delegate void OnEditorEventHandler(Map2DGridUnit sender, int rIndex, int cIndex);
+        public OnEditorEventHandler OnEditorMenuItemCommand = null;
+
         int mControlID = -1;
         int mRowIndex = -1;
         int mColIndex = -1;
         Rect mViewRect;
+        Vector2 mImageSize = Vector2.zero;
         GameObject mGridUnitObj;
         public Map2DGridUnit()
         {
@@ -55,6 +64,11 @@ namespace Assets.Script.Editor.Map2DEditor
                 return sr.sprite.texture;
             } 
         }
+        public Vector2 ImageSize
+        {
+            set { mImageSize = value; }
+            get { return mImageSize; }
+        }
         public GameObject GridUnit
         {
             set { mGridUnitObj = value; }
@@ -73,45 +87,46 @@ namespace Assets.Script.Editor.Map2DEditor
             if (!mViewRect.Contains(e.mousePosition))
                 return;
             EventType et = e.GetTypeForControl(mControlID);
-            switch(et)
-            {
-                case EventType.MouseDown:
-                case EventType.MouseUp:
-                case EventType.MouseMove:
-                case EventType.MouseDrag:
-                case EventType.KeyDown:
-                case EventType.KeyUp:
-                case EventType.ScrollWheel:
-                //case EventType.Repaint:
-                //case EventType.Layout:
-                case EventType.DragUpdated:
-                case EventType.DragPerform:
-                case EventType.Ignore:
-                case EventType.Used:
-                case EventType.ValidateCommand:
-                case EventType.ExecuteCommand:
-                case EventType.DragExited:
-                case EventType.ContextClick:
-                    Debug.Log(string.Format("Control[{2}] Event[{0}], CommandName[{1}]", e.type.ToString(), e.commandName, mControlID));
-                    e.Use();
-                    break;
-            }
+            //switch(et)
+            //{
+            //    case EventType.MouseDown:
+            //    case EventType.MouseUp:
+            //    case EventType.MouseMove:
+            //    case EventType.MouseDrag:
+            //    case EventType.KeyDown:
+            //    case EventType.KeyUp:
+            //    case EventType.ScrollWheel:
+            //    //case EventType.Repaint:
+            //    //case EventType.Layout:
+            //    case EventType.DragUpdated:
+            //    case EventType.DragPerform:
+            //    case EventType.Ignore:
+            //    case EventType.Used:
+            //    case EventType.ValidateCommand:
+            //    case EventType.ExecuteCommand:
+            //    case EventType.DragExited:
+            //    case EventType.ContextClick:
+            //        Debug.Log(string.Format("Control[{2}] Event[{0}], CommandName[{1}]", e.type.ToString(), e.commandName, mControlID));
+            //        if(et != EventType.ScrollWheel)
+            //            e.Use();
+            //        break;
+            //}
             switch (et)
             {
-                case EventType.MouseDown:
-                    {
-                        GUIUtility.hotControl = mControlID;
-                    }
-                    break;
+                //case EventType.MouseDown:
+                //    {
+                //        if (e.button == 1)
+                //            GUIUtility.hotControl = mControlID;
+                //    }
+                //    break;
                 case EventType.MouseUp:
                     {
                         if (e.button == 1)
                         {
                             var mousePos = e.mousePosition;
                             //EditorUtility.DisplayPopupMenu(new Rect(mousePos.x, mousePos.y, 0, 0), "Assets/", null);
-                            GUIContent[] menuItems = new GUIContent[] { new GUIContent("编辑"), new GUIContent("创建模板") };
-                            EditorUtility.DisplayCustomMenu(new Rect(mousePos.x, mousePos.y, 0, 0), menuItems, 1, OnGridUnitMenuItemCommands, null);
-                            e.Use();
+                            EditorUtility.DisplayCustomMenu(new Rect(mousePos.x, mousePos.y, 0, 0), MRBMenuItemList, 1, OnGridUnitMenuItemCommands, null);
+                            //e.Use();
                         }
                     }
                     break;
@@ -119,7 +134,15 @@ namespace Assets.Script.Editor.Map2DEditor
         }
         void OnGridUnitMenuItemCommands(object userData, string[] options, int selected)
         {
-
+            switch(selected)
+            {
+                case 0:
+                    if (null != OnEditorMenuItemCommand)
+                        OnEditorMenuItemCommand(this, RowIndex, ColIndex);
+                    break;
+            }
         }
     }
 }
+
+#endif

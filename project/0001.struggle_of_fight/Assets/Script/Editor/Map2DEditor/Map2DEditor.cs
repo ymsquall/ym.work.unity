@@ -11,7 +11,7 @@ namespace Assets.Script.Editor.Map2DEditor
         [MenuItem("Editor/横版地图编辑器")]
         static void DoIt()
         {
-            var mainForm = GetEditorForm();
+            var mainForm = EditorWindowsManager.GetWindow<Map2DEditorForm>(MainFormName);
             if (UnityEditor.EditorApplication.currentScene == null || UnityEditor.EditorApplication.currentScene == "")
             {
                 EditorUtility.DisplayDialog("错误", "必须打开已有场景后才能进行地图编辑！", "关闭", "");
@@ -30,15 +30,36 @@ namespace Assets.Script.Editor.Map2DEditor
             }
         }
 
-        static public void OnDrawSceneFunc(SceneView sceneView)
+        public static void OnDrawSceneFunc(SceneView sceneView)
         {
-            var mainForm = GetEditorForm();
+            var mainForm = EditorWindowsManager.GetWindow<Map2DEditorForm>(MainFormName);
             mainForm.DrawSceneGUI(sceneView);
         }
 
-        public static Map2DEditorForm GetEditorForm()
+        public static void OnFormClosed(string name)
         {
-            return EditorWindowsManager.GetWindow<Map2DEditorForm>(MainFormName);
+            EditorWindowsManager.ClosedWindow(name);
+        }
+
+        public static Map2DGridEditorForm GetOrNewGridEditorForm(int rIndex, int cIndex)
+        {
+            string name = string.Format("GridForm({0}-{1})", rIndex, cIndex);
+            var form = EditorWindowsManager.GetWindow<Map2DGridEditorForm>(name);
+            if (null != form)
+                return form;
+            string title = string.Format("单元{0}-{1}", rIndex, cIndex);
+            form = Map2DGridEditorForm.CreateForm(name, title);
+            form.GridRowIndex = rIndex;
+            form.GridColIndex = cIndex;
+            return form;
+        }
+
+        public static Map2DGridUnit FindGridUnitByIndex(int rIndex, int cIndex)
+        {
+            var mainForm = EditorWindowsManager.GetWindow<Map2DEditorForm>(MainFormName);
+            if (null == mainForm)
+                return null;
+            return mainForm[rIndex, cIndex];
         }
     }
 }
