@@ -18,6 +18,14 @@ namespace Assets.Script.Controller
                                        PlayerOperationsSuperT,
                                        IH2DCCamera
     {
+        static H2DPlayerController mLocalPlayer = null;
+        public static H2DPlayerController LocalPlayer { get { return mLocalPlayer; } }
+        float mTouchMoveSpeed = 0.0f;
+        public float TouchMoveSpeed
+        {
+            set { mTouchMoveSpeed = value; }
+            get { return mTouchMoveSpeed; }
+        }
         float PlayerMovableSuperT.InputSpeedX
         {
             get
@@ -29,7 +37,7 @@ namespace Assets.Script.Controller
                     mAnimController.NowAnimType != AnimationType.EANT_AirAttack01 &&
                     mAnimController.NowAnimType != AnimationType.EANT_Skill02)
                     return 0.0f;
-                return Input.GetAxisRaw("Horizontal");
+                return Input.GetAxisRaw("Horizontal") + TouchMoveSpeed;
             }
         }
 #region 玩家操作相关
@@ -185,6 +193,7 @@ namespace Assets.Script.Controller
         // Use this for initialization
         protected override bool AwakeImpl()
         {
+            mLocalPlayer = this;
             return ThisOperate.Init();
         }
         // Update is called once per frame

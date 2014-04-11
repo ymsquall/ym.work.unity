@@ -61,6 +61,18 @@ namespace Assets.Script.Editor.Map2DEditor
                 return null;
             return mainForm[rIndex, cIndex];
         }
+        
+        public static Color ColorByToolType(string type)
+        {
+            Color color = Color.white;
+            if (Map2DGridEditorToolboxView.ToolsTips[0] == type)
+                color = Color.green;
+            else if (Map2DGridEditorToolboxView.ToolsTips[1] == type)
+                color = Color.cyan;
+            else if (Map2DGridEditorToolboxView.ToolsTips[2] == type)
+                color = Color.red;
+            return color;
+        }
     }
 }
 

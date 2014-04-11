@@ -156,6 +156,10 @@ namespace Assets.Script.Controller
             }
             if (needRota)
             {
+                if(trans.name == "_Monster")
+                {
+                    bool b = mPlayerInstance.UsedModelFlipX;
+                }
                 if (mPlayerInstance.UsedModelFlipX)
                 {
                     trans.rotation = Quaternion.LookRotation(Vector3.right);

@@ -46,6 +46,7 @@ namespace Assets.Script.Controller
         public float 技能1附加位移速度 = 8.0f;
         public bool 使用模型镜像 = true;
         protected float mJumpHeight = 1.0f;
+        protected float mFocusMoveValue = 0.0f;
         protected H2DMovableController mMovableController;
         bool PlayerMovableSuperT.Jumping
         {
@@ -73,9 +74,14 @@ namespace Assets.Script.Controller
         {
             get
             {
-                return 0.0f;
+                return mFocusMoveValue;
             }
         }
+        public float FocusMoveValue
+        {
+            set { mFocusMoveValue = value; }
+        }
+
         float PlayerMovableSuperT.SpeedSmoothing
         {
             get { return 位移平滑速度; }
@@ -95,6 +101,10 @@ namespace Assets.Script.Controller
         CharacterController PlayerMovableSuperT.Controller
         {
             get { return GetComponent<CharacterController>(); }
+        }
+        public Vector3 FaceDirection
+        {
+            set { mMovableController.FaceDirection = value; }
         }
         bool PlayerMovableSuperT.Init()
         {
@@ -119,7 +129,8 @@ namespace Assets.Script.Controller
                 ThisAnim.ChangeAnim(AnimationType.EANT_Jumpup);
                 mInGrounded = false;
                 UpdateCanJump = false;
-                Debug.Log(string.Format("jump:{0}", mGravityController.VerticalSpeed));
+                if (mFocusJump)
+                    mFocusJump = false;
             }
             if (mAnimController.NowAnimType == AnimationType.EANT_Skill01)
             {
@@ -383,10 +394,19 @@ namespace Assets.Script.Controller
         }
         protected bool mInGrounded = false;
 #endregion
+        protected bool mFocusJump = false;
         protected virtual bool UpdateCanJump
         {
             set { }
-            get { return false; }
+            get { return mFocusJump; }
+        }
+        public bool FocusJumpEnd
+        {
+            set { mFocusJump = false; mJumpHeight = 跳跃高度; }
+        }
+        public float FocusJumpBegin
+        {
+            set { mFocusJump = true;  mJumpHeight = value; }
         }
         // Use this for initialization
         void Awake()
@@ -401,7 +421,6 @@ namespace Assets.Script.Controller
         // Update is called once per frame
         void Update()
         {
-            //ThisGrivaty.Update();
             ThisMovable.Update();
             ThisAnim.Update();
             UpdateImpl();

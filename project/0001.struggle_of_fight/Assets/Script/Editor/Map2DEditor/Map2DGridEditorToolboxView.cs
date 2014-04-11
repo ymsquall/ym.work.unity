@@ -19,17 +19,18 @@ namespace Assets.Script.Editor.Map2DEditor
         {
             get { return MouseDragItemType.ToolboxItem; }
         }
-        Texture2D mDraginTexture = null;
+        void IEditorMouseDragItem.OnBeginDragin(Vector2 pos)
+        {
+
+        }
         void IEditorMouseDragItem.DrawDraginGUI(Vector2 pos)
         {
-            if (null == mDraginTexture)
-                mDraginTexture = Texture2D.CreateExternalTexture(100, 100, TextureFormat.Alpha8, false, false, IntPtr.Zero);
             if (Map2DGridEditorToolboxView.ToolsTips[0] == mToolTips)
-                GUI.DrawTexture(new Rect(pos.x - 50, pos.y - 5, 100, 10), mDraginTexture, ScaleMode.ScaleAndCrop);
+                NGUIEditorTools.DrawTexture(NGUIEditorTools.blankTexture, new Rect(pos.x - 50, pos.y - 5, 100, 10), new Rect(0, 0, 1, 1), Color.gray);
             else if (Map2DGridEditorToolboxView.ToolsTips[1] == mToolTips)
-                GUI.DrawTexture(new Rect(pos.x - 10, pos.y - 50, 20, 100), mDraginTexture, ScaleMode.ScaleAndCrop);
+                NGUIEditorTools.DrawTexture(NGUIEditorTools.blankTexture, new Rect(pos.x - 10, pos.y - 50, 20, 100), new Rect(0, 0, 1, 1), Color.gray);
             else if (Map2DGridEditorToolboxView.ToolsTips[2] == mToolTips)
-                GUI.DrawTexture(new Rect(pos.x - 30, pos.y - 30, 60, 60), mDraginTexture, ScaleMode.ScaleAndCrop);
+                NGUIEditorTools.DrawTexture(NGUIEditorTools.blankTexture, new Rect(pos.x - 30, pos.y - 30, 60, 60), new Rect(0, 0, 1, 1), Color.gray);
         }
 #endregion
 
@@ -55,6 +56,7 @@ namespace Assets.Script.Editor.Map2DEditor
             switch (et)
             {
                 case EventType.MouseDrag:
+                    EditorMouseDelegate.Current.EndDrag(e.button);
                     EditorMouseDelegate.Current.BeginDrag(e, this);
                     break;
             }
@@ -79,12 +81,12 @@ namespace Assets.Script.Editor.Map2DEditor
         public void OnGUI()
         {
             EditorGUILayout.BeginVertical();
-            Rect itemRect = new Rect(0, 0, 0, 0);
+            Rect itemRect = new Rect(10, 5, 0, 0);
             foreach (string s in ToolsTips)
             {
                 itemRect.x = mSize.x;
                 itemRect.width = 50;
-                itemRect.height = 20;
+                itemRect.height = 30;
                 int id = EditorGUIUtility.GetControlID(FocusType.Passive);
                 Map2DGridEditorToolboxItem tool = EditorGUIUtility.GetStateObject(typeof(Map2DGridEditorToolboxItem), id) as Map2DGridEditorToolboxItem;
                 tool.Init(id, s, itemRect);
@@ -92,8 +94,14 @@ namespace Assets.Script.Editor.Map2DEditor
                     mToolItems[id] = tool;
                 else
                     mToolItems.Add(id, tool);
-                GUILayout.Label(s, GUILayout.Width(itemRect.width), GUILayout.Height(itemRect.height));
-                //GUILayout.Toggle(false, s, GUILayout.Width(itemRect.width), GUILayout.Height(itemRect.height));
+                //GUILayout.Box("", GUILayout.Width(itemRect.width), GUILayout.Height(itemRect.height));
+                {
+                    GUIStyle cc = new GUIStyle();
+                    cc.normal.background = null;
+                    cc.normal.textColor = Map2DEditor.ColorByToolType(s);
+                    cc.fontSize = 25;
+                    GUI.Label(itemRect, s, cc);
+                }
                 tool.OnEvent(Event.current);
                 itemRect.y += itemRect.height + 5;
             }

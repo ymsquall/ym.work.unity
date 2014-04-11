@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Assets.Script.Controller;
 
 namespace Assets.Script.Controller.OPUI
 {
@@ -11,11 +12,16 @@ namespace Assets.Script.Controller.OPUI
         public GUISkin mJumpButton;
         public GUISkin mSkill1Button;
         public GUISkin mSkill2Button;
+        public Vector2 移动UI位置偏移 = Vector2.zero;
         public Rect mRightToBottomRect;
         public Vector2 mAttackBtnPos;
         public Vector2 mJumpBtnPos;
         public Vector2 mSkill1BtnPos;
         public Vector2 mSkill2BtnPos;
+        // fps
+        public bool 显示FPS = true;
+        public float FPS更新间隔 = 0.5f;
+        public GameObject 测试刷怪 = null;
 
         public class ButtonEventArgs : System.EventArgs
         {
@@ -39,16 +45,21 @@ namespace Assets.Script.Controller.OPUI
 
         void Start()
         {
+            Input.multiTouchEnabled = true;
+#if UNITY_STANDALONE
             mLastMousePos3D = Input.mousePosition;
-
+#endif
             var btnStyle = mMoveStackBG.customStyles[0] as GUIStyle;
-            mBGImageRect = new Rect(0, Screen.height - btnStyle.normal.background.height,
+            mBGImageRect = new Rect(移动UI位置偏移.x, Screen.height - btnStyle.normal.background.height - 移动UI位置偏移.y,
                                      btnStyle.normal.background.width, btnStyle.normal.background.height);
 
             btnStyle = mMoveStackBar.customStyles[0] as GUIStyle;
-            mBarButtonRect = new Rect(0, 0, btnStyle.normal.background.width, btnStyle.normal.background.height);
-            mBarButtonRect.x = mBGImageRect.x + (mBGImageRect.width - mBarButtonRect.width) / 2.0f;
-            mBarButtonRect.y = mBGImageRect.y + (mBGImageRect.height - mBarButtonRect.height) / 2.0f;
+            mBarButtonOriRect = new Rect(0, 0, btnStyle.normal.background.width, btnStyle.normal.background.height);
+            mBarButtonOriRect.x = mBGImageRect.x + (mBGImageRect.width - mBarButtonOriRect.width) / 2.0f;
+            mBarButtonOriRect.y = mBGImageRect.y + (mBGImageRect.height - mBarButtonOriRect.height) / 2.0f;
+
+            mMoveStakBarLeftLimit = mBGImageRect.x;
+            mMoveStakBarRightLimit = mBGImageRect.x + mBGImageRect.width - mBarButtonOriRect.width;
 
             mRightToBottomRect.x = Screen.width - mRightToBottomRect.width;
             mRightToBottomRect.y = Screen.height - mRightToBottomRect.height;
@@ -68,10 +79,13 @@ namespace Assets.Script.Controller.OPUI
             btnStyle = mSkill2Button.customStyles[0] as GUIStyle;
             mSkill2BtnRect = new Rect(mRightToBottomRect.x + mSkill2BtnPos.x, mRightToBottomRect.y + mSkill2BtnPos.y,
                                      btnStyle.normal.background.width, btnStyle.normal.background.height);
+            mLastInterval = Time.realtimeSinceStartup;
+            mFrames = 0;
         }
 
         void Update()
         {
+#if UNITY_STANDALONE
             Vector3 mousePt3 = Input.mousePosition;
             Vector2 mousePt2 = new Vector2(mousePt3.x, Screen.height - mousePt3.y);
             bool mouseDown = Input.GetMouseButtonDown(0);
@@ -152,8 +166,41 @@ namespace Assets.Script.Controller.OPUI
                         return;
                 }
             }
+#else
+            mBarButtonRect = mBarButtonOriRect;
+            H2DPlayerController.LocalPlayer.TouchMoveSpeed = 0.0f;
+            for (int i = 0; i < Input.touchCount; ++ i)
+            {
+                Vector2 pos = Input.touches[i].position;
+                pos.y = Screen.height - pos.y;
+                if (mBGImageRect.Contains(pos))
+                {
+                    mBarButtonRect.x = pos.x - mBarButtonRect.width / 2.0f;
+                    if (mBarButtonRect.x > mMoveStakBarRightLimit)
+                        mBarButtonRect.x = mMoveStakBarRightLimit;
+                    if (mBarButtonRect.x < mMoveStakBarLeftLimit)
+                        mBarButtonRect.x = mMoveStakBarLeftLimit;
+                    float horDist = mBarButtonRect.x - mBarButtonOriRect.x;
+                    if (horDist > 10.0f)
+                        H2DPlayerController.LocalPlayer.TouchMoveSpeed = 1.0f;
+                    else if (horDist < -10.0f)
+                        H2DPlayerController.LocalPlayer.TouchMoveSpeed = -1.0f;
+                    break;
+                }
+            }
+#endif
+            if(显示FPS)
+            {
+                ++mFrames;
+                float timeNow = Time.realtimeSinceStartup;
+                if (timeNow > mLastInterval + FPS更新间隔)
+                {
+                    mFPS = mFrames / (timeNow - mLastInterval);
+                    mFrames = 0;
+                    mLastInterval = timeNow;
+                }
+            }
         }
-
         void OnGUI()
         {
             GUI.Button(mBGImageRect, "", mMoveStackBG.GetStyle(mMoveStackBG.name));
@@ -191,6 +238,90 @@ namespace Assets.Script.Controller.OPUI
                     btnClicked = OnButtonClicked(mSkill2Button, new ButtonEventArgs(new Vector2(mousePt.x, mousePt.y)));
                 }
             }
+#if !UNITY_STANDALONE
+            for(int i = 0; i < Input.touchCount; ++ i)
+            {
+                if (Input.touches[i].phase != TouchPhase.Began)
+                    continue;
+                Vector2 pos = Input.touches[i].position;
+                pos.y = Screen.height - pos.y;
+                if (mBGImageRect.Contains(pos))
+                    continue;
+                if (mAttackBtnRect.Contains(pos))
+                {
+                    if (null != OnButtonDown)
+                    {
+                        if (OnButtonDown(mAttackButton, new ButtonEventArgs(new Vector2(pos.x, pos.y))))
+                            break;
+                    }
+                }
+                if (mJumpBtnRect.Contains(pos))
+                {
+                    if (null != OnButtonDown)
+                    {
+                        if (OnButtonDown(mJumpButton, new ButtonEventArgs(new Vector2(pos.x, pos.y))))
+                            break;
+                    }
+                }
+                if (mSkill1BtnRect.Contains(pos))
+                {
+                    if (null != OnButtonDown)
+                    {
+                        if (OnButtonDown(mSkill1Button, new ButtonEventArgs(new Vector2(pos.x, pos.y))))
+                            break;
+                    }
+                }
+                if (mSkill2BtnRect.Contains(pos))
+                {
+                    if (null != OnButtonDown)
+                    {
+                        if (OnButtonDown(mSkill2Button, new ButtonEventArgs(new Vector2(pos.x, pos.y))))
+                            break;
+                    }
+                }
+            }
+#endif
+            if (显示FPS)
+            {
+                string debugText = string.Format("FPS:{0}, 生物数量:{1}", mFPS.ToString("f2"), mCreatureCount);
+                GUIStyle bb = new GUIStyle();
+                bb.normal.background = null;    //这是设置背景填充的
+                bb.normal.textColor = new Color(1, 0, 0);   //设置字体颜色的
+                bb.fontSize = 30;       //当然，这是字体颜色
+                GUI.Label(new Rect(0, 0, 200, 20), debugText, bb);
+            }
+            // test
+            if (null != 测试刷怪)
+            {
+                Rect rc = new Rect(Screen.width - mAttackBtnRect.width * 2 + 20, 10, mAttackBtnRect.width, mAttackBtnRect.height);
+                if (GUI.Button(rc, "", mAttackButton.GetStyle(mAttackButton.name)))
+                {
+                    if (!btnClicked)
+                    {
+                        GameObject objClone = MonoBehaviour.Instantiate(测试刷怪) as GameObject;
+                        objClone.name = "_" + 测试刷怪.name;
+                        objClone.transform.localPosition = new Vector3(
+                                Random.Range(0.0f, (float)Screen.width) / 200.0f,
+                                Random.Range((Screen.height / 1.5f), (float)Screen.height / 3.0f) / 200.0f,
+                                测试刷怪.transform.localPosition.z
+                            );
+                        H2DCharacterController ctrl = objClone.GetComponent<H2DCharacterController>();
+                        ctrl.FaceDirection = Vector3.right;
+                        CDebug.DebugCharaRandomAction dbgAct = objClone.AddComponent<CDebug.DebugCharaRandomAction>();
+                        mCreatureCount++;
+                    }
+                }
+                rc = new Rect(Screen.width - mAttackBtnRect.width + 10, 10, mAttackBtnRect.width, mAttackBtnRect.height);
+                if (GUI.Button(rc, "", mAttackButton.GetStyle(mAttackButton.name)))
+                {
+                    if (!btnClicked && mCreatureCount > 2)
+                    {
+                        GameObject objClone = GameObject.Find("_" + 测试刷怪.name);
+                        MonoBehaviour.DestroyObject(objClone);
+                        --mCreatureCount;
+                    }
+                }
+            }
         }
 
         void OnMouseDown()
@@ -204,12 +335,22 @@ namespace Assets.Script.Controller.OPUI
         }
 
         private Rect mBGImageRect;
+        private Rect mBarButtonOriRect;
         private Rect mBarButtonRect;
         private Rect mAttackBtnRect;
         private Rect mJumpBtnRect;
         private Rect mSkill1BtnRect;
         private Rect mSkill2BtnRect;
+        float mMoveStakBarLeftLimit = 0.0f;
+        float mMoveStakBarRightLimit = 0.0f;
+#if UNITY_STANDALONE
         private Object mMouseDownButton = null;
         private static Vector3 mLastMousePos3D;
+#endif
+        // show fps
+        float mLastInterval;
+        int mFrames = 0;
+        float mFPS;
+        int mCreatureCount = 2;
     }
 }

@@ -19,11 +19,12 @@ namespace Assets.Script.Editor
     {
         none = 0,
         ToolboxItem = 1,
-        ColliderItem = 2,
+        ImageSubItem = 2,
     }
     public interface IEditorMouseDragItem
     {
         MouseDragItemType ItemType { get; }
+        void OnBeginDragin(Vector2 pos);
         void DrawDraginGUI(Vector2 pos);
     }
 
@@ -40,7 +41,7 @@ namespace Assets.Script.Editor
 
         public static EditorMouseDelegate Current { get { return mCurrent; } }
         public Vector2 BeginPos { get { return mMouseBeginDragPosition; } }
-        public bool Dragin(MouseButtonType buttonID)
+        public bool InDrag(MouseButtonType buttonID)
         {
             if (buttonID < MouseButtonType.left || buttonID >= MouseButtonType.max)
                 return false;
@@ -49,6 +50,15 @@ namespace Assets.Script.Editor
         public int DraginCount
         {
             get { return mMouseDraginObjects.Count; }
+        }
+        public MouseDragItemType DraginType
+        {
+            get 
+            {
+                if (DraginCount <= 0)
+                    return MouseDragItemType.none;
+                return mMouseDraginObjects[0].ItemType;
+            }
         }
         public IEditorMouseDragItem this[int index]
         {
@@ -72,6 +82,7 @@ namespace Assets.Script.Editor
             {
                 foreach (IEditorMouseDragItem o in objs)
                 {
+                    o.OnBeginDragin(e.mousePosition);
                     mMouseDraginObjects.Add(o);
                 }
             }
