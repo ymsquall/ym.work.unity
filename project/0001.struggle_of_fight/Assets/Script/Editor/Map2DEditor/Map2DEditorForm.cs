@@ -99,13 +99,16 @@ namespace Assets.Script.Editor.Map2DEditor
                     Texture2D tex = null != obj ? obj.Image : null;
                     if (null == tex)
                     {
-                        bin = BitConverter.GetBytes(-1); newFile.Write(bin, 0, bin.Length);
+                        bin = BitConverter.GetBytes((ushort)0); newFile.Write(bin, 0, bin.Length);
                         bin = BitConverter.GetBytes((ushort)0); newFile.Write(bin, 0, bin.Length);
                         bin = BitConverter.GetBytes((ushort)0); newFile.Write(bin, 0, bin.Length);
                     }
                     else
                     {
-                        bin = BitConverter.GetBytes(tex.GetInstanceID()); newFile.Write(bin, 0, bin.Length);
+                        string assetPath = AssetDatabase.GetAssetPath(tex.GetInstanceID());
+                        byte[] bytePath = System.Text.Encoding.Default.GetBytes(assetPath);
+                        bin = BitConverter.GetBytes((ushort)bytePath.Length); newFile.Write(bin, 0, bin.Length);
+                        newFile.Write(bytePath, 0, bytePath.Length);
                         bin = BitConverter.GetBytes((ushort)tex.width); newFile.Write(bin, 0, bin.Length);
                         bin = BitConverter.GetBytes((ushort)tex.height); newFile.Write(bin, 0, bin.Length);
                     }
@@ -158,10 +161,17 @@ namespace Assets.Script.Editor.Map2DEditor
                 {
                     Map2DGridUnit gridUnit = new Map2DGridUnit();
                     mMapUnitList[i, j] = gridUnit;
-                    int instanceID = BitConverter.ToInt32(buffer, readIndex); readIndex += sizeof(int);
+                    string texPath = "";
+                    ushort pathLength = BitConverter.ToUInt16(buffer, readIndex); readIndex += sizeof(ushort);
+                    if (pathLength > 0)
+                    {
+                        texPath = System.Text.Encoding.Default.GetString(buffer, readIndex, pathLength);
+                        //texPath = BitConverter.ToString(buffer, readIndex, pathLength);
+                        readIndex += pathLength;
+                    }
                     ushort texWidth = BitConverter.ToUInt16(buffer, readIndex); readIndex += sizeof(ushort);
-                    ushort texHeight =  BitConverter.ToUInt16(buffer, readIndex); readIndex += sizeof(ushort);
-                    gridUnit.Image = EditorUtility.InstanceIDToObject(instanceID) as Texture2D;
+                    ushort texHeight = BitConverter.ToUInt16(buffer, readIndex); readIndex += sizeof(ushort);
+                    gridUnit.Image = AssetDatabase.LoadAssetAtPath(texPath, typeof(Texture2D)) as Texture2D;
                     gridUnit.ImageSize = new Vector2((float)texWidth, (float)texHeight);
                     if(!gridUnit.ReadImageSubs(buffer, ref readIndex))
                     {
@@ -315,7 +325,7 @@ namespace Assets.Script.Editor.Map2DEditor
                     gridRect.x = (float)j * gridRect.width;
                     gridRect.y = (float)i * gridRect.height;
                     int instanceID = i * newColCount + j;
-                    int id = EditorGUIUtility.GetControlID(instanceID.GetHashCode(), FocusType.Passive, gridRect);
+                    int id = EditorGUIUtility.GetControlID(FocusType.Passive);
                     if (mMapUnitList[i, j] == null)
                         mMapUnitList[i, j] = GUIUtility.GetStateObject(typeof(Map2DGridUnit), id) as Map2DGridUnit;
                     Texture2D newTex = EditorGUILayout.ObjectField(mMapUnitList[i, j].Image, typeof(Texture2D), true,

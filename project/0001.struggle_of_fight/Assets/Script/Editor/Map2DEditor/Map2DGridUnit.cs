@@ -74,7 +74,7 @@ namespace Assets.Script.Editor.Map2DEditor
             EventType et = e.GetTypeForControl(mControlID);
             switch (et)
             {
-                case EventType.MouseUp:
+                //case EventType.MouseUp:
                 case EventType.ContextClick:
                     {
                         if (e.button == 1)
