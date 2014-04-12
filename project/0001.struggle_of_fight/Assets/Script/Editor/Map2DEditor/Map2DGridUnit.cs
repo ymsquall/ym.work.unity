@@ -8,11 +8,14 @@ using UnityEditor;
 
 namespace Assets.Script.Editor.Map2DEditor
 {
-    public enum Map2DGridImageSubType : int
+    public enum Map2DGridImageSubType
     {
-        ground,
-        wall,
-        monster_pt,
+        地面,
+        墙壁,
+        刷怪点,
+        //ground = "平台",
+        //wall = "墙壁",
+        //monster_pt = "刷怪点",
         max
     }
     public class Map2DGridUnit
@@ -114,9 +117,9 @@ namespace Assets.Script.Editor.Map2DEditor
                 data.range.height = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
                 switch (data.type)
                 {
-                    case Map2DGridImageSubType.ground:
-                    case Map2DGridImageSubType.wall:
-                    case Map2DGridImageSubType.monster_pt:
+                    case Map2DGridImageSubType.地面:
+                    case Map2DGridImageSubType.墙壁:
+                    case Map2DGridImageSubType.刷怪点:
                         mImageSubList.Add(data);
                         break;
                     default:

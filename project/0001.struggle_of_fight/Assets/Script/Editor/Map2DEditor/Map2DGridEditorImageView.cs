@@ -9,27 +9,27 @@ namespace Assets.Script.Editor.Map2DEditor
 {
     public class Map2DGridEditorImageSubItem : IEditorMouseDragItem
     {
-        public Map2DGridEditorImageSubItem(string type, Vector2 pos, Map2DGridEditorImageView parent)
+        public Map2DGridEditorImageSubItem(Map2DGridImageSubType type, Vector2 pos, Map2DGridEditorImageView parent)
         {
             mImageSubType = type;
             mParent = parent;
             pos = Point2WorldPoint(pos);
-            if (Map2DGridEditorToolboxView.ToolsTips[0] == mImageSubType)
+            switch(mImageSubType)
             {
-                mRange.width = 100; mRange.height = 10;
-            }
-            else if (Map2DGridEditorToolboxView.ToolsTips[1] == mImageSubType)
-            {
-                mRange.width = 20; mRange.height = 100;
-            }
-            else if (Map2DGridEditorToolboxView.ToolsTips[2] == mImageSubType)
-            {
-                mRange.width = 60; mRange.height = 60;
+                case Map2DGridImageSubType.地面:
+                    mRange.width = 100; mRange.height = 10;
+                    break;
+                case Map2DGridImageSubType.墙壁:
+                    mRange.width = 20; mRange.height = 100;
+                    break;
+                case Map2DGridImageSubType.刷怪点:
+                    mRange.width = 60; mRange.height = 60;
+                    break;
             }
             mRange.x = pos.x - mRange.width * 0.5f;
             mRange.y = pos.y - mRange.height * 0.5f;
         }
-        public Map2DGridEditorImageSubItem(string type, Rect range, Map2DGridEditorImageView parent)
+        public Map2DGridEditorImageSubItem(Map2DGridImageSubType type, Rect range, Map2DGridEditorImageView parent)
         {
             mImageSubType = type;
             mParent = parent;
@@ -37,7 +37,7 @@ namespace Assets.Script.Editor.Map2DEditor
         }
         int mControlID = -1;
         Map2DGridEditorImageView mParent = null;
-        string mImageSubType;
+        Map2DGridImageSubType mImageSubType;
         Rect mRange = new Rect(0, 0, 0, 0);
         //Vector2 mBeginDraginPos;
 
@@ -54,12 +54,14 @@ namespace Assets.Script.Editor.Map2DEditor
             set { mParent = value; }
             get { return mParent; }
         }
-        public string ImageSubType
+        public Map2DGridImageSubType ImageSubType
         {
+            set { mImageSubType = value; }
             get { return mImageSubType; }
         }
         public Rect LocalRange
         {
+            set { mRange = value; }
             get { return mRange; }
         }
         public Rect WorldRange
@@ -187,14 +189,14 @@ namespace Assets.Script.Editor.Map2DEditor
                 foreach(Map2DGridEditorImageSubItem i in mImageSubList)
                 {
                     Map2DGridUnit.ImageSubData data;
-                    data.type = Map2DGridEditorToolboxView.ToolTips2Type(i.ImageSubType);
+                    data.type = i.ImageSubType;
                     data.range = i.LocalRange;
                     list.Add(data);
                 }
                 return list;
             }
         }
-        public Map2DGridEditorImageSubItem AddImageSubItem(string type, Vector2 pos)
+        public Map2DGridEditorImageSubItem AddImageSubItem(Map2DGridImageSubType type, Vector2 pos)
         {
             //int count = mImageSubList.Count;
             Map2DGridEditorImageSubItem item = new Map2DGridEditorImageSubItem(type, pos, this);
@@ -203,7 +205,7 @@ namespace Assets.Script.Editor.Map2DEditor
             mImageSubList.Add(item);
             return item;
         }
-        public Map2DGridEditorImageSubItem AddImageSubItem(string type, Rect range)
+        public Map2DGridEditorImageSubItem AddImageSubItem(Map2DGridImageSubType type, Rect range)
         {
             Map2DGridEditorImageSubItem item = new Map2DGridEditorImageSubItem(type, range, this);
             item.OnMouseLBUpInOutside += OnClearDraginItem;
@@ -295,7 +297,7 @@ namespace Assets.Script.Editor.Map2DEditor
                                     if (item.ItemType != MouseDragItemType.ToolboxItem)
                                         continue;
                                     Map2DGridEditorToolboxItem toolItem = item as Map2DGridEditorToolboxItem;
-                                    AddImageSubItem(toolItem.ToolTips, e.mousePosition);
+                                    AddImageSubItem(toolItem.ImageSubType, e.mousePosition);
                                     dragItem = true;
                                 }
                                 EditorMouseDelegate.Current.EndDrag(e.button);
@@ -344,10 +346,15 @@ namespace Assets.Script.Editor.Map2DEditor
         }
         void OnClearDraginItem(Map2DGridEditorImageSubItem sender)
         {
-
+            Map2DGridEditorForm parent = mParent as Map2DGridEditorForm;
+            if (null != parent)
+                parent.OnDeSelectImageSubItem(sender);
         }
         void OnItemDraginEnded(Map2DGridEditorImageSubItem sender)
         {
+            Map2DGridEditorForm parent = mParent as Map2DGridEditorForm;
+            if (null != parent)
+                parent.OnImageSubItemSelected(sender);
             Map2DEditor.DoSaved();
         }
     }

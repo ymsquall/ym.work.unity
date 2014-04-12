@@ -10,17 +10,35 @@ namespace Assets.Script.Editor.Map2DEditor
     {
         int mControlID;
         EditorWindow mParent;
-        Rect mSize;
+        Rect mRange;
+
+        Map2DGridEditorImageSubItem mSelected = null;
+        public Map2DGridEditorImageSubItem Selected
+        {
+            set { mSelected = value; }
+            get { return mSelected; }
+        }
 
         public void Init(int id, EditorWindow parent, Rect rc)
         {
             mControlID = id;
             mParent = parent;
-            mSize = rc;
+            mRange = rc;
         }
 
         public void OnGUI()
         {
+            EditorGUILayout.BeginHorizontal();
+            if(null != Selected)
+            {
+                Rect newRange = EditorGUILayout.RectField("范围:", Selected.LocalRange);
+                if (newRange != Selected.LocalRange)
+                    mSelected.LocalRange = newRange;
+                Map2DGridImageSubType newType = (Map2DGridImageSubType)EditorGUILayout.EnumPopup("类型", Selected.ImageSubType);
+                if (newType != Selected.ImageSubType)
+                    mSelected.ImageSubType = newType;
+            }
+            EditorGUILayout.EndHorizontal();
         }
     }
 }

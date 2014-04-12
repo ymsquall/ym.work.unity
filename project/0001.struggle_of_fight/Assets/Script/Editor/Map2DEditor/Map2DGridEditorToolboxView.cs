@@ -11,7 +11,7 @@ namespace Assets.Script.Editor.Map2DEditor
     {
         int mControlID = -1;
         Rect mRange = new Rect(0, 0, 0, 0);
-        string mToolTips;
+        Map2DGridImageSubType mImageSubType;
         bool mSelected = false;
 
 #region IEditorMouseDragItem
@@ -25,24 +25,30 @@ namespace Assets.Script.Editor.Map2DEditor
         }
         void IEditorMouseDragItem.DrawDraginGUI(Vector2 pos)
         {
-            if (Map2DGridEditorToolboxView.ToolsTips[0] == mToolTips)
-                NGUIEditorTools.DrawTexture(NGUIEditorTools.blankTexture, new Rect(pos.x - 50, pos.y - 5, 100, 10), new Rect(0, 0, 1, 1), Color.gray);
-            else if (Map2DGridEditorToolboxView.ToolsTips[1] == mToolTips)
-                NGUIEditorTools.DrawTexture(NGUIEditorTools.blankTexture, new Rect(pos.x - 10, pos.y - 50, 20, 100), new Rect(0, 0, 1, 1), Color.gray);
-            else if (Map2DGridEditorToolboxView.ToolsTips[2] == mToolTips)
-                NGUIEditorTools.DrawTexture(NGUIEditorTools.blankTexture, new Rect(pos.x - 30, pos.y - 30, 60, 60), new Rect(0, 0, 1, 1), Color.gray);
+            switch(mImageSubType)
+            {
+                case Map2DGridImageSubType.地面:
+                    NGUIEditorTools.DrawTexture(NGUIEditorTools.blankTexture, new Rect(pos.x - 50, pos.y - 5, 100, 10), new Rect(0, 0, 1, 1), Color.gray);
+                    break;
+                case Map2DGridImageSubType.墙壁:
+                    NGUIEditorTools.DrawTexture(NGUIEditorTools.blankTexture, new Rect(pos.x - 10, pos.y - 50, 20, 100), new Rect(0, 0, 1, 1), Color.gray);
+                    break;
+                case Map2DGridImageSubType.刷怪点:
+                    NGUIEditorTools.DrawTexture(NGUIEditorTools.blankTexture, new Rect(pos.x - 30, pos.y - 30, 60, 60), new Rect(0, 0, 1, 1), Color.gray);
+                    break;
+            }
         }
 #endregion
 
         public int ControlID { get { return mControlID; } }
-        public string ToolTips { get { return mToolTips; } }
+        public Map2DGridImageSubType ImageSubType { get { return mImageSubType; } }
         public Rect Range { get { return mRange; } }
         public bool Selected { set{ mSelected = value; } get { return mSelected; } }
 
-        public void Init(int id, string tips, Rect rc)
+        public void Init(int id, Map2DGridImageSubType type, Rect rc)
         {
             mControlID = id;
-            mToolTips = tips;
+            mImageSubType = type;
             mRange = rc;
         }
         public void OnEvent(Event e)
@@ -68,22 +74,6 @@ namespace Assets.Script.Editor.Map2DEditor
         EditorWindow mParent;
         Rect mSize;
 
-        public static string[] ToolsTips = { "平台", "墙壁", "刷怪点" };
-        public static Map2DGridImageSubType ToolTips2Type(string type)
-        {
-            for(int i = 0; i < (int)Map2DGridImageSubType.max; ++ i)
-            {
-                if (ToolsTips[i] == type)
-                    return (Map2DGridImageSubType)i;
-            }
-            return Map2DGridImageSubType.max;
-        }
-        public static string Type2ToolTips(Map2DGridImageSubType type)
-        {
-            if (type >= Map2DGridImageSubType.ground && type < Map2DGridImageSubType.max)
-                return ToolsTips[(int)type];
-            return "";
-        }
         Dictionary<int, Map2DGridEditorToolboxItem> mToolItems = new Dictionary<int, Map2DGridEditorToolboxItem>(0);
 
         public void Init(int id, EditorWindow parent, Rect rc)
@@ -97,14 +87,14 @@ namespace Assets.Script.Editor.Map2DEditor
         {
             EditorGUILayout.BeginVertical();
             Rect itemRect = new Rect(10, 5, 0, 0);
-            foreach (string s in ToolsTips)
+            for (Map2DGridImageSubType i = Map2DGridImageSubType.地面; i < Map2DGridImageSubType.max; ++ i)
             {
                 itemRect.x = mSize.x;
                 itemRect.width = 50;
                 itemRect.height = 30;
                 int id = EditorGUIUtility.GetControlID(FocusType.Passive);
                 Map2DGridEditorToolboxItem tool = EditorGUIUtility.GetStateObject(typeof(Map2DGridEditorToolboxItem), id) as Map2DGridEditorToolboxItem;
-                tool.Init(id, s, itemRect);
+                tool.Init(id, i, itemRect);
                 if (mToolItems.ContainsKey(id))
                     mToolItems[id] = tool;
                 else
@@ -113,9 +103,9 @@ namespace Assets.Script.Editor.Map2DEditor
                 {
                     GUIStyle cc = new GUIStyle();
                     cc.normal.background = null;
-                    cc.normal.textColor = Map2DEditor.ColorByToolType(s);
+                    cc.normal.textColor = Map2DEditor.ColorByToolType(i);
                     cc.fontSize = 25;
-                    GUI.Label(itemRect, s, cc);
+                    GUI.Label(itemRect, i.ToString(), cc);
                 }
                 tool.OnEvent(Event.current);
                 itemRect.y += itemRect.height + 5;

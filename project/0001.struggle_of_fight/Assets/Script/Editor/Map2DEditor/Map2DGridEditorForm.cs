@@ -13,6 +13,7 @@ namespace Assets.Script.Editor.Map2DEditor
         int mGridRowIndex = -1, mGridColIndex = -1;
         bool mInited = false;
         Map2DGridEditorImageView mImageView;
+        Map2DGridEditorPropertyView mPropertyView;
         public int GridRowIndex
         {
             set { mGridRowIndex = value; }
@@ -23,6 +24,14 @@ namespace Assets.Script.Editor.Map2DEditor
             set { mGridColIndex = value; }
             get { return mGridColIndex; }
         }
+
+        public List<Map2DGridUnit.ImageSubData> ImageSubList
+        {
+            get
+            {
+                return mImageView.ImageSubList;
+            }
+        }
         void OnEnable()
         {
             wantsMouseMove = true;
@@ -30,6 +39,15 @@ namespace Assets.Script.Editor.Map2DEditor
         void OnDestroy()
         {
             Map2DEditor.OnFormClosed(this.name);
+        }
+        public void Init()
+        {
+            Map2DGridUnit grid = Map2DEditor.FindGridUnitByIndex(GridRowIndex, GridColIndex);
+            foreach (Map2DGridUnit.ImageSubData d in grid.ImageSubList)
+            {
+                mImageView.AddImageSubItem(d.type, d.range);
+            }
+            mInited = true;
         }
         void OnGUI()
         {
@@ -61,32 +79,23 @@ namespace Assets.Script.Editor.Map2DEditor
             GUILayout.Box("", GUILayout.Width(position.width), GUILayout.Height(5));
             EditorGUILayout.BeginHorizontal();
             id = EditorGUIUtility.GetControlID(FocusType.Keyboard);
-            Map2DGridEditorPropertyView property = EditorGUIUtility.GetStateObject(typeof(Map2DGridEditorPropertyView), id) as Map2DGridEditorPropertyView;
-            if (property != null)
+            mPropertyView = EditorGUIUtility.GetStateObject(typeof(Map2DGridEditorPropertyView), id) as Map2DGridEditorPropertyView;
+            if (mPropertyView != null)
             {
                 Rect rc = new Rect(0, position.height - 95, position.width, 95);
-                property.Init(id, this, rc);
-                property.OnGUI();
+                mPropertyView.Init(id, this, rc);
+                mPropertyView.OnGUI();
             }
             GUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
         }
-        public void Init()
+        public void OnImageSubItemSelected(Map2DGridEditorImageSubItem item)
         {
-            Map2DGridUnit grid = Map2DEditor.FindGridUnitByIndex(GridRowIndex, GridColIndex);
-            foreach(Map2DGridUnit.ImageSubData d in grid.ImageSubList)
-            {
-                mImageView.AddImageSubItem(Map2DGridEditorToolboxView.Type2ToolTips(d.type), d.range);
-            }
-            mInited = true;
+            mPropertyView.Selected = item;
         }
-
-        public List<Map2DGridUnit.ImageSubData> ImageSubList
+        public void OnDeSelectImageSubItem(Map2DGridEditorImageSubItem item)
         {
-            get
-            {
-                return mImageView.ImageSubList;
-            }
+            mPropertyView.Selected = null;
         }
     }
 }
