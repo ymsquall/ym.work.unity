@@ -69,6 +69,10 @@ namespace Assets.Script.Editor
                 return mMouseDraginObjects[index];
             }
         }
+        public bool DraginItem(IEditorMouseDragItem item)
+        {
+            return mMouseDraginObjects.Contains(item);
+        }
 
         public void BeginDrag(Event e, params IEditorMouseDragItem[] objs)
         {

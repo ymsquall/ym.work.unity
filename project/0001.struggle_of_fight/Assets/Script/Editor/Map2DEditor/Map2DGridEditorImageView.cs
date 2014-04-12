@@ -16,25 +16,30 @@ namespace Assets.Script.Editor.Map2DEditor
             pos = Point2WorldPoint(pos);
             if (Map2DGridEditorToolboxView.ToolsTips[0] == mImageSubType)
             {
-                mRegion.width = 100; mRegion.height = 10;
+                mRange.width = 100; mRange.height = 10;
             }
             else if (Map2DGridEditorToolboxView.ToolsTips[1] == mImageSubType)
             {
-                mRegion.width = 20; mRegion.height = 100;
+                mRange.width = 20; mRange.height = 100;
             }
             else if (Map2DGridEditorToolboxView.ToolsTips[2] == mImageSubType)
             {
-                mRegion.width = 60; mRegion.height = 60;
+                mRange.width = 60; mRange.height = 60;
             }
-            mRegion.x = pos.x - mRegion.width * 0.5f;
-            mRegion.y = pos.y - mRegion.height * 0.5f;
+            mRange.x = pos.x - mRange.width * 0.5f;
+            mRange.y = pos.y - mRange.height * 0.5f;
+        }
+        public Map2DGridEditorImageSubItem(string type, Rect range, Map2DGridEditorImageView parent)
+        {
+            mImageSubType = type;
+            mParent = parent;
+            mRange = range;
         }
         int mControlID = -1;
         Map2DGridEditorImageView mParent = null;
         string mImageSubType;
-        Rect mRegion = new Rect(0, 0, 0, 0);
-        Vector2 mBeginDraginPos;
-        Vector2 mDraginPosOffset;
+        Rect mRange = new Rect(0, 0, 0, 0);
+        //Vector2 mBeginDraginPos;
 
         public delegate void OnMouseLBEvent(Map2DGridEditorImageSubItem sender);
         public OnMouseLBEvent OnMouseLBUpInOutside;
@@ -49,13 +54,21 @@ namespace Assets.Script.Editor.Map2DEditor
             set { mParent = value; }
             get { return mParent; }
         }
+        public string ImageSubType
+        {
+            get { return mImageSubType; }
+        }
+        public Rect LocalRange
+        {
+            get { return mRange; }
+        }
         public Rect WorldRange
         {
             get
             {
-                Rect ret = mRegion;
-                ret.x = mParent.Position.x + mRegion.x * mParent.Scale;
-                ret.y = mParent.Position.y + mRegion.y * mParent.Scale;
+                Rect ret = mRange;
+                ret.x = mParent.Position.x + mRange.x * mParent.Scale;
+                ret.y = mParent.Position.y + mRange.y * mParent.Scale;
                 ret.width *= mParent.Scale;
                 ret.height *= mParent.Scale;
                 return ret;
@@ -63,7 +76,6 @@ namespace Assets.Script.Editor.Map2DEditor
         }
         public Vector2 Point2WorldPoint(Vector2 pos)
         {
-            //return (pos - mParent.Position) / mParent.Scale;
             return pos / mParent.Scale;
         }
 #region IEditorMouseDragItem
@@ -73,19 +85,11 @@ namespace Assets.Script.Editor.Map2DEditor
         }
         void IEditorMouseDragItem.OnBeginDragin(Vector2 pos)
         {
-            //pos = Point2WorldPoint(pos);
-            mBeginDraginPos = pos;
-            mDraginPosOffset = pos - (mParent.Position + new Vector2(mRegion.x, mRegion.y));
-            mDraginPosOffset.x -= 1;
-            mDraginPosOffset.y -= 1;
+            //mBeginDraginPos = pos;
         }
         void IEditorMouseDragItem.DrawDraginGUI(Vector2 pos)
         {
-            //pos = Point2WorldPoint(pos);
-            Vector2 realPos = pos - mDraginPosOffset;
-            mRegion.center = realPos - mParent.Position;
-            //mRegion.x = realPos.x - mRegion.width;
-            //mRegion.y = realPos.y - mRegion.height;
+            mRange.center += Event.current.delta / mParent.Scale;
             //NGUIEditorTools.DrawTexture(NGUIEditorTools.blankTexture, new Rect(mRegion.center.x, mRegion.center.y, mRegion.width, mRegion.height), new Rect(0, 0, 1, 1), Map2DEditor.ColorByToolType(mImageSubType));
         }
 #endregion
@@ -99,88 +103,55 @@ namespace Assets.Script.Editor.Map2DEditor
         {
             if (e.type == EventType.Layout || e.type == EventType.Repaint)
                 return;
+            bool inRange = WorldRange.Contains(e.mousePosition);
+            bool draginMe = EditorMouseDelegate.Current.DraginItem(this);
             EventType et = e.GetTypeForControl(ControlID);
-            if (WorldRange.Contains(e.mousePosition))
+            switch(et)
             {
-                Debug.Log(et.ToString());
-                switch(et)
-                {
-                    case EventType.MouseDown:
+                case EventType.MouseDown:
+                    {
+                        if(e.button == 0)
                         {
-                            if(e.button == 0)
+                            if(inRange)
                             {
                                 EditorMouseDelegate.Current.EndDrag(e.button);
                                 EditorMouseDelegate.Current.BeginDrag(e, this);
                                 e.Use();
                             }
                         }
-                        break;
-                    case EventType.MouseDrag:
+                    }
+                    break;
+                case EventType.MouseDrag:
+                    {
+                        if (e.button == 0)
                         {
-                            if (e.button == 0)
+                            if (draginMe)
                             {
-                                if (EditorMouseDelegate.Current.DraginType == MouseDragItemType.ImageSubItem)
-                                {
-                                    e.Use();
-                                }
+                                ((IEditorMouseDragItem)this).DrawDraginGUI(e.mousePosition);
+                                e.Use();
                             }
                         }
-                        break;
-                    case EventType.MouseUp:
+                    }
+                    break;
+                case EventType.MouseUp:
+                    {
+                        if (e.button == 0)
                         {
-                            if (e.button == 0)
-                            {
-                                if (null != OnMouseLBUpInSide)
-                                    OnMouseLBUpInSide(this);
-                                //e.Use();
-                            }
-                        }
-                        break;
-                }
-            }
-            else if (EditorMouseDelegate.Current.DraginType == MouseDragItemType.ImageSubItem)
-            {
-                switch (et)
-                {
-                    case EventType.MouseDrag:
-                        {
-                            if (e.button == 0)
-                            {
-                                if (EditorMouseDelegate.Current.DraginType == MouseDragItemType.ImageSubItem)
-                                {
-                                    e.Use();
-                                }
-                            }
-                        }
-                        break;
-                    case EventType.MouseUp:
-                        {
-                            if (e.button == 0)
+                            if (draginMe || inRange)
                             {
                                 if (null != OnMouseLBUpInSide)
                                     OnMouseLBUpInSide(this);
-                                //e.Use();
                             }
-                        }
-                        break;
-                }
-            }
-            else
-            {
-                switch (et)
-                {
-                    case EventType.MouseUp:
-                        {
-                            if (e.button == 0)
+                            else
                             {
                                 EditorMouseDelegate.Current.EndDrag(e.button);
                                 if (null != OnMouseLBUpInOutside)
                                     OnMouseLBUpInOutside(this);
-                                //e.Use();
                             }
+                            e.Use();
                         }
-                        break;
-                }
+                    }
+                    break;
             }
         }
     }
@@ -193,13 +164,6 @@ namespace Assets.Script.Editor.Map2DEditor
         Rect mImageRealViewSize = new Rect(0, 0, 0, 0);
         int mControlID = -1;
         List<Map2DGridEditorImageSubItem> mImageSubList = new List<Map2DGridEditorImageSubItem>(0);
-
-        struct ImageSubbject
-        {
-            int id;
-            Transform obj;
-            Rect rc;
-        }
 
         public int ControlID
         {
@@ -214,12 +178,36 @@ namespace Assets.Script.Editor.Map2DEditor
             get { return mImageScrollPos; }
         }
         public float Scale { get { return mImageScrollScale; } }
+
+        public List<Map2DGridUnit.ImageSubData> ImageSubList
+        {
+            get
+            {
+                List<Map2DGridUnit.ImageSubData> list = new List<Map2DGridUnit.ImageSubData>();
+                foreach(Map2DGridEditorImageSubItem i in mImageSubList)
+                {
+                    Map2DGridUnit.ImageSubData data;
+                    data.type = Map2DGridEditorToolboxView.ToolTips2Type(i.ImageSubType);
+                    data.range = i.LocalRange;
+                    list.Add(data);
+                }
+                return list;
+            }
+        }
         public Map2DGridEditorImageSubItem AddImageSubItem(string type, Vector2 pos)
         {
             //int count = mImageSubList.Count;
             Map2DGridEditorImageSubItem item = new Map2DGridEditorImageSubItem(type, pos, this);
-            item.OnMouseLBUpInOutside += OnClearSelectedItem;
-            item.OnMouseLBUpInSide += OnSelectedItem;
+            item.OnMouseLBUpInOutside += OnClearDraginItem;
+            item.OnMouseLBUpInSide += OnItemDraginEnded;
+            mImageSubList.Add(item);
+            return item;
+        }
+        public Map2DGridEditorImageSubItem AddImageSubItem(string type, Rect range)
+        {
+            Map2DGridEditorImageSubItem item = new Map2DGridEditorImageSubItem(type, range, this);
+            item.OnMouseLBUpInOutside += OnClearDraginItem;
+            item.OnMouseLBUpInSide += OnItemDraginEnded;
             mImageSubList.Add(item);
             return item;
         }
@@ -255,8 +243,8 @@ namespace Assets.Script.Editor.Map2DEditor
             for (int i = 0; i < EditorMouseDelegate.Current.DraginCount; ++i)
             {
                 IEditorMouseDragItem item = EditorMouseDelegate.Current[i];
-                //if (item.ItemType != MouseDragItemType.ToolboxItem)
-                //    continue;
+                if (item.ItemType != MouseDragItemType.ToolboxItem)
+                    continue;
                 item.DrawDraginGUI(Event.current.mousePosition);
             }
             GUILayout.EndArea();
@@ -312,7 +300,10 @@ namespace Assets.Script.Editor.Map2DEditor
                                 }
                                 EditorMouseDelegate.Current.EndDrag(e.button);
                                 if (dragItem)
+                                {
+                                    OnItemDraginEnded(null);
                                     e.Use();
+                                }
                             }
                         }
                         break;
@@ -351,13 +342,13 @@ namespace Assets.Script.Editor.Map2DEditor
                 }
             }
         }
-        void OnClearSelectedItem(Map2DGridEditorImageSubItem sender)
+        void OnClearDraginItem(Map2DGridEditorImageSubItem sender)
         {
 
         }
-        void OnSelectedItem(Map2DGridEditorImageSubItem sender)
+        void OnItemDraginEnded(Map2DGridEditorImageSubItem sender)
         {
-
+            Map2DEditor.DoSaved();
         }
     }
 }

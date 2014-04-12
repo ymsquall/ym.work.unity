@@ -1,6 +1,8 @@
 ﻿#if UNITY_EDITOR
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEditor;
 
@@ -9,6 +11,8 @@ namespace Assets.Script.Editor.Map2DEditor
     public class Map2DGridEditorForm : EditorBaseWindow<Map2DGridEditorForm>
     {
         int mGridRowIndex = -1, mGridColIndex = -1;
+        bool mInited = false;
+        Map2DGridEditorImageView mImageView;
         public int GridRowIndex
         {
             set { mGridRowIndex = value; }
@@ -32,12 +36,16 @@ namespace Assets.Script.Editor.Map2DEditor
             EditorGUILayout.BeginVertical();
             EditorGUILayout.BeginHorizontal();
             int id = EditorGUIUtility.GetControlID(FocusType.Passive);
-            Map2DGridEditorImageView gridImage = EditorGUIUtility.GetStateObject(typeof(Map2DGridEditorImageView), id) as Map2DGridEditorImageView;
-            if (gridImage != null)
+            mImageView = EditorGUIUtility.GetStateObject(typeof(Map2DGridEditorImageView), id) as Map2DGridEditorImageView;
+            if (mImageView != null)
             {
+                if(!mInited)
+                {
+                    Init();
+                }
                 Rect rc = new Rect(0,0,position.width - 100, position.height - 100);
-                gridImage.Init(id, this, rc);
-                gridImage.OnGUI();
+                mImageView.Init(id, this, rc);
+                mImageView.OnGUI();
             }
             GUILayout.Box("", GUILayout.Width(5), GUILayout.Height(position.height - 100));
             id = EditorGUIUtility.GetControlID(FocusType.Passive);
@@ -62,6 +70,23 @@ namespace Assets.Script.Editor.Map2DEditor
             }
             GUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
+        }
+        public void Init()
+        {
+            Map2DGridUnit grid = Map2DEditor.FindGridUnitByIndex(GridRowIndex, GridColIndex);
+            foreach(Map2DGridUnit.ImageSubData d in grid.ImageSubList)
+            {
+                mImageView.AddImageSubItem(Map2DGridEditorToolboxView.Type2ToolTips(d.type), d.range);
+            }
+            mInited = true;
+        }
+
+        public List<Map2DGridUnit.ImageSubData> ImageSubList
+        {
+            get
+            {
+                return mImageView.ImageSubList;
+            }
         }
     }
 }

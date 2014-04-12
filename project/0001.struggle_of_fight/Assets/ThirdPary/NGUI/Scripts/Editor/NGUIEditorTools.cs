@@ -14,7 +14,7 @@ using System.Reflection;
 
 public class NGUIEditorTools
 {
-	static Texture2D mWhiteTex;
+	//static Texture2D mWhiteTex;
 	static Texture2D mBackdropTex;
 	static Texture2D mContrastTex;
 	static Texture2D mGradientTex;

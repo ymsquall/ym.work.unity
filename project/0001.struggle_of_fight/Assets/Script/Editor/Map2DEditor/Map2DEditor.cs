@@ -29,7 +29,12 @@ namespace Assets.Script.Editor.Map2DEditor
                 SceneView.onSceneGUIDelegate += mainForm.mSceneDelegate;
             }
         }
-
+        public static void DoSaved()
+        {
+            var mainForm = EditorWindowsManager.GetWindow<Map2DEditorForm>(MainFormName);
+            if(null != mainForm)
+                mainForm.SaveMap2DData();
+        }
         public static void OnDrawSceneFunc(SceneView sceneView)
         {
             var mainForm = EditorWindowsManager.GetWindow<Map2DEditorForm>(MainFormName);
@@ -41,12 +46,14 @@ namespace Assets.Script.Editor.Map2DEditor
             EditorWindowsManager.ClosedWindow(name);
         }
 
-        public static Map2DGridEditorForm GetOrNewGridEditorForm(int rIndex, int cIndex)
+        public static Map2DGridEditorForm GetOrNewGridEditorForm(int rIndex, int cIndex, bool newForm = true)
         {
             string name = string.Format("GridForm({0}-{1})", rIndex, cIndex);
             var form = EditorWindowsManager.GetWindow<Map2DGridEditorForm>(name);
             if (null != form)
                 return form;
+            if (!newForm)
+                return null;
             string title = string.Format("单元{0}-{1}", rIndex, cIndex);
             form = Map2DGridEditorForm.CreateForm(name, title);
             form.GridRowIndex = rIndex;

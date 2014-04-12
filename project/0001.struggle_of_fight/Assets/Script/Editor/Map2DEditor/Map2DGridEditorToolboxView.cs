@@ -69,6 +69,21 @@ namespace Assets.Script.Editor.Map2DEditor
         Rect mSize;
 
         public static string[] ToolsTips = { "平台", "墙壁", "刷怪点" };
+        public static Map2DGridImageSubType ToolTips2Type(string type)
+        {
+            for(int i = 0; i < (int)Map2DGridImageSubType.max; ++ i)
+            {
+                if (ToolsTips[i] == type)
+                    return (Map2DGridImageSubType)i;
+            }
+            return Map2DGridImageSubType.max;
+        }
+        public static string Type2ToolTips(Map2DGridImageSubType type)
+        {
+            if (type >= Map2DGridImageSubType.ground && type < Map2DGridImageSubType.max)
+                return ToolsTips[(int)type];
+            return "";
+        }
         Dictionary<int, Map2DGridEditorToolboxItem> mToolItems = new Dictionary<int, Map2DGridEditorToolboxItem>(0);
 
         public void Init(int id, EditorWindow parent, Rect rc)

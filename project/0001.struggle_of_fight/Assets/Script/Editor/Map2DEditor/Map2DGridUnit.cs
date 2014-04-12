@@ -1,79 +1,58 @@
 ﻿#if UNITY_EDITOR
 
+using System;
+using System.IO;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
 namespace Assets.Script.Editor.Map2DEditor
 {
+    public enum Map2DGridImageSubType : int
+    {
+        ground,
+        wall,
+        monster_pt,
+        max
+    }
     public class Map2DGridUnit
     {
         static GUIContent[] MRBMenuItemList = 
             new GUIContent[] { new GUIContent("编辑单元"),
                              };
-        public delegate void OnEditorEventHandler(Map2DGridUnit sender, int rIndex, int cIndex);
-        public OnEditorEventHandler OnEditorMenuItemCommand = null;
-
         int mControlID = -1;
         int mRowIndex = -1;
         int mColIndex = -1;
         Rect mViewRect;
         Vector2 mImageSize = Vector2.zero;
-        GameObject mGridUnitObj;
-        public Map2DGridUnit()
+        Texture2D mImage = null;
+
+        public struct ImageSubData
         {
-            Created();
+            public Map2DGridImageSubType type;
+            public Rect range;
         }
-        public void Created()
-        {
-            mGridUnitObj = new GameObject();
-            mGridUnitObj.AddComponent<SpriteRenderer>();
-        }
-        public void Destroy()
-        {
-            if (null != mGridUnitObj)
-            {
-                GameObject.DestroyImmediate(mGridUnitObj);
-                GridUnit = null;
-            }
-        }
+        List<ImageSubData> mImageSubList = new List<ImageSubData>(0);
+
         public int ControlID { get { return mControlID; } }
         public int RowIndex { get { return mRowIndex; } }
         public int ColIndex { get { return mColIndex; } }
         public Rect ViewRect { get { return mViewRect; } }
         public Texture2D Image
         {
-            set
-            {
-                SpriteRenderer sr = GridUnit.GetComponent<SpriteRenderer>();
-                Texture2D oldTex = null;
-                if(sr.sprite != null)
-                    oldTex = sr.sprite.texture;
-                if(oldTex != value)
-                {
-                    if (null != value)
-                        sr.sprite = Sprite.Create(value, new Rect(0, 0, value.width, value.height), new Vector2(value.width, value.height));
-                    else
-                        sr.sprite = null;
-                }
-            }
-            get
-            {
-                SpriteRenderer sr = GridUnit.GetComponent<SpriteRenderer>();
-                if (sr.sprite == null)
-                    return null;
-                return sr.sprite.texture;
-            } 
+            set { mImage = value; }
+            get { return mImage; }
         }
         public Vector2 ImageSize
         {
             set { mImageSize = value; }
             get { return mImageSize; }
         }
-        public GameObject GridUnit
+        public List<ImageSubData> ImageSubList
         {
-            set { mGridUnitObj = value; }
-            get { return mGridUnitObj; }
+            get { return mImageSubList; }
         }
+
         public void Init(int id, int rIndex, int cIndex, Rect rc, Texture2D img)
         {
             mControlID = id;
@@ -82,44 +61,21 @@ namespace Assets.Script.Editor.Map2DEditor
             mViewRect = rc;
             Image = img;
         }
+        public void Destroy()
+        {
+            Map2DGridEditorForm form = Map2DEditor.GetOrNewGridEditorForm(mRowIndex, mColIndex, false);
+            if (null != form)
+                form.Close();
+        }
         public void OnEvent(Event e)
         {
             if (!mViewRect.Contains(e.mousePosition))
                 return;
             EventType et = e.GetTypeForControl(mControlID);
-            //switch(et)
-            //{
-            //    case EventType.MouseDown:
-            //    case EventType.MouseUp:
-            //    case EventType.MouseMove:
-            //    case EventType.MouseDrag:
-            //    case EventType.KeyDown:
-            //    case EventType.KeyUp:
-            //    case EventType.ScrollWheel:
-            //    //case EventType.Repaint:
-            //    //case EventType.Layout:
-            //    case EventType.DragUpdated:
-            //    case EventType.DragPerform:
-            //    case EventType.Ignore:
-            //    case EventType.Used:
-            //    case EventType.ValidateCommand:
-            //    case EventType.ExecuteCommand:
-            //    case EventType.DragExited:
-            //    case EventType.ContextClick:
-            //        Debug.Log(string.Format("Control[{2}] Event[{0}], CommandName[{1}]", e.type.ToString(), e.commandName, mControlID));
-            //        if(et != EventType.ScrollWheel)
-            //            e.Use();
-            //        break;
-            //}
             switch (et)
             {
-                //case EventType.MouseDown:
-                //    {
-                //        if (e.button == 1)
-                //            GUIUtility.hotControl = mControlID;
-                //    }
-                //    break;
                 case EventType.MouseUp:
+                case EventType.ContextClick:
                     {
                         if (e.button == 1)
                         {
@@ -137,10 +93,55 @@ namespace Assets.Script.Editor.Map2DEditor
             switch(selected)
             {
                 case 0:
-                    if (null != OnEditorMenuItemCommand)
-                        OnEditorMenuItemCommand(this, RowIndex, ColIndex);
+                    {
+                        Map2DEditor.GetOrNewGridEditorForm(RowIndex, ColIndex);
+                    }
                     break;
             }
+        }
+        public bool ReadImageSubs(byte[] buffer, ref int readIndex)
+        {
+            int childCount = BitConverter.ToChar(buffer, readIndex); readIndex += sizeof(char);
+            for (int c = 0; c < childCount; ++c)
+            {
+                ImageSubData data = new ImageSubData();
+                data.type = (Map2DGridImageSubType)BitConverter.ToInt16(buffer, readIndex); readIndex += sizeof(short);
+                // renge
+                data.range = new Rect(0, 0, 0, 0);
+                data.range.x = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
+                data.range.y = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
+                data.range.width = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
+                data.range.height = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
+                switch (data.type)
+                {
+                    case Map2DGridImageSubType.ground:
+                    case Map2DGridImageSubType.wall:
+                    case Map2DGridImageSubType.monster_pt:
+                        mImageSubList.Add(data);
+                        break;
+                    default:
+                        EditorUtility.DisplayDialog("错误", "地图编辑器数据文件中出现了未知的碰撞类型！", "关闭", "");
+                        continue;
+                }
+            }
+            return true;
+        }
+        public bool SaveGridUnit(FileStream file)
+        {
+            Map2DGridEditorForm gridEditor = Map2DEditor.GetOrNewGridEditorForm(RowIndex, ColIndex, false);
+            if (null != gridEditor)
+                mImageSubList = gridEditor.ImageSubList;
+            byte[] bin = BitConverter.GetBytes((char)mImageSubList.Count); file.Write(bin, 0, bin.Length);
+            foreach (ImageSubData d in mImageSubList)
+            {
+                bin = BitConverter.GetBytes((short)d.type); file.Write(bin, 0, bin.Length);
+                // range
+                bin = BitConverter.GetBytes(d.range.x); file.Write(bin, 0, bin.Length);
+                bin = BitConverter.GetBytes(d.range.y); file.Write(bin, 0, bin.Length);
+                bin = BitConverter.GetBytes(d.range.width); file.Write(bin, 0, bin.Length);
+                bin = BitConverter.GetBytes(d.range.height); file.Write(bin, 0, bin.Length);
+            }
+            return true;
         }
     }
 }

@@ -82,7 +82,7 @@ namespace Assets.Script.Editor.Map2DEditor
             cfgFile.Close();
             return true;
         }
-        bool SaveMap2DData()
+        public bool SaveMap2DData()
         {
             FileStream newFile = File.OpenWrite(mDataFilePath);
             byte[] bin = BitConverter.GetBytes(Map2DDataFileVersion);  // data version
@@ -96,13 +96,7 @@ namespace Assets.Script.Editor.Map2DEditor
                 for(int j = 0; j < colCount; ++j)
                 {
                     Map2DGridUnit obj = mMapUnitList[i, j];
-                    Texture2D tex = null;
-                    if (null != obj && null != obj.GridUnit)
-                    {
-                        SpriteRenderer sr = obj.GridUnit.GetComponent<SpriteRenderer>();
-                        if(null != sr && null != sr.sprite)
-                            tex = sr.sprite.texture;
-                    }
+                    Texture2D tex = null != obj ? obj.Image : null;
                     if (null == tex)
                     {
                         bin = BitConverter.GetBytes(-1); newFile.Write(bin, 0, bin.Length);
@@ -111,10 +105,9 @@ namespace Assets.Script.Editor.Map2DEditor
                     }
                     else
                     {
-                        SpriteRenderer sr = obj.GridUnit.GetComponent<SpriteRenderer>();
-                        bin = BitConverter.GetBytes(sr.sprite.texture.GetInstanceID()); newFile.Write(bin, 0, bin.Length);
-                        bin = BitConverter.GetBytes((ushort)sr.sprite.texture.width); newFile.Write(bin, 0, bin.Length);
-                        bin = BitConverter.GetBytes((ushort)sr.sprite.texture.height); newFile.Write(bin, 0, bin.Length);
+                        bin = BitConverter.GetBytes(tex.GetInstanceID()); newFile.Write(bin, 0, bin.Length);
+                        bin = BitConverter.GetBytes((ushort)tex.width); newFile.Write(bin, 0, bin.Length);
+                        bin = BitConverter.GetBytes((ushort)tex.height); newFile.Write(bin, 0, bin.Length);
                     }
                     if (null == obj)
                     {
@@ -123,53 +116,10 @@ namespace Assets.Script.Editor.Map2DEditor
                     }
                     else
                     {
-                        int count = obj.GridUnit.transform.childCount;
-                        bin = BitConverter.GetBytes((char)count); newFile.Write(bin, 0, bin.Length);
-                        for (int c = 0; c < count; ++c)
+                        if (!obj.SaveGridUnit(newFile))
                         {
-                            Transform co = obj.GridUnit.transform.GetChild(c);
-                            if (co.collider.GetType() == typeof(BoxCollider))
-                            {
-                                bin = BitConverter.GetBytes((short)PrimitiveType.Cube);
-                                newFile.Write(bin, 0, bin.Length);
-                            }
-                            else if (co.collider.GetType() == typeof(Plane))
-                            {
-                                bin = BitConverter.GetBytes((short)PrimitiveType.Plane);
-                                newFile.Write(bin, 0, bin.Length);
-                            }
-                            else
-                            {
-                                EditorUtility.DisplayDialog("错误", "地图编辑器地图单元只支持Plane和Cube类型的碰撞！", "继续", "");
-                                bin = BitConverter.GetBytes((short)-1); newFile.Write(bin, 0, bin.Length);
-                                // roat
-                                bin = BitConverter.GetBytes(0.0f); newFile.Write(bin, 0, bin.Length);
-                                bin = BitConverter.GetBytes(0.0f); newFile.Write(bin, 0, bin.Length);
-                                bin = BitConverter.GetBytes(0.0f); newFile.Write(bin, 0, bin.Length);
-                                bin = BitConverter.GetBytes(0.0f); newFile.Write(bin, 0, bin.Length);
-                                // pos
-                                bin = BitConverter.GetBytes(0.0f); newFile.Write(bin, 0, bin.Length);
-                                bin = BitConverter.GetBytes(0.0f); newFile.Write(bin, 0, bin.Length);
-                                bin = BitConverter.GetBytes(0.0f); newFile.Write(bin, 0, bin.Length);
-                                // size
-                                bin = BitConverter.GetBytes(0.0f); newFile.Write(bin, 0, bin.Length);
-                                bin = BitConverter.GetBytes(0.0f); newFile.Write(bin, 0, bin.Length);
-                                bin = BitConverter.GetBytes(0.0f); newFile.Write(bin, 0, bin.Length);
-                                continue;
-                            }
-                            // roat
-                            bin = BitConverter.GetBytes(co.localRotation.x); newFile.Write(bin, 0, bin.Length);
-                            bin = BitConverter.GetBytes(co.localRotation.y); newFile.Write(bin, 0, bin.Length);
-                            bin = BitConverter.GetBytes(co.localRotation.z); newFile.Write(bin, 0, bin.Length);
-                            bin = BitConverter.GetBytes(co.localRotation.w); newFile.Write(bin, 0, bin.Length);
-                            // pos
-                            bin = BitConverter.GetBytes(co.localPosition.x); newFile.Write(bin, 0, bin.Length);
-                            bin = BitConverter.GetBytes(co.localPosition.y); newFile.Write(bin, 0, bin.Length);
-                            bin = BitConverter.GetBytes(co.localPosition.z); newFile.Write(bin, 0, bin.Length);
-                            // size
-                            bin = BitConverter.GetBytes(co.localScale.x); newFile.Write(bin, 0, bin.Length);
-                            bin = BitConverter.GetBytes(co.localScale.y); newFile.Write(bin, 0, bin.Length);
-                            bin = BitConverter.GetBytes(co.localScale.z); newFile.Write(bin, 0, bin.Length);
+                            newFile.Close();
+                            return false;
                         }
                     }
                 }
@@ -206,63 +156,17 @@ namespace Assets.Script.Editor.Map2DEditor
             {
                 for (int j = 0; j < colCount; ++j)
                 {
-                    mMapUnitList[i, j] = new Map2DGridUnit();
-                    mMapUnitList[i, j].OnEditorMenuItemCommand += (Map2DGridUnit sender, int rIndex, int cIndex) =>
-                                                                    {
-                                                                        Map2DEditor.GetOrNewGridEditorForm(rIndex, cIndex);
-                                                                    };
-                    SpriteRenderer sr = mMapUnitList[i, j].GridUnit.GetComponent<SpriteRenderer>();
+                    Map2DGridUnit gridUnit = new Map2DGridUnit();
+                    mMapUnitList[i, j] = gridUnit;
                     int instanceID = BitConverter.ToInt32(buffer, readIndex); readIndex += sizeof(int);
                     ushort texWidth = BitConverter.ToUInt16(buffer, readIndex); readIndex += sizeof(ushort);
                     ushort texHeight =  BitConverter.ToUInt16(buffer, readIndex); readIndex += sizeof(ushort);
-                    mMapUnitList[i, j].ImageSize = new Vector2((float)texWidth, (float)texHeight);
-                    char childCount = BitConverter.ToChar(buffer, readIndex); readIndex += sizeof(char);
-                    for (int c = 0; c < childCount; ++ c)
+                    gridUnit.Image = EditorUtility.InstanceIDToObject(instanceID) as Texture2D;
+                    gridUnit.ImageSize = new Vector2((float)texWidth, (float)texHeight);
+                    if(!gridUnit.ReadImageSubs(buffer, ref readIndex))
                     {
-                        Quaternion roat = Quaternion.LookRotation(Vector3.zero);
-                        Vector3 pos = Vector3.zero;
-                        Vector3 scale = Vector3.zero;
-                        GameObject child = null;
-                        PrimitiveType colliderType = (PrimitiveType)BitConverter.ToInt16(buffer, readIndex); readIndex += sizeof(short);
-                        // roat
-                        roat.x = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
-                        roat.y = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
-                        roat.z = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
-                        roat.w = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
-                        // pos
-                        pos.x = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
-                        pos.y = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
-                        pos.z = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
-                        // size
-                        scale.x = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
-                        scale.y = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
-                        scale.z = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
-                        switch(colliderType)
-                        {
-                            case PrimitiveType.Cube:
-                                {
-                                    child = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                                }
-                                break;
-                            case PrimitiveType.Plane:
-                                {
-                                    child = GameObject.CreatePrimitive(PrimitiveType.Plane);
-                                }
-                                break;
-                            default:
-                                EditorUtility.DisplayDialog("错误", "地图编辑器数据文件中出现了未知的碰撞类型！", "关闭", "");
-                                continue;
-                        }
-                        child.transform.localRotation = roat;
-                        child.transform.localPosition = pos;
-                        child.transform.localScale = scale;
-                        child.transform.parent = mMapUnitList[i, j].GridUnit.transform;
-                    }
-                    if (instanceID != -1)
-                    {
-                        Texture2D tex = EditorUtility.InstanceIDToObject(instanceID) as Texture2D;
-                        if (tex != null)
-                            sr.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(tex.width, tex.height));
+                        dataFile.Close();
+                        return false;
                     }
                 }
             }
@@ -341,7 +245,7 @@ namespace Assets.Script.Editor.Map2DEditor
             {
                 for (int j = 0; j < colCount; ++j)
                 {
-                    mMapUnitList[i,j].Destroy();
+                    mMapUnitList[i, j].Destroy();
                 }
             }
             mMapUnitList = null;
@@ -351,71 +255,6 @@ namespace Assets.Script.Editor.Map2DEditor
 #endregion
 
 #region 事件处理
-        void OnObjectMenuItemSelected(object userData, string[] options, int selected)
-        {
-
-        }
-        bool OnEvent(Event e)
-        {
-            //switch (e.type)
-            //{
-            //    case EventType.MouseDown:
-            //        {
-            //            if(e.button == 1)
-            //            {
-            //                Event se = new Event();
-            //                se.button = 0;
-            //                se.mousePosition = se.mousePosition;
-            //                SendEvent(se);
-            //                e.Use();
-            //            }
-            //        }
-            //        break;
-            //    case EventType.MouseUp:
-            //        break;
-            //    case EventType.MouseMove:
-            //        break;
-            //    case EventType.MouseDrag:
-            //        break;
-            //    case EventType.KeyDown:
-            //        break;
-            //    case EventType.KeyUp:
-            //        break;
-            //    case EventType.ScrollWheel:
-            //        break;
-            //    case EventType.Repaint:
-            //        break;
-            //    case EventType.Layout:
-            //        break;
-            //    case EventType.DragUpdated:
-            //        break;
-            //    case EventType.DragPerform:
-            //        break;
-            //    case EventType.Ignore:
-            //        break;
-            //    case EventType.Used:
-            //        break;
-            //    case EventType.ValidateCommand:
-            //        break;
-            //    case EventType.ExecuteCommand:
-            //        break;
-            //    case EventType.DragExited:
-            //        break;
-            //    case EventType.ContextClick:
-            //        {
-            //            var mousePos = e.mousePosition;
-            //            //EditorUtility.DisplayPopupMenu(new Rect(mousePos.x, mousePos.y, 0, 0), "Assets/", null);
-            //            GUIContent[] menuItems = new GUIContent[] { new GUIContent("编辑"), new GUIContent("创建模板") };
-            //            EditorUtility.DisplayCustomMenu(new Rect(mousePos.x, mousePos.y, 0, 0), menuItems, 1, OnObjectMenuItemSelected, null);
-            //            //EditorUtility.DisplayPopupMenu(new Rect(mousePos.x, mousePos.y, 0, 0), "Assets/", null);
-            //            GUIContent[] menuItems = new GUIContent[] { new GUIContent("编辑"), new GUIContent("创建模板") };
-            //            EditorUtility.DisplayCustomMenu(new Rect(mousePos.x, mousePos.y, 0, 0), menuItems, 1, OnObjectMenuItemSelected, null);
-            //            e.Use();
-            //        }
-            //        break;
-            //}
-            return true;
-        }
 #endregion
 
 #region 表现层
@@ -478,13 +317,7 @@ namespace Assets.Script.Editor.Map2DEditor
                     int instanceID = i * newColCount + j;
                     int id = EditorGUIUtility.GetControlID(instanceID.GetHashCode(), FocusType.Passive, gridRect);
                     if (mMapUnitList[i, j] == null)
-                    {
                         mMapUnitList[i, j] = GUIUtility.GetStateObject(typeof(Map2DGridUnit), id) as Map2DGridUnit;
-                        mMapUnitList[i, j].OnEditorMenuItemCommand += (Map2DGridUnit sender, int rIndex, int cIndex) =>
-                                                                        {
-                                                                            Map2DEditor.GetOrNewGridEditorForm(rIndex, cIndex);
-                                                                        };
-                    }
                     Texture2D newTex = EditorGUILayout.ObjectField(mMapUnitList[i, j].Image, typeof(Texture2D), true,
                         GUILayout.Width(gridRect.width), GUILayout.Height(gridRect.height)) as Texture2D;
                     if(newTex != null)
