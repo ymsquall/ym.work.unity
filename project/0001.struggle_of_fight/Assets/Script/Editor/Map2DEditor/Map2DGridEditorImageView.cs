@@ -9,9 +9,11 @@ namespace Assets.Script.Editor.Map2DEditor
 {
     public class Map2DGridEditorImageSubItem : IEditorMouseDragItem
     {
-        public Map2DGridEditorImageSubItem(string type, Vector2 pos)
+        public Map2DGridEditorImageSubItem(string type, Vector2 pos, Map2DGridEditorImageView parent)
         {
             mImageSubType = type;
+            mParent = parent;
+            pos = Point2WorldPoint(pos);
             if (Map2DGridEditorToolboxView.ToolsTips[0] == mImageSubType)
             {
                 mRegion.width = 100; mRegion.height = 10;
@@ -52,12 +54,17 @@ namespace Assets.Script.Editor.Map2DEditor
             get
             {
                 Rect ret = mRegion;
-                ret.x += mParent.Position.x;
-                ret.y += mParent.Position.y;
+                ret.x = mParent.Position.x + mRegion.x * mParent.Scale;
+                ret.y = mParent.Position.y + mRegion.y * mParent.Scale;
                 ret.width *= mParent.Scale;
                 ret.height *= mParent.Scale;
                 return ret;
             }
+        }
+        public Vector2 Point2WorldPoint(Vector2 pos)
+        {
+            //return (pos - mParent.Position) / mParent.Scale;
+            return pos / mParent.Scale;
         }
 #region IEditorMouseDragItem
         MouseDragItemType IEditorMouseDragItem.ItemType
@@ -66,15 +73,17 @@ namespace Assets.Script.Editor.Map2DEditor
         }
         void IEditorMouseDragItem.OnBeginDragin(Vector2 pos)
         {
+            //pos = Point2WorldPoint(pos);
             mBeginDraginPos = pos;
-            mDraginPosOffset = pos - mRegion.center;
+            mDraginPosOffset = pos - (mParent.Position + new Vector2(mRegion.x, mRegion.y));
             mDraginPosOffset.x -= 1;
             mDraginPosOffset.y -= 1;
         }
         void IEditorMouseDragItem.DrawDraginGUI(Vector2 pos)
         {
-            Vector2 realPos = pos - mDraginPosOffset - mParent.Position;
-            mRegion.center = realPos;
+            //pos = Point2WorldPoint(pos);
+            Vector2 realPos = pos - mDraginPosOffset;
+            mRegion.center = realPos - mParent.Position;
             //mRegion.x = realPos.x - mRegion.width;
             //mRegion.y = realPos.y - mRegion.height;
             //NGUIEditorTools.DrawTexture(NGUIEditorTools.blankTexture, new Rect(mRegion.center.x, mRegion.center.y, mRegion.width, mRegion.height), new Rect(0, 0, 1, 1), Map2DEditor.ColorByToolType(mImageSubType));
@@ -208,8 +217,7 @@ namespace Assets.Script.Editor.Map2DEditor
         public Map2DGridEditorImageSubItem AddImageSubItem(string type, Vector2 pos)
         {
             //int count = mImageSubList.Count;
-            Map2DGridEditorImageSubItem item = new Map2DGridEditorImageSubItem(type, pos);
-            item.Parent = this;
+            Map2DGridEditorImageSubItem item = new Map2DGridEditorImageSubItem(type, pos, this);
             item.OnMouseLBUpInOutside += OnClearSelectedItem;
             item.OnMouseLBUpInSide += OnSelectedItem;
             mImageSubList.Add(item);

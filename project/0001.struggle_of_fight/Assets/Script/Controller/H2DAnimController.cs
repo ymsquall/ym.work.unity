@@ -48,6 +48,10 @@ namespace Assets.Script.Controller
             }
             get { return mNowAnimType; }
         }
+        public float RunAnimSpeedScale
+        {
+            set { mRunAnimSpeedScale = value; }
+        }
         public bool SetAnimClip(AnimationType type, AnimationClip clip, float speed, float cross, WrapMode mode)
         {
             if (null == clip || type >= AnimationType.EANT_Max || type < AnimationType.EANT_Idel)
@@ -73,7 +77,10 @@ namespace Assets.Script.Controller
                 AnimationState pState = mAnimation[pClip.name];
                 if (pState)
                 {
-                    pState.speed = mAnimClipSpeedList[index];
+                    if (index == (int)AnimationType.EANT_Running)
+                        pState.speed = mAnimClipSpeedList[index] * mRunAnimSpeedScale;
+                    else
+                        pState.speed = mAnimClipSpeedList[index];
                     pState.wrapMode = mAnimWarpModeList[index];
                     mAnimation.CrossFade(pClip.name, mAnimCrossFadeList[index]);
                 }
@@ -87,5 +94,6 @@ namespace Assets.Script.Controller
         float[] mAnimCrossFadeList = new float[(int)AnimationType.EANT_Max];
         WrapMode[] mAnimWarpModeList = new WrapMode[(int)AnimationType.EANT_Max];
         AnimationType mNowAnimType = AnimationType.EANT_Idel;
+        float mRunAnimSpeedScale = 1.0f;
     }
 }

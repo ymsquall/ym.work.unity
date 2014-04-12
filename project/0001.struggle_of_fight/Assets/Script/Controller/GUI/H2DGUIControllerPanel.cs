@@ -12,7 +12,8 @@ namespace Assets.Script.Controller.OPUI
         public GUISkin mJumpButton;
         public GUISkin mSkill1Button;
         public GUISkin mSkill2Button;
-        public Vector2 移动UI位置偏移 = Vector2.zero;
+        public Vector2 移动UI位置偏移 = new Vector2(25, 25);
+        public Vector2 UI缩放倍数 = Vector2.zero;
         public Rect mRightToBottomRect;
         public Vector2 mAttackBtnPos;
         public Vector2 mJumpBtnPos;
@@ -50,11 +51,12 @@ namespace Assets.Script.Controller.OPUI
             mLastMousePos3D = Input.mousePosition;
 #endif
             var btnStyle = mMoveStackBG.customStyles[0] as GUIStyle;
-            mBGImageRect = new Rect(移动UI位置偏移.x, Screen.height - btnStyle.normal.background.height - 移动UI位置偏移.y,
-                                     btnStyle.normal.background.width, btnStyle.normal.background.height);
+            mBGImageRect = new Rect(移动UI位置偏移.x, Screen.height - btnStyle.normal.background.height * UI缩放倍数.x - 移动UI位置偏移.y,
+                                     btnStyle.normal.background.width * UI缩放倍数.x, btnStyle.normal.background.height * UI缩放倍数.y);
 
             btnStyle = mMoveStackBar.customStyles[0] as GUIStyle;
-            mBarButtonOriRect = new Rect(0, 0, btnStyle.normal.background.width, btnStyle.normal.background.height);
+            mBarButtonOriRect = new Rect(0, 0, btnStyle.normal.background.width * UI缩放倍数.x
+                                                , btnStyle.normal.background.height * UI缩放倍数.y);
             mBarButtonOriRect.x = mBGImageRect.x + (mBGImageRect.width - mBarButtonOriRect.width) / 2.0f;
             mBarButtonOriRect.y = mBGImageRect.y + (mBGImageRect.height - mBarButtonOriRect.height) / 2.0f;
 
@@ -65,20 +67,24 @@ namespace Assets.Script.Controller.OPUI
             mRightToBottomRect.y = Screen.height - mRightToBottomRect.height;
 
             btnStyle = mAttackButton.customStyles[0] as GUIStyle;
-            mAttackBtnRect = new Rect(mRightToBottomRect.x + mAttackBtnPos.x, mRightToBottomRect.y + mAttackBtnPos.y,
-                                      btnStyle.normal.background.width, btnStyle.normal.background.height);
+            mAttackBtnRect = new Rect(mRightToBottomRect.x + mAttackBtnPos.x - (btnStyle.normal.background.width * UI缩放倍数.x - btnStyle.normal.background.width),
+                                        mRightToBottomRect.y + mAttackBtnPos.y - (btnStyle.normal.background.height * UI缩放倍数.y - btnStyle.normal.background.height),
+                                        btnStyle.normal.background.width * UI缩放倍数.x, btnStyle.normal.background.height * UI缩放倍数.y);
 
             btnStyle = mJumpButton.customStyles[0] as GUIStyle;
-            mJumpBtnRect = new Rect(mRightToBottomRect.x + mJumpBtnPos.x, mRightToBottomRect.y + mJumpBtnPos.y,
-                                     btnStyle.normal.background.width, btnStyle.normal.background.height);
+            mJumpBtnRect = new Rect(mRightToBottomRect.x + mJumpBtnPos.x - (btnStyle.normal.background.width * UI缩放倍数.x - btnStyle.normal.background.width),
+                                    mRightToBottomRect.y + mJumpBtnPos.y - (btnStyle.normal.background.height * UI缩放倍数.y - btnStyle.normal.background.height),
+                                    btnStyle.normal.background.width * UI缩放倍数.x, btnStyle.normal.background.height * UI缩放倍数.y);
 
             btnStyle = mSkill1Button.customStyles[0] as GUIStyle;
-            mSkill1BtnRect = new Rect(mRightToBottomRect.x + mSkill1BtnPos.x, mRightToBottomRect.y + mSkill1BtnPos.y,
-                                     btnStyle.normal.background.width, btnStyle.normal.background.height);
+            mSkill1BtnRect = new Rect(mRightToBottomRect.x + mSkill1BtnPos.x - (btnStyle.normal.background.width * UI缩放倍数.x - btnStyle.normal.background.width),
+                                        mRightToBottomRect.y + mSkill1BtnPos.y - (btnStyle.normal.background.height * UI缩放倍数.y - btnStyle.normal.background.height),
+                                        btnStyle.normal.background.width * UI缩放倍数.x, btnStyle.normal.background.height * UI缩放倍数.y);
 
             btnStyle = mSkill2Button.customStyles[0] as GUIStyle;
-            mSkill2BtnRect = new Rect(mRightToBottomRect.x + mSkill2BtnPos.x, mRightToBottomRect.y + mSkill2BtnPos.y,
-                                     btnStyle.normal.background.width, btnStyle.normal.background.height);
+            mSkill2BtnRect = new Rect(mRightToBottomRect.x + mSkill2BtnPos.x - (btnStyle.normal.background.width * UI缩放倍数.x - btnStyle.normal.background.width),
+                                        mRightToBottomRect.y + mSkill2BtnPos.y - (btnStyle.normal.background.height * UI缩放倍数.y - btnStyle.normal.background.height),
+                                        btnStyle.normal.background.width * UI缩放倍数.x, btnStyle.normal.background.height * UI缩放倍数.y);
             mLastInterval = Time.realtimeSinceStartup;
             mFrames = 0;
         }
@@ -173,23 +179,36 @@ namespace Assets.Script.Controller.OPUI
             {
                 Vector2 pos = Input.touches[i].position;
                 pos.y = Screen.height - pos.y;
-                if (mBGImageRect.Contains(pos))
+                if (mBGImageRect.Contains(pos) && Input.touches[i].phase == TouchPhase.Began)
                 {
-                    mBarButtonRect.x = pos.x - mBarButtonRect.width / 2.0f;
-                    if (mBarButtonRect.x > mMoveStakBarRightLimit)
-                        mBarButtonRect.x = mMoveStakBarRightLimit;
-                    if (mBarButtonRect.x < mMoveStakBarLeftLimit)
-                        mBarButtonRect.x = mMoveStakBarLeftLimit;
-                    float horDist = mBarButtonRect.x - mBarButtonOriRect.x;
-                    if (horDist > 10.0f)
-                        H2DPlayerController.LocalPlayer.TouchMoveSpeed = 1.0f;
-                    else if (horDist < -10.0f)
-                        H2DPlayerController.LocalPlayer.TouchMoveSpeed = -1.0f;
-                    break;
+                    if (Input.touches[i].phase == TouchPhase.Began)
+                    {
+                        mMoveStackTouchID = i;
+                        break;
+                    }
                 }
             }
+            if (-1 != mMoveStackTouchID)
+            {
+                if (Input.touches[mMoveStackTouchID].phase == TouchPhase.Ended || Input.touches[mMoveStackTouchID].phase == TouchPhase.Canceled)
+                    mMoveStackTouchID = -1;
+                Vector2 pos = Input.touches[mMoveStackTouchID].position;
+                pos.y = Screen.height - pos.y;
+                mBarButtonRect.x = pos.x - mBarButtonRect.width / 2.0f;
+                if (mBarButtonRect.x > mMoveStakBarRightLimit)
+                    mBarButtonRect.x = mMoveStakBarRightLimit;
+                if (mBarButtonRect.x < mMoveStakBarLeftLimit)
+                    mBarButtonRect.x = mMoveStakBarLeftLimit;
+                float horDist = (mBarButtonRect.x - mBarButtonOriRect.x) / 20.0f;
+                if (horDist > 1.0f)
+                    H2DPlayerController.LocalPlayer.TouchMoveSpeed = 1.0f;
+                else if (horDist < -1.0f)
+                    H2DPlayerController.LocalPlayer.TouchMoveSpeed = -1.0f;
+                else
+                    H2DPlayerController.LocalPlayer.TouchMoveSpeed = horDist;
+            }
 #endif
-            if(显示FPS)
+            if (显示FPS)
             {
                 ++mFrames;
                 float timeNow = Time.realtimeSinceStartup;
@@ -293,7 +312,7 @@ namespace Assets.Script.Controller.OPUI
             // test
             if (null != 测试刷怪)
             {
-                Rect rc = new Rect(Screen.width - mAttackBtnRect.width * 2 + 20, 10, mAttackBtnRect.width, mAttackBtnRect.height);
+                Rect rc = new Rect(Screen.width - (mAttackBtnRect.width / UI缩放倍数.x) * 2 + 20, 10, (mAttackBtnRect.width / UI缩放倍数.x), (mAttackBtnRect.height / UI缩放倍数.y));
                 if (GUI.Button(rc, "", mAttackButton.GetStyle(mAttackButton.name)))
                 {
                     if (!btnClicked)
@@ -311,7 +330,7 @@ namespace Assets.Script.Controller.OPUI
                         mCreatureCount++;
                     }
                 }
-                rc = new Rect(Screen.width - mAttackBtnRect.width + 10, 10, mAttackBtnRect.width, mAttackBtnRect.height);
+                rc = new Rect(Screen.width - (mAttackBtnRect.width / UI缩放倍数.x) + 10, 10, (mAttackBtnRect.width / UI缩放倍数.x), (mAttackBtnRect.height / UI缩放倍数.y));
                 if (GUI.Button(rc, "", mAttackButton.GetStyle(mAttackButton.name)))
                 {
                     if (!btnClicked && mCreatureCount > 2)
@@ -347,6 +366,7 @@ namespace Assets.Script.Controller.OPUI
         private Object mMouseDownButton = null;
         private static Vector3 mLastMousePos3D;
 #endif
+        int mMoveStackTouchID = -1;
         // show fps
         float mLastInterval;
         int mFrames = 0;

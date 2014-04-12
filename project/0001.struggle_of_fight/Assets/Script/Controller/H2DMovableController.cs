@@ -45,6 +45,7 @@ namespace Assets.Script.Controller
         public bool Init()
         {
             mMoveDirection = mFaceDirection;
+            mLaseFaceDirection = mFaceDirection;
             return true;
         }
         public bool UpdateSmoothedMovementDirection(bool grounded, bool inJumpAir, bool inDroping, Transform trans)
@@ -95,7 +96,7 @@ namespace Assets.Script.Controller
                 //* We want to support analog input but make sure you cant walk faster diagonally than just forward or sideways
                 var targetSpeed = Mathf.Min(targetDirection.magnitude, 1.0f);
                 // Pick speed modifier
-                targetSpeed *= mPlayerInstance.SpeedScaleX;
+                targetSpeed *= mPlayerInstance.SpeedScaleX * Mathf.Abs(h);
                 mMoveSpeed = Mathf.Lerp(mMoveSpeed, targetSpeed, curSmooth);
             //}
             //else
@@ -156,10 +157,6 @@ namespace Assets.Script.Controller
             }
             if (needRota)
             {
-                if(trans.name == "_Monster")
-                {
-                    bool b = mPlayerInstance.UsedModelFlipX;
-                }
                 if (mPlayerInstance.UsedModelFlipX)
                 {
                     trans.rotation = Quaternion.LookRotation(Vector3.right);
@@ -169,11 +166,23 @@ namespace Assets.Script.Controller
                 }
                 else
                     trans.rotation = Quaternion.LookRotation(mFaceDirection);
+                if (mLaseFaceDirection != mFaceDirection)
+                {
+                    Vector3 rightDir = Camera.main.transform.TransformDirection(Vector3.right);
+                    Vector3 size = mPlayerInstance.Controller.bounds.size;
+                    size.y = size.z = 0.0f;
+                    if (mFaceDirection == rightDir)
+                        mPlayerInstance.Controller.transform.localPosition -= size / 2.0f;
+                    else
+                        mPlayerInstance.Controller.transform.localPosition += size / 2.0f;
+                    mLaseFaceDirection = mFaceDirection;
+                }
             }
             return true;
         }
         PlayerMovableInstance mPlayerInstance = null;
         Vector3 mFaceDirection = Vector3.zero;
+        Vector3 mLaseFaceDirection = Vector3.zero;
         Vector3 mMoveDirection = Vector3.zero;
         Vector3 mInAirVelocity = Vector3.zero;
         float mDeceleration = 0.0f;

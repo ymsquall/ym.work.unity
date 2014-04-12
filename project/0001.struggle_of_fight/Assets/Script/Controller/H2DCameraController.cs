@@ -15,6 +15,7 @@ namespace Assets.Script.Controller
         public float mAngularSmoothLag = 0.3f;
         public float mAngularMaxSpeed = 15.0f;
         public float mHeightSmoothLag = 0.3f;
+        public float 水平平滑延迟 = 0.1f;
         public float mSnapSmoothLag = 0.2f;
         public float mSnapMaxSpeed = 720.0f;
         public float mClampHeadPositionScreenSpace = 0.75f;
@@ -86,6 +87,8 @@ namespace Assets.Script.Controller
             // Damp the height
             var currentHeight = mCameraTransform.position.y;
             currentHeight = Mathf.SmoothDamp(currentHeight, mTargetHeight, ref mHeightVelocity, mHeightSmoothLag);
+            var currentWidth = mCameraTransform.position.x;
+            currentWidth = Mathf.SmoothDamp(currentWidth, targetCenter.x, ref mWidthVelocity, 水平平滑延迟);
             // Convert the angle into a rotation, by which we then reposition the camera
             var currentRotation = Quaternion.Euler(0, 0, 0);
             // Set the position of the camera on the x-z plane to:
@@ -93,8 +96,9 @@ namespace Assets.Script.Controller
             var cameraPosition = mCameraTransform.position;
             cameraPosition = targetCenter;
             cameraPosition += currentRotation * Vector3.back * mDistance;
-            // Set the height of the camera
+            // Set the height of the cameraa
             cameraPosition.y = currentHeight;
+            cameraPosition.x = currentWidth;
             //mCameraTransform.position = cameraPosition;
             // bound locket
             float cameraH2WScale = mCamera.pixelWidth / mCamera.pixelHeight;
@@ -183,6 +187,7 @@ namespace Assets.Script.Controller
         private Vector3 mHeadOffset = Vector3.zero;
         private Vector3 mCenterOffset = Vector3.zero;
         private float mHeightVelocity = 0.0f;
+        private float mWidthVelocity = 0.0f;
         private float mAngleVelocity = 0.0f;
         //private bool mSnap = false;
         private IH2DCCamera mController = null;

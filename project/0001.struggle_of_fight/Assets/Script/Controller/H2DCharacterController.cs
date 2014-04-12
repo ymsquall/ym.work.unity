@@ -155,6 +155,7 @@ namespace Assets.Script.Controller
             mInGrounded = mColliderController.GroundMoveTest(ThisMovable.Droping, ref outPos);
             if (!mMovableController.MovementAfter(ThisGrivaty.Grounded, outPos, transform))
                 return false;
+            mAnimController.RunAnimSpeedScale = Mathf.Abs(ThisMovable.InputSpeedX);
             if (ThisGrivaty.Grounded)
             {
                 if (ThisMovable.Moving)
