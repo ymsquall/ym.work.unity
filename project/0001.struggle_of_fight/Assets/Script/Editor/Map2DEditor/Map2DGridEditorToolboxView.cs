@@ -61,9 +61,27 @@ namespace Assets.Script.Editor.Map2DEditor
             Debug.Log("Map2DGridEditorToolboxItem.OnEvent=" + et.ToString());
             switch (et)
             {
-                case EventType.MouseDrag:
-                    EditorMouseDelegate.Current.EndDrag(e.button);
-                    EditorMouseDelegate.Current.BeginDrag(e, this);
+                case EventType.MouseDown:
+                    {
+                        if(e.button == 0)
+                        {
+                            EditorMouseDelegate.Current.EndDrag(e.button);
+                            EditorMouseDelegate.Current.BeginDrag(e, this);
+                            e.Use();
+                        }
+                    }
+                    break;
+                case EventType.MouseUp:
+                    {
+                        if (e.button == 0)
+                        {
+                            if(EditorMouseDelegate.Current.DraginType == MouseDragItemType.ToolboxItem)
+                            {
+                                EditorMouseDelegate.Current.EndDrag(e.button);
+                                e.Use();
+                            }
+                        }
+                    }
                     break;
             }
         }

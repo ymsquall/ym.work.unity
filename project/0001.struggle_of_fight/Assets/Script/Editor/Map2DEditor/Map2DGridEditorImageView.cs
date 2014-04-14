@@ -114,9 +114,9 @@ namespace Assets.Script.Editor.Map2DEditor
                     {
                         if(e.button == 0)
                         {
+                            EditorMouseDelegate.Current.EndDrag(e.button);
                             if(inRange)
                             {
-                                EditorMouseDelegate.Current.EndDrag(e.button);
                                 EditorMouseDelegate.Current.BeginDrag(e, this);
                                 e.Use();
                             }
@@ -143,14 +143,14 @@ namespace Assets.Script.Editor.Map2DEditor
                             {
                                 if (null != OnMouseLBUpInSide)
                                     OnMouseLBUpInSide(this);
+                                e.Use();
                             }
                             else
                             {
-                                EditorMouseDelegate.Current.EndDrag(e.button);
+                                //EditorMouseDelegate.Current.EndDrag(e.button);
                                 if (null != OnMouseLBUpInOutside)
                                     OnMouseLBUpInOutside(this);
                             }
-                            e.Use();
                         }
                     }
                     break;
@@ -300,7 +300,8 @@ namespace Assets.Script.Editor.Map2DEditor
                                     AddImageSubItem(toolItem.ImageSubType, e.mousePosition);
                                     dragItem = true;
                                 }
-                                EditorMouseDelegate.Current.EndDrag(e.button);
+                                if (EditorMouseDelegate.Current.DraginType == MouseDragItemType.ToolboxItem)
+                                    EditorMouseDelegate.Current.EndDrag(e.button);
                                 if (dragItem)
                                 {
                                     OnItemDraginEnded(null);
