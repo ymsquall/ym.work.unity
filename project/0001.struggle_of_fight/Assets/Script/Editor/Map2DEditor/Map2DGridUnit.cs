@@ -146,6 +146,27 @@ namespace Assets.Script.Editor.Map2DEditor
             }
             return true;
         }
+        public bool FillXmlData(ref List<ImageSubData> blockList, ref List<ImageSubData> npcList, Vector2 sceneSize)
+        {
+            //Vector2 mapUnitOffPos = new Vector2(ImageSize.x * ColIndex, ImageSize.y * RowIndex);
+            Vector2 mapUnitOffPos = new Vector2(ImageSize.x * ColIndex - sceneSize.x / 2.0f,
+                                                ImageSize.y * RowIndex - sceneSize.y / 2.0f);
+            foreach(ImageSubData d in mImageSubList)
+            {
+                ImageSubData newData = d;
+                newData.range.x += mapUnitOffPos.x;
+                newData.range.y += mapUnitOffPos.y;
+                if(d.type == Map2DGridImageSubType.地面 || d.type == Map2DGridImageSubType.墙壁)
+                {
+                    blockList.Add(newData);
+                }
+                else if(d.type == Map2DGridImageSubType.刷怪点)
+                {
+                    npcList.Add(newData);
+                }
+            }
+            return true;
+        }
     }
 }
 

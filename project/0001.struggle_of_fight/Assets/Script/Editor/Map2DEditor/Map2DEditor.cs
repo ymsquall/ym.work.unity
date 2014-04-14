@@ -16,17 +16,6 @@ namespace Assets.Script.Editor.Map2DEditor
         [MenuItem("Editor/横版地图编辑器")]
         static void DoIt()
         {
-            // 扫描文件建立文件名<=>InstanceID关联
-            UnityEngine.Object[] assets = AssetDatabase.LoadAllAssetRepresentationsAtPath(Application.dataPath);
-            //string[] picFiles = FileUtils.EnumAllFilesByPath(Application.dataPath, true, ".png", ".jpg", ".dds");
-            //foreach (string fn in picFiles)
-            //{
-            //    Map2DEditor.AssetsFile2InstanceDicts.Add(fn, -1);
-            //    AssetDatabase.GetAssetPath
-            //    ScanAssets(fn);
-            //}
-            //while (Map2DEditor.AssetsFile2InstanceDicts.Count != Map2DEditor.AssetsInstance2FileDicts.Count)
-            //    System.Threading.Thread.Sleep(1000);
             var mainForm = EditorWindowsManager.GetWindow<Map2DEditorForm>(MainFormName);
             if (UnityEditor.EditorApplication.currentScene == null || UnityEditor.EditorApplication.currentScene == "")
             {

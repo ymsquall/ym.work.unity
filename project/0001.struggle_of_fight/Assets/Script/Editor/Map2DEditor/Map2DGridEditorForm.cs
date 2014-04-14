@@ -38,6 +38,7 @@ namespace Assets.Script.Editor.Map2DEditor
         }
         void OnDestroy()
         {
+            Map2DEditor.DoSaved();
             Map2DEditor.OnFormClosed(this.name);
         }
         public void Init()

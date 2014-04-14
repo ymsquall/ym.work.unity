@@ -1,6 +1,8 @@
 ﻿#if UNITY_EDITOR
 
 using System;
+using System.Xml;
+using System.Collections; 
 using System.IO;
 using UnityEngine;
 using UnityEditor;
@@ -12,6 +14,7 @@ namespace Assets.Script.Editor.Map2DEditor
     {
         public const ushort Map2DDataFileVersion = 1;
         //Vector2 mGridsSpcaeSize = new Vector2(5f, 2.5f);
+        string mSceneName;
         string mCongigFilePath = "";
         string mDataFilePath = "";
         internal SceneView.OnSceneFunc mSceneDelegate;
@@ -235,9 +238,9 @@ namespace Assets.Script.Editor.Map2DEditor
         void OnEnable()
         {
             string sceneName = EditorApplication.currentScene.Substring(EditorApplication.currentScene.LastIndexOf("/") + 1);
-            sceneName = sceneName.Substring(0, sceneName.Length - sceneName.LastIndexOf(".") - 2);
-            mCongigFilePath = string.Format("{0}/../Editor/Map2D/{1}.cfg", Application.dataPath, sceneName);
-            mDataFilePath = string.Format("{0}/../Editor/Map2D/{1}.data", Application.dataPath, sceneName);
+            mSceneName = sceneName.Substring(0, sceneName.LastIndexOf("."));
+            mCongigFilePath = string.Format("{0}/../Editor/Map2D/{1}.cfg", Application.dataPath, mSceneName);
+            mDataFilePath = string.Format("{0}/Scenes/{1}/Map2D_{1}.bin", Application.dataPath, mSceneName);
             ReadMap2DConfig();
             ReadMap2DData();
             wantsMouseMove = false;
@@ -298,6 +301,9 @@ namespace Assets.Script.Editor.Map2DEditor
             GUILayout.FlexibleSpace();
             mMapViewScrollRate = EditorGUILayout.Slider(mMapViewScrollRate, 3, 1000.0f);
             GUILayout.EndHorizontal();
+            // status
+            EditorGUILayout.BeginVertical();
+            // context
             mScrollViewPos = GUILayout.BeginScrollView(mScrollViewPos); // begin ver scroll bar
             GUILayout.BeginVertical();
             if (rowCount != newRowCount || colCount != newColCount)
@@ -346,7 +352,84 @@ namespace Assets.Script.Editor.Map2DEditor
             }
             GUILayout.EndVertical();
             GUILayout.EndScrollView();
+            // status
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("导出服务器数据"))
+                ExportServerData();
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
         }
+#endregion
+
+#region 数据导出
+
+        Vector2 SceneSize
+        {
+            get
+            {
+                int rowCount = mMapUnitList.GetLength(0);
+                int colCount = mMapUnitList.GetLength(1);
+                return new Vector2(colCount * mUnitImageWidth, rowCount * mUnitImageHeight);
+            }
+        }
+
+        bool ExportServerData()
+        {
+            string path = string.Format("{0}/../Editor/Map2D/{1}.xml", Application.dataPath, mSceneName);
+            XmlDocument xmlDoc = new XmlDocument();
+            XmlDeclaration decl = xmlDoc.CreateXmlDeclaration("1.0", "UTF-8", "no");
+            XmlElement root = xmlDoc.DocumentElement;
+            xmlDoc.InsertBefore(decl, root);
+            // world  
+            XmlElement world = xmlDoc.CreateElement("world");
+            xmlDoc.AppendChild(world);
+            // map  
+            XmlElement map = xmlDoc.CreateElement("map");
+            map.SetAttribute("id", mSceneName);
+            map.SetAttribute("width", SceneSize.x.ToString());
+            map.SetAttribute("height", SceneSize.y.ToString());
+            map.SetAttribute("bx", "0");
+            map.SetAttribute("by", "0");
+            world.AppendChild(map);
+            // blocks  
+            List<Map2DGridUnit.ImageSubData> blockList = new List<Map2DGridUnit.ImageSubData>(0);
+            List<Map2DGridUnit.ImageSubData> npcList = new List<Map2DGridUnit.ImageSubData>(0);
+            foreach(Map2DGridUnit unit in mMapUnitList)
+            {
+                unit.FillXmlData(ref blockList, ref npcList, SceneSize);
+            }
+            int idIndex = 0;
+            XmlElement blocks = xmlDoc.CreateElement("blocks");
+            foreach (Map2DGridUnit.ImageSubData b in blockList)
+            {
+                XmlElement block = xmlDoc.CreateElement("b");
+                block.SetAttribute("id", idIndex.ToString());
+                block.SetAttribute("x", b.range.x.ToString());
+                block.SetAttribute("y", b.range.y.ToString());
+                block.SetAttribute("width", b.range.width.ToString());
+                block.SetAttribute("height", b.range.height.ToString());
+                block.SetAttribute("type", b.type.ToString());
+                blocks.AppendChild(block);
+                idIndex++;
+            }
+            map.AppendChild(blocks);
+            idIndex = 0;
+            XmlElement npcs = xmlDoc.CreateElement("npcs");
+            foreach (Map2DGridUnit.ImageSubData n in npcList)
+            {
+                XmlElement npc = xmlDoc.CreateElement("n");
+                npc.SetAttribute("id", idIndex.ToString());
+                npc.SetAttribute("x", n.range.x.ToString());
+                npc.SetAttribute("y", n.range.y.ToString());
+                npc.SetAttribute("type", n.type.ToString());
+                npcs.AppendChild(npc);
+                idIndex++;
+            }
+            map.AppendChild(npcs);
+            xmlDoc.Save(path);
+            return true;
+        }
+
 #endregion
     }
 }

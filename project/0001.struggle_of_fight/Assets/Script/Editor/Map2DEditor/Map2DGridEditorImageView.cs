@@ -9,6 +9,8 @@ namespace Assets.Script.Editor.Map2DEditor
 {
     public class Map2DGridEditorImageSubItem : IEditorMouseDragItem
     {
+        static GUIContent[] MRBMenuItemList =
+            new GUIContent[] { new GUIContent("删除"), new GUIContent("复制"), };
         public Map2DGridEditorImageSubItem(Map2DGridImageSubType type, Vector2 pos, Map2DGridEditorImageView parent)
         {
             mImageSubType = type;
@@ -44,6 +46,9 @@ namespace Assets.Script.Editor.Map2DEditor
         public delegate void OnMouseLBEvent(Map2DGridEditorImageSubItem sender);
         public OnMouseLBEvent OnMouseLBUpInOutside;
         public OnMouseLBEvent OnMouseLBUpInSide;
+
+        public delegate void OnItemRBConnamd(Map2DGridEditorImageSubItem sender);
+        public OnItemRBConnamd OnDeleteImageSubItem;
 
         public int ControlID
         {
@@ -154,6 +159,22 @@ namespace Assets.Script.Editor.Map2DEditor
                         }
                     }
                     break;
+                case EventType.ContextClick:
+                    {
+                        if(inRange)
+                        {
+                            var mousePos = e.mousePosition;
+                            EditorUtility.DisplayCustomMenu(new Rect(mousePos.x, mousePos.y, 0, 0), MRBMenuItemList, 1, (object userData, string[] options, int selected) =>
+                            {
+                                if (selected == 0)
+                                {
+                                    if (null != OnDeleteImageSubItem)
+                                        OnDeleteImageSubItem(this);
+                                }
+                            }, null);
+                        }
+                    }
+                    break;
             }
         }
     }
@@ -202,6 +223,7 @@ namespace Assets.Script.Editor.Map2DEditor
             Map2DGridEditorImageSubItem item = new Map2DGridEditorImageSubItem(type, pos, this);
             item.OnMouseLBUpInOutside += OnClearDraginItem;
             item.OnMouseLBUpInSide += OnItemDraginEnded;
+            item.OnDeleteImageSubItem += OnDeleteImageSubItem;
             mImageSubList.Add(item);
             return item;
         }
@@ -210,6 +232,7 @@ namespace Assets.Script.Editor.Map2DEditor
             Map2DGridEditorImageSubItem item = new Map2DGridEditorImageSubItem(type, range, this);
             item.OnMouseLBUpInOutside += OnClearDraginItem;
             item.OnMouseLBUpInSide += OnItemDraginEnded;
+            item.OnDeleteImageSubItem += OnDeleteImageSubItem;
             mImageSubList.Add(item);
             return item;
         }
@@ -357,6 +380,11 @@ namespace Assets.Script.Editor.Map2DEditor
             if (null != parent)
                 parent.OnImageSubItemSelected(sender);
             Map2DEditor.DoSaved();
+        }
+        void OnDeleteImageSubItem(Map2DGridEditorImageSubItem sender)
+        {
+            if (mImageSubList.Contains(sender))
+                mImageSubList.Remove(sender);
         }
     }
 }
