@@ -6,8 +6,6 @@ namespace Assets.Script.Controller
     public class H2DCameraController : MonoBehaviour
     {
         public Object 宿主程序;
-        public Camera mCamera;
-        public Transform mCameraTransform;
         // The distance in the x-z plane to the target
         public float mDistance = 7.0f;
         // the height we want the camera to be above the target
@@ -28,6 +26,7 @@ namespace Assets.Script.Controller
         public static Vector2 s_DefaultScreenSize = new Vector3(1280, 768);
         void Awake()
         {
+            mCamera = GameObject.Find("MainCamera").camera;
             if (!mCameraTransform && mCamera)
                 mCameraTransform = mCamera.transform;
             if (!mCameraTransform)
@@ -184,6 +183,8 @@ namespace Assets.Script.Controller
         {
             return mCenterOffset;
         }
+        Camera mCamera;
+        Transform mCameraTransform;
         private Vector3 mHeadOffset = Vector3.zero;
         private Vector3 mCenterOffset = Vector3.zero;
         private float mHeightVelocity = 0.0f;

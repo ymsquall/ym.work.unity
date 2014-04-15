@@ -27,10 +27,25 @@ namespace Assets.Script.CDebug
         {
             set { mThinkDelayTime = value; }
         }
-        void Start()
+        void Awake()
         {
             mController = transform.GetComponent<H2DCharacterController>();
             mLastTimerLimit = Random.Range(1.0f, 2.0f);
+            //得到所有可渲染的子物体
+            SkinnedMeshRenderer[] rds = transform.GetComponentsInChildren<SkinnedMeshRenderer>();
+            //逐一遍历他的子物体
+            foreach (SkinnedMeshRenderer r in rds)
+            {
+                foreach (Material m in r.materials)
+                {
+                    m.SetColor("_Color", new Color(Random.Range(0.0f, 1.0f),
+                        Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f)));
+                    m.SetColor("_SpecColor", new Color(Random.Range(0.0f, 1.0f),
+                        Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f)));
+                    m.SetColor("_Emission", new Color(Random.Range(0.0f, 1.0f),
+                        Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f)));
+                }
+            }
         }
         void Update()
         {

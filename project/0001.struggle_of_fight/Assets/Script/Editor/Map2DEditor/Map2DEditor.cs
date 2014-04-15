@@ -12,6 +12,19 @@ namespace Assets.Script.Editor.Map2DEditor
         public static Dictionary<int, string> AssetsInstance2FileDicts = new Dictionary<int,string>(0);
         public static Dictionary<string, int> AssetsFile2InstanceDicts = new Dictionary<string, int>(0);
         public const string MainFormName = "Map2DMainForm";
+        public const float DefaultPlaneU3DSize = 10.0f;
+        public const float DefaultCubeU3DSize = 1.0f;
+        public const float DefaultQuadU3DSize = 1.0f;
+        public const int ColliderLayerID_Ground = 9;
+        public const int ColliderLayerID_Wall = 11;
+        public static float PixelUnit2U3DUnit(float p)
+        {
+            return p / 100.0f;
+        }
+        public static float U3DUnit2PixelUnit(float m)
+        {
+            return m * 100.0f;
+        }
 
         [MenuItem("Editor/横版地图编辑器")]
         static void DoIt()

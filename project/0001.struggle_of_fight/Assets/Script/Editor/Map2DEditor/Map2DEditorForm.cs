@@ -7,6 +7,7 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using Assets.Script.Controller;
 
 namespace Assets.Script.Editor.Map2DEditor
 {
@@ -354,8 +355,10 @@ namespace Assets.Script.Editor.Map2DEditor
             GUILayout.EndScrollView();
             // status
             EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("载入当前场景"))
+                DoReloadCurrentScene();
             if (GUILayout.Button("导出服务器数据"))
-                ExportServerData();
+                DoExportServerData();
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
         }
@@ -373,7 +376,113 @@ namespace Assets.Script.Editor.Map2DEditor
             }
         }
 
-        bool ExportServerData()
+        bool mMapLeftToRight = true;
+        bool mMapTopToBottom = true;
+        bool DoReloadCurrentScene()
+        {
+            GameObject map2d = GameObject.Find("Map2D");
+            if (null != map2d)
+                GameObject.DestroyImmediate(map2d);
+            map2d = new GameObject("Map2D");
+            foreach (Map2DGridUnit unit in mMapUnitList)
+            {
+                Vector2 pos2D = new Vector2(unit.ImageSize.x * unit.ColIndex - SceneSize.x / 2.0f,
+                                            unit.ImageSize.y * unit.RowIndex - SceneSize.y / 2.0f);
+                List<Map2DGridUnit.ImageSubData> blockList = new List<Map2DGridUnit.ImageSubData>(0);
+                List<Map2DGridUnit.ImageSubData> npcList = new List<Map2DGridUnit.ImageSubData>(0);
+                unit.FillXmlData(ref blockList, ref npcList, SceneSize);
+
+                GameObject map2dBlock = new GameObject("MapBlock");
+                SpriteRenderer sr = map2dBlock.AddComponent<SpriteRenderer>();
+                sr.sprite = Sprite.Create(unit.Image, new Rect(0, 0, unit.ImageSize.x, unit.ImageSize.y), Vector2.zero);
+                map2dBlock.transform.localPosition = new Vector3(Map2DEditor.PixelUnit2U3DUnit(pos2D.x), Map2DEditor.PixelUnit2U3DUnit(pos2D.y), 0);
+                map2dBlock.transform.parent = map2d.transform;
+                // childen
+                foreach (Map2DGridUnit.ImageSubData d in unit.ImageSubList)
+                {
+                    switch(d.type)
+                    {
+                        case Map2DGridImageSubType.地面:
+                            {
+                                GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                                ground.name = "Ground";
+                                ground.transform.parent = map2dBlock.transform;
+                                float widthScale = Map2DEditor.PixelUnit2U3DUnit(d.range.width);
+                                ground.transform.localRotation = Quaternion.LookRotation(Vector3.down, Vector3.forward);
+                                ground.transform.localScale = new Vector3(widthScale / Map2DEditor.DefaultQuadU3DSize,
+                                                                            5.0f, 1.0f);
+                                ground.transform.localPosition = new Vector3(Map2DEditor.PixelUnit2U3DUnit(d.range.x) + widthScale / 2.0f
+                                    , Map2DEditor.PixelUnit2U3DUnit(unit.ImageSize.y - d.range.y), 0.0f);
+                                ground.layer = Map2DEditor.ColliderLayerID_Ground;
+                            }
+                            break;
+                        case Map2DGridImageSubType.墙壁:
+                            {
+                                GameObject wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                                wall.name = "Wall";
+                                wall.transform.parent = map2dBlock.transform;
+                                Vector2 sizeScale = new Vector2(Map2DEditor.PixelUnit2U3DUnit(d.range.width), Map2DEditor.PixelUnit2U3DUnit(d.range.height));
+                                wall.transform.localScale = new Vector3(sizeScale.x / Map2DEditor.DefaultCubeU3DSize,
+                                                                sizeScale.y / Map2DEditor.DefaultCubeU3DSize, 5.0f);
+                                wall.transform.localPosition = new Vector3(Map2DEditor.PixelUnit2U3DUnit(d.range.x) + sizeScale.x / 2.0f
+                                    , Map2DEditor.PixelUnit2U3DUnit(unit.ImageSize.y - d.range.y) - sizeScale.y / 2.0f, 0.0f);
+                                wall.layer = Map2DEditor.ColliderLayerID_Wall;
+                            }
+                            break;
+                        case Map2DGridImageSubType.刷怪点:
+                            break;
+                    }
+                }
+            }
+            // Map2DAABB
+            Vector2 sceneSize = new Vector2(Map2DEditor.PixelUnit2U3DUnit(SceneSize.x), Map2DEditor.PixelUnit2U3DUnit(SceneSize.y));
+            GameObject lEdge = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            lEdge.name = "Map2DAABBLeft";
+            lEdge.transform.localScale = new Vector3(1.0f, Map2DEditor.DefaultCubeU3DSize * sceneSize.y, 5.0f);
+            lEdge.transform.localPosition = new Vector3((-sceneSize.x - Map2DEditor.DefaultCubeU3DSize) / 2.0f, 0.0f, 0.0f);
+            lEdge.transform.parent = map2d.transform;
+            GameObject tEdge = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            tEdge.name = "Map2DAABBRight";
+            tEdge.transform.localScale = new Vector3(Map2DEditor.DefaultCubeU3DSize * sceneSize.x, 1.0f, 5.0f);
+            tEdge.transform.localPosition = new Vector3(0.0f, (sceneSize.y + Map2DEditor.DefaultCubeU3DSize) / 2.0f, 0.0f);
+            tEdge.transform.parent = map2d.transform;
+            GameObject rEdge = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            rEdge.name = "Map2DAABBTop";
+            rEdge.transform.localScale = new Vector3(1.0f, Map2DEditor.DefaultCubeU3DSize * sceneSize.y, 5.0f);
+            rEdge.transform.localPosition = new Vector3((sceneSize.x + Map2DEditor.DefaultCubeU3DSize) / 2.0f, 0.0f, 0.0f);
+            rEdge.transform.parent = map2d.transform;
+            GameObject bEdge = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            bEdge.name = "Map2DAABBBottom";
+            bEdge.transform.localScale = new Vector3(Map2DEditor.DefaultCubeU3DSize * sceneSize.x, 1.0f, 5.0f);
+            bEdge.transform.localPosition = new Vector3(0.0f, (-sceneSize.y - Map2DEditor.DefaultCubeU3DSize) / 2.0f, 0.0f);
+            bEdge.transform.parent = map2d.transform;
+
+
+            GameObject mainCameraObj = GameObject.Find("MainCamera");
+            if(null == mainCameraObj)
+            {
+                GameObject mc = Resources.LoadAssetAtPath<GameObject>("Assets/PrefabObject/MainCamera.prefab");
+                mainCameraObj = Instantiate(mc) as GameObject;
+                mainCameraObj.name = "MainCamera";
+            }
+
+            GameObject localPlayer = GameObject.Find("LocalPlayer");
+            if (null == localPlayer)
+            {
+                GameObject lp = Resources.LoadAssetAtPath<GameObject>("Assets/PrefabObject/H2DController_LocalPlayer.prefab");
+                localPlayer = Instantiate(lp) as GameObject;
+                localPlayer.name = "LocalPlayer";
+            }
+            var cameraController = localPlayer.GetComponent<H2DCameraController>();
+            cameraController.摄像机锁定左边界 = lEdge.collider;
+            cameraController.摄像机锁定上边界 = tEdge.collider;
+            cameraController.摄像机锁定右边界 = rEdge.collider;
+            cameraController.摄像机锁定下边界 = bEdge.collider;
+
+            return true;
+        }
+
+        bool DoExportServerData()
         {
             string path = string.Format("{0}/../Editor/Map2D/{1}.xml", Application.dataPath, mSceneName);
             XmlDocument xmlDoc = new XmlDocument();
