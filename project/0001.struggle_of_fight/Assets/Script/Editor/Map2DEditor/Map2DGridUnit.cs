@@ -36,6 +36,14 @@ namespace Assets.Script.Editor.Map2DEditor
             public Rect range;
             public Rect collider;
             public string imageFile;
+
+            public Rect ColliderRange
+            {
+                get
+                {
+                    return new Rect(range.x + collider.x, range.y + collider.y, collider.width, collider.height);
+                }
+            }
         }
         List<ImageSubData> mImageSubList = new List<ImageSubData>(0);
 
@@ -179,9 +187,9 @@ namespace Assets.Script.Editor.Map2DEditor
             Map2DGridEditorForm gridEditor = Map2DEditor.GetOrNewGridEditorForm(RowIndex, ColIndex, false);
             if (null != gridEditor)
                 mImageSubList = gridEditor.ImageSubList;
-            //Vector2 mapUnitOffPos = new Vector2(ImageSize.x * ColIndex, ImageSize.y * RowIndex);
-            Vector2 mapUnitOffPos = new Vector2(ImageSize.x * ColIndex - sceneSize.x / 2.0f,
-                                                ImageSize.y * RowIndex - sceneSize.y / 2.0f);
+            Vector2 mapUnitOffPos = new Vector2(ImageSize.x * ColIndex, ImageSize.y * RowIndex);
+            //Vector2 mapUnitOffPos = new Vector2(ImageSize.x * ColIndex - sceneSize.x / 2.0f,
+            //                                    ImageSize.y * RowIndex - sceneSize.y / 2.0f);
             foreach(ImageSubData d in mImageSubList)
             {
                 ImageSubData newData = d;
