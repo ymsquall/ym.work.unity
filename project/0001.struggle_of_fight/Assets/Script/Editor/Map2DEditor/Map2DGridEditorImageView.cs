@@ -31,16 +31,20 @@ namespace Assets.Script.Editor.Map2DEditor
             mRange.x = pos.x - mRange.width * 0.5f;
             mRange.y = pos.y - mRange.height * 0.5f;
         }
-        public Map2DGridEditorImageSubItem(Map2DGridImageSubType type, Rect range, Map2DGridEditorImageView parent)
+        public Map2DGridEditorImageSubItem(Map2DGridImageSubType type, Rect range, string imageFile, Rect collider, Map2DGridEditorImageView parent)
         {
             mImageSubType = type;
             mParent = parent;
             mRange = range;
+            mImage = AssetDatabase.LoadAssetAtPath(imageFile, typeof(Texture2D)) as Texture2D;
+            mCollider = collider;
         }
         int mControlID = -1;
         Map2DGridEditorImageView mParent = null;
         Map2DGridImageSubType mImageSubType;
         Rect mRange = new Rect(0, 0, 0, 0);
+        Texture2D mImage = null;
+        Rect mCollider = new Rect(0, 0, 0, 0);
         //Vector2 mBeginDraginPos;
 
         public delegate void OnMouseLBEvent(Map2DGridEditorImageSubItem sender);
@@ -81,6 +85,28 @@ namespace Assets.Script.Editor.Map2DEditor
                 return ret;
             }
         }
+        public Texture2D Image
+        {
+            set { mImage = value; }
+            get { return mImage; }
+        }
+        public Rect Collider
+        {
+            set { mCollider = value; }
+            get { return mCollider; }
+        }
+        public Rect WorldColliderRange
+        {
+            get
+            {
+                Rect ret = mCollider;
+                ret.x = mParent.Position.x + (mRange.x + mCollider.x) * mParent.Scale;
+                ret.y = mParent.Position.y + (mRange.y + mCollider.y) * mParent.Scale;
+                ret.width *= mParent.Scale;
+                ret.height *= mParent.Scale;
+                return ret;
+            }
+        }
         public Vector2 Point2WorldPoint(Vector2 pos)
         {
             return pos / mParent.Scale;
@@ -103,7 +129,13 @@ namespace Assets.Script.Editor.Map2DEditor
         public void OnGUI()
         {
             mControlID = EditorGUIUtility.GetControlID(FocusType.Native);
-            NGUIEditorTools.DrawTexture(NGUIEditorTools.blankTexture, WorldRange, new Rect(0, 0, 1, 1), Map2DEditor.ColorByToolType(mImageSubType));
+            if (null != Image)
+            {
+                GUI.DrawTexture(WorldRange, Image, ScaleMode.ScaleToFit);
+                NGUIEditorTools.DrawOutline(WorldColliderRange, Map2DEditor.ColorByToolType(mImageSubType));
+            }
+            else
+                NGUIEditorTools.DrawTexture(NGUIEditorTools.blankTexture, WorldRange, new Rect(0, 0, 1, 1), Map2DEditor.ColorByToolType(mImageSubType));
             OnEvent(Event.current);
         }
         void OnEvent(Event e)
@@ -164,7 +196,7 @@ namespace Assets.Script.Editor.Map2DEditor
                         if(inRange)
                         {
                             var mousePos = e.mousePosition;
-                            EditorUtility.DisplayCustomMenu(new Rect(mousePos.x, mousePos.y, 0, 0), MRBMenuItemList, 1, (object userData, string[] options, int selected) =>
+                            EditorUtility.DisplayCustomMenu(new Rect(mousePos.x, mousePos.y, 0, 0), MRBMenuItemList, -1, (object userData, string[] options, int selected) =>
                             {
                                 if (selected == 0)
                                 {
@@ -180,6 +212,13 @@ namespace Assets.Script.Editor.Map2DEditor
     }
     public class Map2DGridEditorImageView
     {
+        static GUIContent[] MRBMenuItemList =
+            new GUIContent[] { new GUIContent("保存为模板"), new GUIContent("重置为模板样式"), };
+
+        public delegate void OnViewRBConnamd(Map2DGridEditorImageView sender);
+        public OnViewRBConnamd OnSaveGridToTemplate;
+        public OnViewRBConnamd OnResetGridFromTemplate;
+
         EditorWindow mParent;
         float mImageScrollScale = 1.0f;
         Vector2 mImageScrollPos = Vector2.zero;
@@ -209,12 +248,25 @@ namespace Assets.Script.Editor.Map2DEditor
                 List<Map2DGridUnit.ImageSubData> list = new List<Map2DGridUnit.ImageSubData>();
                 foreach(Map2DGridEditorImageSubItem i in mImageSubList)
                 {
-                    Map2DGridUnit.ImageSubData data;
+                    Map2DGridUnit.ImageSubData data = new Map2DGridUnit.ImageSubData();
                     data.type = i.ImageSubType;
                     data.range = i.LocalRange;
+                    if (null != i.Image)
+                        data.imageFile = AssetDatabase.GetAssetPath(i.Image.GetInstanceID());
+                    if (null == data.imageFile)
+                        data.imageFile = "";
+                    data.collider = i.Collider;
                     list.Add(data);
                 }
                 return list;
+            }
+        }
+        public void ResetFromList(List<Map2DGridUnit.ImageSubData> lst)
+        {
+            mImageSubList.Clear();
+            foreach (Map2DGridUnit.ImageSubData d in lst)
+            {
+                AddImageSubItem(d.type, d.range, d.imageFile, d.collider);
             }
         }
         public Map2DGridEditorImageSubItem AddImageSubItem(Map2DGridImageSubType type, Vector2 pos)
@@ -227,9 +279,9 @@ namespace Assets.Script.Editor.Map2DEditor
             mImageSubList.Add(item);
             return item;
         }
-        public Map2DGridEditorImageSubItem AddImageSubItem(Map2DGridImageSubType type, Rect range)
+        public Map2DGridEditorImageSubItem AddImageSubItem(Map2DGridImageSubType type, Rect range, string imgFile, Rect collider)
         {
-            Map2DGridEditorImageSubItem item = new Map2DGridEditorImageSubItem(type, range, this);
+            Map2DGridEditorImageSubItem item = new Map2DGridEditorImageSubItem(type, range, imgFile, collider, this);
             item.OnMouseLBUpInOutside += OnClearDraginItem;
             item.OnMouseLBUpInSide += OnItemDraginEnded;
             item.OnDeleteImageSubItem += OnDeleteImageSubItem;
@@ -362,6 +414,39 @@ namespace Assets.Script.Editor.Map2DEditor
                                 //EditorMouseDelegate.Current.BeginDrag(e);
                                 if (EditorMouseDelegate.Current.DraginType == MouseDragItemType.ToolboxItem)
                                     e.Use();
+                            }
+                        }
+                        break;
+                    case EventType.ContextClick:
+                        {
+                            bool inItem = false;
+                            //if (EditorMouseDelegate.Current.DraginType == MouseDragItemType.ImageSubItem)
+                            //    inItem = true;
+                            foreach (Map2DGridEditorImageSubItem item in mImageSubList)
+                            {
+                                if (item.WorldRange.Contains(e.mousePosition))
+                                {
+                                    inItem = true;
+                                    break;
+                                }
+                            }
+                            if(!inItem)
+                            {
+                                var mousePos = e.mousePosition;
+                                EditorUtility.DisplayCustomMenu(new Rect(mousePos.x, mousePos.y, 0, 0), MRBMenuItemList, -1, (object userData, string[] options, int selected) =>
+                                {
+                                    if (selected == 0)
+                                    {
+                                        if (null != OnSaveGridToTemplate)
+                                            OnSaveGridToTemplate(this);
+                                    }
+                                    else if (selected == 1)
+                                    {
+                                        if (null != OnResetGridFromTemplate)
+                                            OnResetGridFromTemplate(this);
+                                    }
+                                }, null);
+                                e.Use();
                             }
                         }
                         break;

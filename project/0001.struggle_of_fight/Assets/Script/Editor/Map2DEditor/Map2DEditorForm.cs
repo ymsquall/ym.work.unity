@@ -155,8 +155,8 @@ namespace Assets.Script.Editor.Map2DEditor
                 dataFile.Close();
                 return false;
             }
-            int rowCount = BitConverter.ToInt32(buffer, readIndex); readIndex += sizeof(int);
-            int colCount = BitConverter.ToInt32(buffer, readIndex); readIndex += sizeof(int);
+            int rowCount = BitConverter.ToInt32(buffer, readIndex); readIndex += sizeof(Int32);
+            int colCount = BitConverter.ToInt32(buffer, readIndex); readIndex += sizeof(Int32);
             mMapUnitList = new Map2DGridUnit[rowCount, colCount];
             mMapUnitDictionary = new Dictionary<int, Map2DGridUnit>(rowCount * colCount);
             for (int i = 0; i < rowCount; ++i)

@@ -856,6 +856,7 @@ public class NGUIEditorTools
         //EditorGUI.DropShadowLabel(GUILayoutUtility.GetRect(Screen.width, 18f), text);
 
         Handles.color = mSaveOldColor;
+        GUI.color = mSaveOldColor;
 	}
 
 	/// <summary>

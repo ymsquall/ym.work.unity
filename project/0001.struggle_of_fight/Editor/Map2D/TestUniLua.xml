@@ -1,23 +1,14 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <world>
-  <map id="TestUniLua" width="1500" height="15600" bx="0" by="0">
+  <map id="TestUniLua" width="1500" height="3900" bx="0" by="0">
     <blocks>
-      <b id="0" x="564.4" y="-7598.9" width="121.4" height="10" type="地面" />
-      <b id="1" x="-627" y="-7599" width="100" height="10" type="地面" />
-      <b id="2" x="-527" y="-7747" width="20" height="100" type="墙壁" />
-      <b id="3" x="-453" y="-7721" width="100" height="10" type="地面" />
-      <b id="4" x="-332" y="-7738" width="20" height="100" type="墙壁" />
-      <b id="5" x="-384" y="-7583" width="20" height="100" type="墙壁" />
-      <b id="6" x="-650" y="-6400" width="100" height="10" type="地面" />
+      <b id="0" x="-513" y="-1808" width="111" height="22" type="地面" />
+      <b id="1" x="-387" y="-555" width="222" height="77" type="墙壁" />
+      <b id="2" x="-652" y="845" width="111" height="22" type="地面" />
+      <b id="3" x="-435" y="766" width="222" height="55" type="墙壁" />
     </blocks>
     <npcs>
-      <n id="0" x="-98.18005" y="-7408.112" type="刷怪点" />
-      <n id="1" x="282.1613" y="-7338.108" type="刷怪点" />
-      <n id="2" x="-471.5273" y="-7656.64" type="刷怪点" />
-      <n id="3" x="-310" y="-7552" type="刷怪点" />
-      <n id="4" x="-314" y="-7636" type="刷怪点" />
-      <n id="5" x="-667" y="-7676" type="刷怪点" />
-      <n id="6" x="-550" y="-6300" type="刷怪点" />
+      <n id="0" x="-354" y="930" type="刷怪点" />
     </npcs>
   </map>
 </world>

@@ -34,6 +34,8 @@ namespace Assets.Script.Editor.Map2DEditor
         {
             public Map2DGridImageSubType type;
             public Rect range;
+            public Rect collider;
+            public string imageFile;
         }
         List<ImageSubData> mImageSubList = new List<ImageSubData>(0);
 
@@ -104,7 +106,7 @@ namespace Assets.Script.Editor.Map2DEditor
         }
         public bool ReadImageSubs(byte[] buffer, ref int readIndex)
         {
-            int childCount = BitConverter.ToChar(buffer, readIndex); readIndex += sizeof(char);
+            int childCount = BitConverter.ToUInt16(buffer, readIndex); readIndex += sizeof(ushort);
             for (int c = 0; c < childCount; ++c)
             {
                 ImageSubData data = new ImageSubData();
@@ -115,6 +117,17 @@ namespace Assets.Script.Editor.Map2DEditor
                 data.range.y = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
                 data.range.width = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
                 data.range.height = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
+                data.imageFile = "";
+                int imageFileLength = BitConverter.ToUInt16(buffer, readIndex); readIndex += sizeof(ushort);
+                if (imageFileLength > 0)
+                {
+                    data.imageFile = System.Text.Encoding.Default.GetString(buffer, readIndex, imageFileLength);
+                    readIndex += imageFileLength;
+                    data.collider.x = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
+                    data.collider.y = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
+                    data.collider.width = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
+                    data.collider.height = BitConverter.ToSingle(buffer, readIndex); readIndex += sizeof(float);
+                }
                 switch (data.type)
                 {
                     case Map2DGridImageSubType.地面:
@@ -134,7 +147,7 @@ namespace Assets.Script.Editor.Map2DEditor
             Map2DGridEditorForm gridEditor = Map2DEditor.GetOrNewGridEditorForm(RowIndex, ColIndex, false);
             if (null != gridEditor)
                 mImageSubList = gridEditor.ImageSubList;
-            byte[] bin = BitConverter.GetBytes((char)mImageSubList.Count); file.Write(bin, 0, bin.Length);
+            byte[] bin = BitConverter.GetBytes((ushort)mImageSubList.Count); file.Write(bin, 0, bin.Length);
             foreach (ImageSubData d in mImageSubList)
             {
                 bin = BitConverter.GetBytes((short)d.type); file.Write(bin, 0, bin.Length);
@@ -143,19 +156,47 @@ namespace Assets.Script.Editor.Map2DEditor
                 bin = BitConverter.GetBytes(d.range.y); file.Write(bin, 0, bin.Length);
                 bin = BitConverter.GetBytes(d.range.width); file.Write(bin, 0, bin.Length);
                 bin = BitConverter.GetBytes(d.range.height); file.Write(bin, 0, bin.Length);
+                if (d.imageFile.Length > 0)
+                {
+                    byte[] bytePath = System.Text.Encoding.Default.GetBytes(d.imageFile);
+                    bin = BitConverter.GetBytes((ushort)bytePath.Length); file.Write(bin, 0, bin.Length);
+                    file.Write(bytePath, 0, bytePath.Length);
+                    bin = BitConverter.GetBytes(d.collider.x); file.Write(bin, 0, bin.Length);
+                    bin = BitConverter.GetBytes(d.collider.y); file.Write(bin, 0, bin.Length);
+                    bin = BitConverter.GetBytes(d.collider.width); file.Write(bin, 0, bin.Length);
+                    bin = BitConverter.GetBytes(d.collider.height); file.Write(bin, 0, bin.Length);
+                }
+                else
+                {
+                    bin = BitConverter.GetBytes((ushort)0);
+                    file.Write(bin, 0, bin.Length);
+                }
             }
             return true;
         }
         public bool FillXmlData(ref List<ImageSubData> blockList, ref List<ImageSubData> npcList, Vector2 sceneSize)
         {
+            Map2DGridEditorForm gridEditor = Map2DEditor.GetOrNewGridEditorForm(RowIndex, ColIndex, false);
+            if (null != gridEditor)
+                mImageSubList = gridEditor.ImageSubList;
             //Vector2 mapUnitOffPos = new Vector2(ImageSize.x * ColIndex, ImageSize.y * RowIndex);
             Vector2 mapUnitOffPos = new Vector2(ImageSize.x * ColIndex - sceneSize.x / 2.0f,
                                                 ImageSize.y * RowIndex - sceneSize.y / 2.0f);
             foreach(ImageSubData d in mImageSubList)
             {
                 ImageSubData newData = d;
-                newData.range.x += mapUnitOffPos.x;
-                newData.range.y += mapUnitOffPos.y;
+                if(d.imageFile.Length > 0)
+                {
+                    newData.range.x += newData.collider.x + mapUnitOffPos.x;
+                    newData.range.y += newData.collider.y + mapUnitOffPos.y;
+                    newData.range.width = newData.collider.width;
+                    newData.range.height = newData.collider.height;
+                }
+                else
+                {
+                    newData.range.x += mapUnitOffPos.x;
+                    newData.range.y += mapUnitOffPos.y;
+                }
                 if(d.type == Map2DGridImageSubType.地面 || d.type == Map2DGridImageSubType.墙壁)
                 {
                     blockList.Add(newData);
