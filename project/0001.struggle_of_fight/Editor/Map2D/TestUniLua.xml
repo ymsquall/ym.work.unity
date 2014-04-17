@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <world>
-  <map id="TestUniLua" width="1500" height="3900" bx="0" by="0">
+  <map id="TestUniLua" width="1500" height="5200" bx="0" by="0">
     <blocks>
-      <b id="0" x="-513" y="-1808" width="111" height="22" type="地面" />
-      <b id="1" x="-387" y="-555" width="222" height="77" type="墙壁" />
-      <b id="2" x="-652" y="845" width="111" height="22" type="地面" />
-      <b id="3" x="-435" y="766" width="222" height="55" type="墙壁" />
+      <b id="0" x="224.7941" y="220.6174" width="111" height="55" type="地面" />
+      <b id="1" x="877.6749" y="1404.784" width="144" height="20" type="墙壁" />
+      <b id="2" x="98" y="2795" width="111" height="22" type="地面" />
+      <b id="3" x="315" y="2716" width="222" height="55" type="墙壁" />
     </blocks>
     <npcs>
-      <n id="0" x="-354" y="930" type="刷怪点" />
+      <n id="0" x="396" y="2880" type="刷怪点" />
     </npcs>
   </map>
 </world>
